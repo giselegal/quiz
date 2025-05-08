@@ -33,13 +33,13 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       // Configurar tempo para esconder o efeito visual
       const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
-      }, 1000); // Aumentada a duração da animação para 1s
+      }, 1500); // Aumentada a duração da animação para 1.5s
       
       // Auto-avançar quando selecionar a terceira opção em perguntas normais
       if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
         const timer = setTimeout(() => {
           onNext();
-        }, 700); // Pequeno delay antes de avançar automaticamente
+        }, 800); // Pequeno delay antes de avançar automaticamente
         setAutoAdvanceTimer(timer);
       }
       
@@ -73,11 +73,11 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       <div className="flex flex-col items-center w-full">
         {/* Texto ajuda acima do botão */}
         {!canProceed && (
-          <p className="text-sm text-[#8F7A6A] mb-2">{getHelperText()}</p>
+          <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
-        {/* Botões de navegação */}
-        <div className="flex justify-center items-center w-full gap-4 relative">
+        {/* Botões de navegação com layout melhorado */}
+        <div className="relative w-full max-w-md flex justify-center items-center py-2">
           {/* Botão Anterior (à esquerda quando presente) */}
           {onPrevious && (
             <Button 
@@ -94,8 +94,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             onClick={onNext}
             disabled={!canProceed}
             className={`bg-[#B89B7A] hover:bg-[#A38A69] transition-all duration-500 mx-auto
-              ${!canProceed ? 'opacity-50' : 'opacity-100'}
-              ${showActivationEffect ? 'scale-110 shadow-lg animate-pulse' : ''}
+              ${!canProceed ? 'opacity-50' : 'opacity-100'} 
+              ${showActivationEffect ? 'animate-enhanced-pulse scale-110 shadow-lg' : ''}
             `}
           >
             {isLastQuestion ? 'Ver Resultado' : 'Próximo'}

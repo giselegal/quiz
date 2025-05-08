@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '../ui/aspect-ratio';
 import { getFallbackStyle } from '@/utils/styleUtils';
+import { optimizeCloudinaryUrl } from '@/utils/imageUtils';
 
 interface QuizOptionImageProps {
   imageUrl: string;
@@ -24,6 +25,13 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
+
+  // Optimize Cloudinary URL
+  const optimizedImageUrl = optimizeCloudinaryUrl(imageUrl, {
+    quality: 95,
+    format: 'auto',
+    width: imageUrl.includes('sapatos') ? 400 : 500
+  });
 
   if (imageError) {
     return (
@@ -48,15 +56,15 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
           isSelected && "scale-[1.03] transition-all duration-300"
         )}>
           <img
-            src={`${imageUrl.replace('/upload/', '/upload/q_95,f_auto/')}`}
+            src={optimizedImageUrl}
             alt={altText}
             className={cn(
               "object-cover w-full h-full transition-all duration-300",
               isSelected 
-                ? "shadow-xl" 
+                ? "shadow-3d" 
                 : "shadow-sm hover:shadow-md",
-              // Removido a borda completamente e melhorado o efeito 3D
-              isSelected && is3DQuestion && "transform rotate-y-12 transform-3d"
+              // Enhanced 3D effect
+              isSelected && is3DQuestion && "transform-3d rotate-y-12"
             )}
             onError={() => setImageError(true)}
           />

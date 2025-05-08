@@ -1,8 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
 import { ShoppingCart, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
+import { Slider } from '../ui/slider';
+import { optimizeCloudinaryUrl } from '@/utils/imageUtils';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -14,16 +17,16 @@ interface TransformationItem {
   name: string;
 }
 
-// Imagens otimizadas com melhor qualidade
+// Updated transformation items with separate before/after images
 const transformations: TransformationItem[] = [
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/q_auto:best,f_auto,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/q_auto:best,f_auto,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
     name: "Adriana"
   }, 
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/q_auto:best,f_auto,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/q_auto:best,f_auto,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp", 
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp",
     name: "Mariangela"
   }
 ];
@@ -44,41 +47,52 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
 
   // Preload images to ensure they display correctly
   useEffect(() => {
-    // Precarregar todas as imagens para melhor experiência
-    transformations.forEach((item) => {
-      const beforeImg = new Image();
-      const afterImg = new Image();
-      beforeImg.src = item.beforeImage;
-      afterImg.src = item.afterImage;
-      
-      if (item === activeTransformation) {
-        beforeImg.onload = () => setImagesLoaded(prev => ({
-          ...prev,
-          before: true
-        }));
-        afterImg.onload = () => setImagesLoaded(prev => ({
-          ...prev,
-          after: true
-        }));
-      }
-    });
-    
-    return () => {
-      // Cleanup
-    };
-  }, [activeIndex, activeTransformation]);
-
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSliderPosition(Number(e.target.value));
-  };
-
-  const handleDotClick = (index: number) => {
-    setActiveIndex(index);
-    // Reset images loaded state when changing transformation
+    // Reset image loaded state when changing transformation
     setImagesLoaded({
       before: false,
       after: false
     });
+    
+    // Preload images with quality parameters
+    const beforeImg = new Image();
+    const afterImg = new Image();
+    
+    // Use optimized Cloudinary URLs
+    beforeImg.src = optimizeCloudinaryUrl(activeTransformation.beforeImage, { 
+      quality: 95, 
+      format: 'auto',
+      width: 800 
+    });
+    
+    afterImg.src = optimizeCloudinaryUrl(activeTransformation.afterImage, { 
+      quality: 95, 
+      format: 'auto',
+      width: 800 
+    });
+    
+    beforeImg.onload = () => setImagesLoaded(prev => ({
+      ...prev,
+      before: true
+    }));
+    
+    afterImg.onload = () => setImagesLoaded(prev => ({
+      ...prev,
+      after: true
+    }));
+    
+    return () => {
+      // Cleanup
+      beforeImg.onload = null;
+      afterImg.onload = null;
+    };
+  }, [activeIndex, activeTransformation]);
+
+  const handleSliderChange = (value: number[]) => {
+    setSliderPosition(value[0]);
+  };
+
+  const handleDotClick = (index: number) => {
+    setActiveIndex(index);
   };
   
   const handleButtonClick = () => {
@@ -141,14 +155,53 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                 </div>
               )}
               <div className={`relative h-[400px] md:h-[500px] w-full mb-4 ${areImagesReady ? '' : 'hidden'}`}>
+                {/* Before image */}
                 <img 
-                  src={activeTransformation.afterImage} 
-                  alt={`Transformação - ${activeTransformation.name}`} 
-                  className="w-full h-full object-cover rounded-lg shadow-md" 
-                  loading="eager"
-                  fetchPriority="high"
+                  src={optimizeCloudinaryUrl(activeTransformation.beforeImage, { quality: 95, format: 'auto', width: 800 })} 
+                  alt={`Antes - ${activeTransformation.name}`} 
+                  className="w-full h-full object-cover rounded-lg absolute top-0 left-0"
+                  style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                 />
-                <div className="absolute bottom-4 left-0 right-0 mx-auto bg-white/80 backdrop-blur-sm py-2 px-4 text-center rounded-lg max-w-xs">
+                
+                {/* After image */}
+                <img 
+                  src={optimizeCloudinaryUrl(activeTransformation.afterImage, { quality: 95, format: 'auto', width: 800 })} 
+                  alt={`Depois - ${activeTransformation.name}`} 
+                  className="w-full h-full object-cover rounded-lg absolute top-0 left-0"
+                  style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+                />
+                
+                {/* Slider control */}
+                <div className="absolute left-0 right-0 bottom-16 px-8">
+                  <Slider
+                    value={[sliderPosition]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    onValueChange={handleSliderChange}
+                    className="z-10"
+                  />
+                </div>
+                
+                {/* Slider divider line */}
+                <div 
+                  className="absolute top-0 bottom-0 w-1 bg-white shadow-md z-10"
+                  style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+                >
+                  <div className="absolute top-1/2 left-1/2 w-6 h-6 bg-white rounded-full shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab">
+                    <div className="w-3 h-3 bg-[#aa6b5d] rounded-full"></div>
+                  </div>
+                </div>
+                
+                {/* Labels */}
+                <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm">
+                  Antes
+                </div>
+                <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm">
+                  Depois
+                </div>
+                
+                <div className="absolute bottom-28 left-0 right-0 mx-auto bg-white/80 backdrop-blur-sm py-2 px-4 text-center rounded-lg max-w-xs">
                   <p className="font-medium">{activeTransformation.name}</p>
                 </div>
               </div>

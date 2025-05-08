@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { optimizeCloudinaryUrl, getResponsiveImageUrl } from '@/utils/imageUtils';
 
 interface OptimizedImageProps {
   src: string;
@@ -35,9 +36,17 @@ export default function OptimizedImage({
   const [error, setError] = useState(false);
   
   // Otimizar URLs do Cloudinary automaticamente
-  const optimizedSrc = src.includes('cloudinary.com') && !src.includes('q_') 
-    ? src.replace('/upload/', '/upload/q_95,f_auto/')
-    : src;
+  const optimizedSrc = optimizeCloudinaryUrl(src, { 
+    quality: 95, 
+    format: 'auto',
+    width: width || undefined,
+    height: height || undefined
+  });
+  
+  // Get responsive image attributes if needed
+  const responsiveImageProps = width && width > 300 ? 
+    getResponsiveImageUrl(src) : 
+    { srcSet: '', sizes: '' };
   
   useEffect(() => {
     // Reset states when src changes
@@ -76,6 +85,8 @@ export default function OptimizedImage({
         width={width}
         height={height}
         loading={priority ? "eager" : "lazy"}
+        srcSet={responsiveImageProps.srcSet || undefined}
+        sizes={responsiveImageProps.sizes || undefined}
         className={cn(
           "max-w-full h-auto",
           objectFit === 'cover' && "object-cover",

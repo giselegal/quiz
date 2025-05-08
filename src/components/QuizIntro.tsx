@@ -57,19 +57,19 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] px-4 py-8">
       <div className={`w-full max-w-md mx-auto bg-[#FEFEFE] shadow-lg rounded-2xl p-4 md:p-6 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         {/* Logotipo - menor e com mais espaço embaixo */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-12">
           <OptimizedImage 
             src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
             alt="Logo Gisele Galvão" 
-            className="w-16 md:w-20 h-auto" 
-            width={80}
-            height={40}
+            className="w-14 md:w-18 h-auto" 
+            width={72}
+            height={36}
             priority={true} 
           />
         </div>
 
-        {/* Barra de carregamento dourada animada */}
-        <div className="relative w-full h-[3px] bg-[#f1e8db] rounded-full overflow-hidden mb-6">
+        {/* Barra de carregamento dourada animada - aumentado o gap */}
+        <div className="relative w-full h-[3px] bg-[#f1e8db] rounded-full overflow-hidden mb-8">
           <div className="absolute inset-0 w-1/3 bg-[#b29670] animate-loading-bar rounded-full"></div>
         </div>
 
@@ -92,17 +92,17 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         </div>
 
         {/* Subtítulo */}
-        <p className="text-sm text-[#433830] text-center mb-6 max-w-md mx-auto">
+        <p className="text-sm text-[#433830] text-center mb-7 max-w-md mx-auto">
           Em poucos minutos, descubra seu{' '}
           <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
           looks que realmente refletem sua <span className="font-semibold text-[#b29670]">essência</span>, com
           praticidade e <span className="font-semibold text-[#aa6b5d]">confiança</span>.
         </p>
 
-        {/* Formulário */}
+        {/* Formulário - ajustado para melhor responsividade */}
         <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto flex flex-col gap-3" aria-live="polite">
           <label htmlFor="name" className="text-xs font-semibold text-[#432818]">
-            NOME *
+            NOME
           </label>
           <Input 
             id="name" 
@@ -115,7 +115,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           />
           <Button 
             type="submit" 
-            className="w-full md:w-full mx-auto bg-[#b29670] hover:bg-[#a1835d] text-white py-3 px-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-2" 
+            className="w-full mx-auto bg-[#b29670] hover:bg-[#a1835d] text-white py-3 px-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-3" 
             disabled={!nome.trim()}
           >
             Quero Descobrir meu Estilo Agora!

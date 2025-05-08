@@ -23,21 +23,20 @@ export const optimizeCloudinaryUrl = (
   const defaults = {
     width: 0,
     height: 0,
-    quality: 95,
+    quality: 95, // Increased from 90 to 95 for better image quality
     format: 'auto',
     crop: 'fill'
   };
 
   const settings = { ...defaults, ...options };
   
-  // Extract the upload path from the URL
-  const uploadMatch = url.match(/\/upload(\/.*)/);
-  if (!uploadMatch) {
-    return url;
-  }
-  
-  // Check if the URL already has transformation parameters
-  if (url.includes('/upload/q_') || url.includes('/upload/f_')) {
+  // Check if URL already has transformation parameters
+  if (
+    url.includes('/upload/q_') || 
+    url.includes('/upload/f_') ||
+    url.includes('?q=')
+  ) {
+    // If URL already has quality and format parameters, don't modify it
     return url;
   }
   
@@ -56,8 +55,8 @@ export const optimizeCloudinaryUrl = (
     transformations += `,h_${settings.height}`;
   }
   
-  // Apply transformations to URL
-  return url.replace(/\/upload/, `/upload/${transformations}`);
+  // Apply transformations to URL, ensuring we're not duplicating parameters
+  return url.replace(/\/upload\//, `/upload/${transformations}/`);
 };
 
 /**
@@ -78,4 +77,35 @@ export const preloadImages = (urls: string[]): void => {
  */
 export const getOptimizedCloudinaryParams = (): string => {
   return 'q_95,f_auto';
+};
+
+/**
+ * Generate a responsive image URL with different sizes
+ * @param baseUrl The base Cloudinary URL
+ * @param sizes Array of width sizes to generate
+ * @returns Object with srcset and sizes attributes for responsive images
+ */
+export const getResponsiveImageUrl = (
+  baseUrl: string,
+  sizes: number[] = [320, 640, 960, 1280]
+): { srcSet: string, sizes: string } => {
+  if (!baseUrl || !baseUrl.includes('cloudinary.com')) {
+    return { srcSet: baseUrl, sizes: '100vw' };
+  }
+  
+  const srcSet = sizes
+    .map(size => {
+      const optimizedUrl = optimizeCloudinaryUrl(baseUrl, { 
+        width: size,
+        quality: 95,
+        format: 'auto'
+      });
+      return `${optimizedUrl} ${size}w`;
+    })
+    .join(', ');
+  
+  return {
+    srcSet,
+    sizes: '(max-width: 768px) 100vw, 50vw'
+  };
 };
