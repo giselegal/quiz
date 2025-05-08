@@ -44,19 +44,19 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
         className="w-full h-full"
       >
         <div className={cn(
-          "w-full h-full flex items-center justify-center overflow-hidden transform-3d",
-          isSelected && "scale-[1.02]"
+          "w-full h-full flex items-center justify-center overflow-hidden transform-gpu",
+          isSelected && "scale-[1.03] transition-all duration-300"
         )}>
           <img
-            src={imageUrl}
+            src={`${imageUrl.replace('/upload/', '/upload/q_95,f_auto/')}`}
             alt={altText}
             className={cn(
               "object-cover w-full h-full transition-all duration-300",
               isSelected 
-                ? "shadow-lg" 
+                ? "shadow-xl" 
                 : "shadow-sm hover:shadow-md",
-              // Removendo a borda e adicionando efeito 3D
-              isSelected && is3DQuestion && "transform rotate-y-12"
+              // Removido a borda completamente e melhorado o efeito 3D
+              isSelected && is3DQuestion && "transform rotate-y-12 transform-3d"
             )}
             onError={() => setImageError(true)}
           />

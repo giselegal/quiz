@@ -41,9 +41,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     logoImg.onload = handleImageLoad;
     mainImg.onload = handleImageLoad;
 
-    // Preload most important images
-    logoImg.src = "https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
-    mainImg.src = "https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg";
+    // Preload most important images with quality parameters
+    logoImg.src = "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
+    mainImg.src = "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg";
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -57,19 +57,19 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] px-4 py-8">
       <div className={`w-full max-w-md mx-auto bg-[#FEFEFE] shadow-lg rounded-2xl p-4 md:p-6 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         {/* Logotipo - menor e com mais espaço embaixo */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-8">
           <OptimizedImage 
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
+            src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
             alt="Logo Gisele Galvão" 
-            className="w-20 md:w-24 h-auto" 
-            width={96}
-            height={48}
+            className="w-16 md:w-20 h-auto" 
+            width={80}
+            height={40}
             priority={true} 
           />
         </div>
 
         {/* Barra de carregamento dourada animada */}
-        <div className="relative w-full h-[4px] bg-[#f1e8db] rounded-full overflow-hidden mb-6">
+        <div className="relative w-full h-[3px] bg-[#f1e8db] rounded-full overflow-hidden mb-6">
           <div className="absolute inset-0 w-1/3 bg-[#b29670] animate-loading-bar rounded-full"></div>
         </div>
 
@@ -81,11 +81,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         {/* Imagem - menor */}
         <div className="flex justify-center mb-6">
           <OptimizedImage 
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
+            src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
             alt="Mulher elegante com roupas estilosas" 
-            className="w-full max-w-[250px] h-auto rounded-lg shadow-sm" 
-            width={250} 
-            height={334} 
+            className="w-full max-w-[220px] h-auto rounded-lg shadow-sm" 
+            width={220} 
+            height={294} 
             objectFit="cover"
             priority={true} 
           />
@@ -115,7 +115,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           />
           <Button 
             type="submit" 
-            className="w-full bg-[#b29670] hover:bg-[#a1835d] text-white py-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-2" 
+            className="w-full md:w-full mx-auto bg-[#b29670] hover:bg-[#a1835d] text-white py-3 px-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-2" 
             disabled={!nome.trim()}
           >
             Quero Descobrir meu Estilo Agora!

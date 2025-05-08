@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
+import { colors } from '@/styles/tailwind.config';
 
 interface QuizNavigationProps {
   canProceed: boolean;
@@ -21,17 +22,40 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
 }) => {
   // Estado para controlar a animação de ativação do botão
   const [showActivationEffect, setShowActivationEffect] = useState(false);
-  
+  const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<NodeJS.Timeout | null>(null);
+
   // Verificar quando o botão se torna disponível para mostrar o efeito
   useEffect(() => {
     if (canProceed) {
+      // Mostrar o efeito de ativação
       setShowActivationEffect(true);
-      const timer = setTimeout(() => {
+      
+      // Configurar tempo para esconder o efeito visual
+      const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
-      }, 800); // Aumentando a duração da animação para 800ms
-      return () => clearTimeout(timer);
+      }, 1000); // Aumentada a duração da animação para 1s
+      
+      // Auto-avançar quando selecionar a terceira opção em perguntas normais
+      if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
+        const timer = setTimeout(() => {
+          onNext();
+        }, 700); // Pequeno delay antes de avançar automaticamente
+        setAutoAdvanceTimer(timer);
+      }
+      
+      return () => {
+        clearTimeout(visualTimer);
+        if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+      };
     }
-  }, [canProceed]);
+  }, [canProceed, currentQuestionType, selectedOptionsCount, onNext]);
+  
+  // Limpar o timer quando o componente for desmontado
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+    };
+  }, [autoAdvanceTimer]);
 
   const getHelperText = () => {
     if (!canProceed) {
@@ -44,36 +68,40 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center mt-6 w-full px-4 md:px-0">
-      <div className="w-1/3 text-left">
-        {onPrevious && (
-          <Button 
-            variant="outline" 
-            onClick={onPrevious}
-            className="text-[#8F7A6A] border-[#8F7A6A]"
-          >
-            Voltar
-          </Button>
-        )}
-      </div>
-      
-      <div className="w-1/3 flex flex-col items-center justify-center">
+    <div className="mt-6 w-full px-4 md:px-0">
+      {/* Container centralizado para todos os elementos */}
+      <div className="flex flex-col items-center w-full">
+        {/* Texto ajuda acima do botão */}
         {!canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-2">{getHelperText()}</p>
         )}
-        <Button
-          onClick={onNext}
-          disabled={!canProceed}
-          className={`bg-[#B89B7A] hover:bg-[#A38A69] transition-all duration-500
-            ${!canProceed ? 'opacity-50' : 'opacity-100'}
-            ${showActivationEffect ? 'scale-110 shadow-lg animate-pulse' : ''}
-          `}
-        >
-          {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
-        </Button>
+        
+        {/* Botões de navegação */}
+        <div className="flex justify-center items-center w-full gap-4 relative">
+          {/* Botão Anterior (à esquerda quando presente) */}
+          {onPrevious && (
+            <Button 
+              variant="outline" 
+              onClick={onPrevious}
+              className="text-[#8F7A6A] border-[#8F7A6A] absolute left-0"
+            >
+              Voltar
+            </Button>
+          )}
+          
+          {/* Botão Próximo (sempre centralizado) */}
+          <Button
+            onClick={onNext}
+            disabled={!canProceed}
+            className={`bg-[#B89B7A] hover:bg-[#A38A69] transition-all duration-500 mx-auto
+              ${!canProceed ? 'opacity-50' : 'opacity-100'}
+              ${showActivationEffect ? 'scale-110 shadow-lg animate-pulse' : ''}
+            `}
+          >
+            {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
+          </Button>
+        </div>
       </div>
-      
-      <div className="w-1/3"></div>
     </div>
   );
 };

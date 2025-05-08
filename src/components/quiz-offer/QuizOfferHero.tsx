@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { getCtaUrl } from '@/services/pixelManager';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 interface QuizOfferHeroProps {
   onStartQuizClick: () => void;
@@ -34,14 +35,14 @@ export const QuizOfferHero: React.FC<QuizOfferHeroProps> = ({ onStartQuizClick }
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
           <Button 
             onClick={handleStartQuizClick}
-            className="text-white py-3 px-6 rounded-md bg-[#aa6b5d] hover:bg-[#8f574a] text-base md:text-lg"
+            className="text-white py-3 px-6 rounded-md bg-[#aa6b5d] hover:bg-[#8f574a] text-base md:text-lg w-full md:w-auto"
           >
             Começar o Quiz Gratuito
           </Button>
           
           <Button 
             onClick={handleCtaClick}
-            className="text-white py-3 px-6 rounded-md btn-cta-green text-base md:text-lg"
+            className="text-white py-3 px-6 rounded-md btn-cta-green text-base md:text-lg w-full md:w-auto"
           >
             <ShoppingCart className="w-5 h-5 mr-2" />
             Adquirir Guia Completo

@@ -40,16 +40,16 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         // Para opções de imagem - sem borda, apenas sombra
         else {
           optionRef.current.style.borderColor = 'transparent';
-          optionRef.current.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15)';
+          optionRef.current.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.2)';
         }
       } else {
         if (type === 'text') {
           optionRef.current.style.borderColor = '#B89B7A';
+          optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
         } else {
           optionRef.current.style.borderColor = 'transparent';
+          optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
         }
-        // Sombra leve quando não selecionado
-        optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
       }
     }
   }, [isSelected, type]);
@@ -65,7 +65,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         // Aplicar sombra correspondente ao estado
         optionRef.current.style.boxShadow = isSelected 
           ? '0 2px 4px rgba(0, 0, 0, 0.05)' 
-          : '0 8px 16px rgba(0, 0, 0, 0.15)';
+          : '0 12px 24px rgba(0, 0, 0, 0.2)';
       }
       // Chamar onSelect com um pequeno atraso para evitar flash
       setTimeout(() => {
