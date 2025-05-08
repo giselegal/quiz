@@ -10,7 +10,8 @@ import {
   preloadImages, 
   preloadImagesByIds, 
   preloadImagesByUrls, 
-  preloadCriticalImages 
+  preloadCriticalImages,
+  preloadImagesByCategory
 } from '@/utils/imageManager';
 import type { BankImage } from '@/data/imageBank';
 import type { StyleCategory } from '@/types/quiz';
@@ -18,11 +19,13 @@ import type { StyleCategory } from '@/types/quiz';
 interface UseImageBankProps {
   initialCategory?: string;
   autoPreload?: boolean;
+  preloadPriority?: number;
 }
 
 export const useImageBank = ({ 
   initialCategory,
-  autoPreload = false
+  autoPreload = false,
+  preloadPriority = 3
 }: UseImageBankProps = {}) => {
   const [isLoading, setIsLoading] = useState(autoPreload);
   const [images, setImages] = useState<BankImage[]>([]);
@@ -78,6 +81,17 @@ export const useImageBank = ({
     });
   }, []);
 
+  // Preload images by category
+  const preloadByCategory = useCallback((category: string) => {
+    setIsLoading(true);
+    
+    preloadImagesByCategory(category, {
+      onComplete: () => {
+        setIsLoading(false);
+      }
+    });
+  }, []);
+
   // Initialize with category if provided
   useEffect(() => {
     loadImages(initialCategory);
@@ -90,7 +104,8 @@ export const useImageBank = ({
       preloadImages(images, {
         onComplete: () => {
           setIsLoading(false);
-        }
+        },
+        batchSize: 4
       });
     }
   }, [initialCategory, autoPreload, loadImages]);
@@ -105,7 +120,8 @@ export const useImageBank = ({
     getImage,
     preloadImages: preloadSelectedImages,
     preloadCriticalImages,
-    preloadByUrls: preloadImagesByUrls
+    preloadByUrls: preloadImagesByUrls,
+    preloadByCategory
   };
 };
 

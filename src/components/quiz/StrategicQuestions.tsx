@@ -4,6 +4,8 @@ import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { AnimatedWrapper } from '../ui/animated-wrapper';
+import { preloadCriticalImages } from '@/utils/imageManager';
+import OptimizedImage from '../ui/OptimizedImage';
 
 interface StrategicQuestionsProps {
   currentQuestionIndex: number;
@@ -19,9 +21,18 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
   onNextClick
 }) => {
   const [mountKey, setMountKey] = useState(Date.now());
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
   
   console.log('Rendering strategic question:', strategicQuestions[currentQuestionIndex]?.id);
   console.log('Question has image:', !!strategicQuestions[currentQuestionIndex]?.imageUrl);
+  
+  // Preload strategic images on first render
+  useEffect(() => {
+    if (!imagesPreloaded) {
+      preloadCriticalImages('strategic');
+      setImagesPreloaded(true);
+    }
+  }, [imagesPreloaded]);
   
   // Remount component when question changes to ensure clean state
   useEffect(() => {

@@ -5,8 +5,8 @@ import { Button } from '../ui/button';
 import { ShoppingCart, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { Slider } from '../ui/slider';
-import { optimizeCloudinaryUrl, preloadImages } from '@/utils/imageUtils';
 import OptimizedImage from '../ui/OptimizedImage';
+import { preloadImagesByCategory, getOptimizedImage } from '@/utils/imageManager';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -16,6 +16,8 @@ interface TransformationItem {
   beforeImage: string;
   afterImage: string;
   name: string;
+  beforeId: string;
+  afterId: string;
 }
 
 // Correct image URLs for before/after transformations
@@ -23,12 +25,16 @@ const transformations: TransformationItem[] = [
   {
     beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
     afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
-    name: "Adriana"
+    name: "Adriana",
+    beforeId: "transformation-adriana-before",
+    afterId: "transformation-adriana-after"
   }, 
   {
     beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp", 
     afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp",
-    name: "Mariangela"
+    name: "Mariangela",
+    beforeId: "transformation-mariangela-before",
+    afterId: "transformation-mariangela-after"
   }
 ];
 
@@ -49,75 +55,20 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   
   // Preload all transformation images on component mount
   useEffect(() => {
-    const allImagesToPreload = transformations.flatMap(item => [
-      { url: item.beforeImage, priority: item === activeTransformation ? 2 : 1 },
-      { url: item.afterImage, priority: item === activeTransformation ? 2 : 1 }
-    ]);
-    
-    preloadImages(allImagesToPreload, {
+    // Use the image bank to preload transformation images
+    preloadImagesByCategory('transformation', {
       batchSize: 2,
       quality: 95,
-      onComplete: () => setImagesPreloaded(true)
+      onComplete: () => {
+        setImagesPreloaded(true);
+        setImagesLoaded({
+          before: true,
+          after: true
+        });
+      }
     });
   }, []);
   
-  // Track loading state for active transformation
-  useEffect(() => {
-    // Reset image loaded state when changing transformation
-    setImagesLoaded({
-      before: false,
-      after: false
-    });
-    
-    // Create URLs with optimized parameters
-    const beforeImgUrl = optimizeCloudinaryUrl(activeTransformation.beforeImage, { 
-      quality: 95, 
-      format: 'auto',
-      width: 800 
-    });
-    
-    const afterImgUrl = optimizeCloudinaryUrl(activeTransformation.afterImage, { 
-      quality: 95, 
-      format: 'auto',
-      width: 800 
-    });
-    
-    // Preload the active transformation images with high priority
-    const beforeImg = new Image();
-    const afterImg = new Image();
-    
-    beforeImg.src = beforeImgUrl;
-    afterImg.src = afterImgUrl;
-    
-    beforeImg.onload = () => setImagesLoaded(prev => ({
-      ...prev,
-      before: true
-    }));
-    
-    afterImg.onload = () => setImagesLoaded(prev => ({
-      ...prev,
-      after: true
-    }));
-    
-    // If we're not on first mount, preload the next set
-    if (imagesPreloaded && transformations.length > 1) {
-      const nextIndex = (activeIndex + 1) % transformations.length;
-      const nextTransformation = transformations[nextIndex];
-      
-      // Preload next transformation images with lower priority
-      preloadImages([
-        { url: nextTransformation.beforeImage, priority: 1 },
-        { url: nextTransformation.afterImage, priority: 1 }
-      ], { quality: 95 });
-    }
-    
-    return () => {
-      // Cleanup
-      beforeImg.onload = null;
-      afterImg.onload = null;
-    };
-  }, [activeIndex, activeTransformation, imagesPreloaded]);
-
   const handleSliderChange = (value: number[]) => {
     setSliderPosition(value[0]);
   };
@@ -197,31 +148,25 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
               
               {/* Before/After image comparison with slider */}
               <div className={`relative h-[400px] md:h-[500px] w-full mb-4 ${areImagesReady ? '' : 'hidden'}`}>
-                {/* Before image - fixed path and optimized */}
+                {/* Before image - using OptimizedImage */}
                 <div className="absolute inset-0 overflow-hidden">
-                  <img 
-                    src={optimizeCloudinaryUrl(activeTransformation.beforeImage, { 
-                      quality: 95, 
-                      format: 'auto', 
-                      width: 800 
-                    })}
+                  <OptimizedImage 
+                    src={activeTransformation.beforeImage}
                     alt={`Antes - ${activeTransformation.name}`} 
                     className="w-full h-full object-cover rounded-lg"
                     style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                    priority={true}
                   />
                 </div>
                 
-                {/* After image - fixed path and optimized */}
+                {/* After image - using OptimizedImage */}
                 <div className="absolute inset-0 overflow-hidden">
-                  <img 
-                    src={optimizeCloudinaryUrl(activeTransformation.afterImage, { 
-                      quality: 95, 
-                      format: 'auto', 
-                      width: 800 
-                    })} 
+                  <OptimizedImage
+                    src={activeTransformation.afterImage}
                     alt={`Depois - ${activeTransformation.name}`} 
                     className="w-full h-full object-cover rounded-lg"
                     style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+                    priority={true}
                   />
                 </div>
                 

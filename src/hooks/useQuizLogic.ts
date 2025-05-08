@@ -1,7 +1,8 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { quizQuestions } from '../data/quizQuestions';
 import { QuizResult, StyleResult } from '../types/quiz';
-import { preloadImages } from '../utils/imageUtils';
+import { preloadImages, preloadCriticalImages } from '../utils/imageManager';
 
 export const useQuizLogic = () => {
   // 1. State declarations (all at the top)
@@ -74,6 +75,9 @@ export const useQuizLogic = () => {
         setIsInitialLoadComplete(true);
       }
     }
+    
+    // Also start preloading strategic images in the background
+    preloadCriticalImages('strategic');
   }, []);
 
   // 3. Simple utility functions that don't depend on other functions

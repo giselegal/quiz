@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { optimizeCloudinaryUrl, getResponsiveImageUrl, getLowQualityPlaceholder } from '@/utils/imageUtils';
@@ -13,6 +12,7 @@ interface OptimizedImageProps {
   priority?: boolean;
   onLoad?: () => void;
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  style?: React.CSSProperties;
 }
 
 /**
@@ -33,7 +33,8 @@ export default function OptimizedImage({
   className,
   priority = false,
   onLoad,
-  objectFit = 'cover'
+  objectFit = 'cover',
+  style
 }: OptimizedImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -105,11 +106,12 @@ export default function OptimizedImage({
   
   return (
     <div 
+      className="relative"
       style={{
-        width: width || 'auto',
-        height: height || 'auto'
+        width: width || '100%',
+        height: height || '100%',
+        ...style
       }} 
-      className=""
     >
       {!loaded && !error && (
         <>
@@ -154,6 +156,9 @@ export default function OptimizedImage({
         }}
         onError={() => setError(true)}
         className={cn(
+          "w-full h-full transition-opacity duration-300",
+          !loaded && "opacity-0",
+          loaded && "opacity-100",
           objectFit === 'cover' && "object-cover",
           objectFit === 'contain' && "object-contain",
           objectFit === 'fill' && "object-fill",
@@ -161,6 +166,7 @@ export default function OptimizedImage({
           objectFit === 'scale-down' && "object-scale-down",
           className
         )}
+        style={style}
       />
       
       {error && (

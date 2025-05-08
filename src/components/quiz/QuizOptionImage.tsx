@@ -5,6 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '../ui/aspect-ratio';
 import { getFallbackStyle } from '@/utils/styleUtils';
 import { isImagePreloaded, getOptimizedImage, getImageMetadata } from '@/utils/imageManager';
+import OptimizedImage from '../ui/OptimizedImage';
 
 interface QuizOptionImageProps {
   imageUrl: string;
@@ -72,20 +73,12 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
           "w-full h-full flex items-center justify-center overflow-hidden transform-gpu",
           isSelected && "scale-[1.03] transition-all duration-300"
         )}>
-          {/* Only show loading state if image isn't already loaded */}
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-              <div className="h-8 w-8 border-2 border-[#B89B7A] border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
-          
-          <img
+          {/* Use OptimizedImage component instead of img tag */}
+          <OptimizedImage 
             src={optimizedImageUrl}
             alt={imageMetadata?.alt || altText}
             className={cn(
-              "object-cover w-full h-full transition-opacity duration-300",
-              !imageLoaded && "opacity-0",
-              imageLoaded && "opacity-100",
+              "object-cover w-full h-full",
               isSelected 
                 ? "shadow-3d" 
                 : "shadow-sm hover:shadow-md",
@@ -93,9 +86,7 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
               isSelected && is3DQuestion && "transform-3d rotate-y-12"
             )}
             onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
-            loading="eager" // Change to eager since we're managing preloading
-            fetchPriority="high"
+            priority={true}
           />
         </div>
       </AspectRatio>

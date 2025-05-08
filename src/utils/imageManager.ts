@@ -272,9 +272,9 @@ export const getOptimizedImage = (
 
 /**
  * Preload critical images for a page
- * @param page 'intro', 'quiz', or 'results'
+ * @param page 'intro', 'quiz', 'results' or 'strategic'
  */
-export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results') => {
+export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'strategic') => {
   // Determine which images are critical based on the page
   let minPriority = 4;
   let categoryFilter: string | undefined;
@@ -288,7 +288,13 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results') => {
       break;
     case 'results':
       minPriority = 3;
+      // Also preload transformation images
+      preloadImagesByCategory('transformation', { quality: 95, batchSize: 2 });
       categoryFilter = undefined;
+      break;
+    case 'strategic':
+      categoryFilter = 'strategic';
+      minPriority = 3;
       break;
   }
   
@@ -310,6 +316,23 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results') => {
   });
 };
 
+/**
+ * Preload images from a specific category
+ * @param category Category name to preload
+ * @param options Preload options
+ */
+export const preloadImagesByCategory = (
+  category: string,
+  options: PreloadOptions = {}
+) => {
+  const images = getAllImages().filter(img => img.category === category);
+  
+  if (images.length > 0) {
+    console.log(`Preloading ${images.length} images from ${category} category`);
+    preloadImages(images, options);
+  }
+};
+
 // Initialize the cache on module load
 initializeImageCache();
 
@@ -317,6 +340,7 @@ export default {
   preloadImages,
   preloadImagesByIds,
   preloadImagesByUrls,
+  preloadImagesByCategory,
   isImagePreloaded,
   getImageMetadata,
   preloadCriticalImages,

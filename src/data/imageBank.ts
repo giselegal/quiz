@@ -191,6 +191,65 @@ const imageBank: ImageCategory[] = [
         preloadPriority: 5
       }
     ]
+  },
+  // New category for strategic questions
+  {
+    id: 'strategic',
+    name: 'Strategic Questions',
+    description: 'Images for strategic questions',
+    images: [
+      {
+        id: 'strategic-7-image',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745459978/20250423_1704_Transforma%C3%A7%C3%A3o_no_Closet_Moderno_simple_compose_01jsj3xvy6fpfb6pyd5shg5eak_1_appany.webp',
+        alt: 'Transformação no Closet Moderno',
+        category: 'strategic',
+        preloadPriority: 4
+      }
+    ]
+  },
+  // New category for transformation images
+  {
+    id: 'transformation',
+    name: 'Before After Transformations',
+    description: 'Before and after transformation images',
+    images: [
+      {
+        id: 'transformation-adriana-before',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp',
+        alt: 'Adriana - Antes',
+        category: 'transformation',
+        preloadPriority: 3,
+        width: 800,
+        height: 1000
+      },
+      {
+        id: 'transformation-adriana-after',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp',
+        alt: 'Adriana - Depois',
+        category: 'transformation',
+        preloadPriority: 3,
+        width: 800,
+        height: 1000
+      },
+      {
+        id: 'transformation-mariangela-before',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp',
+        alt: 'Mariangela - Antes',
+        category: 'transformation',
+        preloadPriority: 3,
+        width: 800,
+        height: 1000
+      },
+      {
+        id: 'transformation-mariangela-after',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp',
+        alt: 'Mariangela - Depois',
+        category: 'transformation',
+        preloadPriority: 3,
+        width: 800,
+        height: 1000
+      }
+    ]
   }
 ];
 
