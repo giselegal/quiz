@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -42,14 +43,20 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
         ratio={imageUrl.includes('sapatos') ? 1 : 3/4} 
         className="w-full h-full"
       >
-        <div className="w-full h-full flex items-center justify-center overflow-hidden">
+        <div className={cn(
+          "w-full h-full flex items-center justify-center overflow-hidden transform-3d",
+          isSelected && "scale-[1.02]"
+        )}>
           <img
             src={imageUrl}
             alt={altText}
             className={cn(
-              "object-cover w-full h-full",
-              // Removendo a borda das imagens, mesmo quando selecionadas
-              isSelected && "outline outline-2 outline-offset-2 outline-[#b29670]"
+              "object-cover w-full h-full transition-all duration-300",
+              isSelected 
+                ? "shadow-lg" 
+                : "shadow-sm hover:shadow-md",
+              // Removendo a borda e adicionando efeito 3D
+              isSelected && is3DQuestion && "transform rotate-y-12"
             )}
             onError={() => setImageError(true)}
           />

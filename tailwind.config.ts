@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -110,12 +111,17 @@ export default {
             transform: 'scale(1)',
             opacity: '1'
           }
+        },
+        'loading-bar': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' }
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'scale-in': 'scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        'scale-in': 'scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        'loading-bar': 'loading-bar 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1)'
       },
       perspective: {
         '1000': '1000px',

@@ -28,7 +28,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       setShowActivationEffect(true);
       const timer = setTimeout(() => {
         setShowActivationEffect(false);
-      }, 600); // A duração da animação
+      }, 800); // Aumentando a duração da animação para 800ms
       return () => clearTimeout(timer);
     }
   }, [canProceed]);
@@ -44,8 +44,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   };
 
   return (
-    <div className="flex justify-center items-center mt-6 w-full px-4 md:px-0">
-      <div className="flex-1 text-left">
+    <div className="flex justify-between items-center mt-6 w-full px-4 md:px-0">
+      <div className="w-1/3 text-left">
         {onPrevious && (
           <Button 
             variant="outline" 
@@ -57,23 +57,23 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
         )}
       </div>
       
-      <div className="flex flex-col items-center justify-center flex-1">
+      <div className="w-1/3 flex flex-col items-center justify-center">
         {!canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-2">{getHelperText()}</p>
         )}
         <Button
           onClick={onNext}
           disabled={!canProceed}
-          className={`bg-[#B89B7A] hover:bg-[#A38A69] transition-all
+          className={`bg-[#B89B7A] hover:bg-[#A38A69] transition-all duration-500
             ${!canProceed ? 'opacity-50' : 'opacity-100'}
-            ${showActivationEffect ? 'scale-105 shadow-lg' : ''}
+            ${showActivationEffect ? 'scale-110 shadow-lg animate-pulse' : ''}
           `}
         >
           {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
         </Button>
       </div>
       
-      <div className="flex-1"></div>
+      <div className="w-1/3"></div>
     </div>
   );
 };

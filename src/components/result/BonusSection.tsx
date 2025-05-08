@@ -29,15 +29,15 @@ const BonusSection: React.FC = () => {
 
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-[#B89B7A]/10 hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow transform-3d hover:scale-[1.01] border-0">
             <div className="flex justify-center mb-4">
               <picture>
                 {/* Várias resoluções de imagem para responder a diferentes tamanhos de tela */}
                 <source 
                   srcSet={`
-                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 200, quality: 90, format: 'webp' })} 200w,
-                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 300, quality: 90, format: 'webp' })} 300w,
-                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 400, quality: 90, format: 'webp' })} 400w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 200, quality: 95, format: 'webp' })} 200w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 300, quality: 95, format: 'webp' })} 300w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 400, quality: 95, format: 'webp' })} 400w,
                     ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 600, quality: 95, format: 'webp' })} 600w
                   `}
                   sizes="(max-width: 768px) 45vw, 300px"
@@ -69,15 +69,15 @@ const BonusSection: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-[#B89B7A]/10 hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow transform-3d hover:scale-[1.01] border-0">
             <div className="flex justify-center mb-4">
               <picture>
                 {/* Várias resoluções de imagem para responder a diferentes tamanhos de tela */}
                 <source 
                   srcSet={`
-                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 200, quality: 90, format: 'webp' })} 200w,
-                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 300, quality: 90, format: 'webp' })} 300w,
-                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 400, quality: 90, format: 'webp' })} 400w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 200, quality: 95, format: 'webp' })} 200w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 300, quality: 95, format: 'webp' })} 300w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 400, quality: 95, format: 'webp' })} 400w,
                     ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 600, quality: 95, format: 'webp' })} 600w
                   `}
                   sizes="(max-width: 768px) 45vw, 300px"

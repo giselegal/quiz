@@ -54,27 +54,27 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FEFEFE] px-4 py-8">
-      <div className={`w-full max-w-lg bg-[#FEFEFE] shadow-lg rounded-2xl p-4 md:p-6 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] px-4 py-8">
+      <div className={`w-full max-w-md mx-auto bg-[#FEFEFE] shadow-lg rounded-2xl p-4 md:p-6 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         {/* Logotipo - menor e com mais espaço embaixo */}
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-6">
           <OptimizedImage 
             src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
             alt="Logo Gisele Galvão" 
-            className="w-24 md:w-28 h-auto" 
-            width={112}
-            height={56}
+            className="w-20 md:w-24 h-auto" 
+            width={96}
+            height={48}
             priority={true} 
           />
         </div>
 
         {/* Barra de carregamento dourada animada */}
-        <div className="relative w-full max-w-md mx-auto h-[4px] bg-[#f1e8db] rounded-full overflow-hidden mb-6">
+        <div className="relative w-full h-[4px] bg-[#f1e8db] rounded-full overflow-hidden mb-6">
           <div className="absolute inset-0 w-1/3 bg-[#b29670] animate-loading-bar rounded-full"></div>
         </div>
 
         {/* Título */}
-        <h1 className="font-playfair text-xl md:text-2xl lg:text-3xl font-bold text-center mb-4 leading-normal text-[#432818]">
+        <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818]">
           Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
         </h1>
 
@@ -83,9 +83,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           <OptimizedImage 
             src="https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
             alt="Mulher elegante com roupas estilosas" 
-            className="w-full max-w-xs h-auto rounded-lg shadow-sm" 
-            width={320} 
-            height={427} 
+            className="w-full max-w-[250px] h-auto rounded-lg shadow-sm" 
+            width={250} 
+            height={334} 
             objectFit="cover"
             priority={true} 
           />

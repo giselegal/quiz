@@ -31,31 +31,43 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   // Usar useEffect para lidar com mudanças de isSelected sem causar flash
   useEffect(() => {
     if (optionRef.current) {
-      // Aplicar mudanças de estilo apenas nas colunas, não nas imagens
       if (isSelected) {
-        optionRef.current.style.borderColor = '#b29670';
-        // Sombra mais pronunciada quando selecionado
-        optionRef.current.style.boxShadow = '0 4px 8px rgba(178, 150, 112, 0.25)';
+        // Para opções de texto - manter borda amarela
+        if (type === 'text') {
+          optionRef.current.style.borderColor = '#b29670';
+          optionRef.current.style.boxShadow = '0 4px 8px rgba(178, 150, 112, 0.25)';
+        } 
+        // Para opções de imagem - sem borda, apenas sombra
+        else {
+          optionRef.current.style.borderColor = 'transparent';
+          optionRef.current.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15)';
+        }
       } else {
-        optionRef.current.style.borderColor = '#B89B7A';
-        // Sombra leve quando não selecionado para dar profundidade
+        if (type === 'text') {
+          optionRef.current.style.borderColor = '#B89B7A';
+        } else {
+          optionRef.current.style.borderColor = 'transparent';
+        }
+        // Sombra leve quando não selecionado
         optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
       }
     }
-  }, [isSelected]);
+  }, [isSelected, type]);
   
-  // Manipulador de clique personalizado com debounce para evitar múltiplos cliques rápidos
+  // Manipulador de clique customizado com debounce
   const handleClick = () => {
     if (!isDisabled) {
       // Aplicar mudança visual imediatamente para feedback instantâneo
       if (optionRef.current) {
-        optionRef.current.style.borderColor = isSelected ? '#B89B7A' : '#b29670';
+        if (type === 'text') {
+          optionRef.current.style.borderColor = isSelected ? '#B89B7A' : '#b29670';
+        }
         // Aplicar sombra correspondente ao estado
         optionRef.current.style.boxShadow = isSelected 
           ? '0 2px 4px rgba(0, 0, 0, 0.05)' 
-          : '0 4px 8px rgba(178, 150, 112, 0.25)';
+          : '0 8px 16px rgba(0, 0, 0, 0.15)';
       }
-      // Chamar onSelect com um pequeno atraso para evitar flash durante atualizações de estado
+      // Chamar onSelect com um pequeno atraso para evitar flash
       setTimeout(() => {
         onSelect(option.id);
       }, 10);
@@ -80,11 +92,11 @@ const QuizOption: React.FC<QuizOptionProps> = ({
           // Para opções de texto - manter borda
           type === 'text' && "p-4 border",
           
-          // Para opções de imagem - manter apenas borda na coluna, não nas imagens
-          type !== 'text' && "border",
+          // Para opções de imagem - SEM borda na coluna
+          type !== 'text' && "border-0",
           
           // Fundo sólido sem transparência e adicionando sombra padrão
-          "bg-[#FEFEFE] shadow-sm hover:shadow-md"
+          "bg-[#FEFEFE] shadow-sm hover:shadow-md transition-all duration-300"
         )}
       >
         {type !== 'text' && option.imageUrl && (
@@ -101,7 +113,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         <p className={cn(
           type !== 'text' 
             ? cn(
-                "leading-tight font-medium py-0 px-2 mt-auto text-[#432818] relative", 
+                "leading-tight font-medium py-1 px-2 mt-auto text-[#432818] relative", 
                 isMobile ? "text-[0.7rem]" : "text-[0.7rem] sm:text-sm"
               )
             : cn(
