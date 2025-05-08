@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '../ui/aspect-ratio';
@@ -26,10 +26,9 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
   const isMobile = useIsMobile();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [placeholderVisible, setPlaceholderVisible] = useState(true);
   
   // Use memoization to avoid recalculating the URL on each render
-  const optimizedImageUrl = React.useMemo(() => 
+  const optimizedImageUrl = useMemo(() => 
     optimizeCloudinaryUrl(imageUrl, {
       quality: 95,
       format: 'auto',
@@ -42,16 +41,8 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
   useEffect(() => {
     if (isImagePreloaded(imageUrl)) {
       setImageLoaded(true);
-      setPlaceholderVisible(false);
     }
   }, [imageUrl]);
-
-  // Handle image load completion
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-    // Small delay before hiding placeholder for smooth transition
-    setTimeout(() => setPlaceholderVisible(false), 100);
-  };
 
   if (imageError) {
     return (
@@ -75,15 +66,10 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
           "w-full h-full flex items-center justify-center overflow-hidden transform-gpu",
           isSelected && "scale-[1.03] transition-all duration-300"
         )}>
-          {/* Low quality placeholder for smoother loading */}
-          {placeholderVisible && (
-            <div className="absolute inset-0 bg-gray-100 animate-pulse">
-              {/* Only show spinner if truly loading (not preloaded) */}
-              {!imageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-8 w-8 border-2 border-[#B89B7A] border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
+          {/* Only show loading state if image isn't already loaded */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+              <div className="h-8 w-8 border-2 border-[#B89B7A] border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
           
@@ -91,7 +77,7 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
             src={optimizedImageUrl}
             alt={altText}
             className={cn(
-              "object-cover w-full h-full transition-all duration-300",
+              "object-cover w-full h-full transition-opacity duration-300",
               !imageLoaded && "opacity-0",
               imageLoaded && "opacity-100",
               isSelected 
@@ -100,9 +86,10 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
               // Enhanced 3D effect
               isSelected && is3DQuestion && "transform-3d rotate-y-12"
             )}
-            onLoad={handleImageLoad}
+            onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
-            loading="lazy" // Let the browser decide, we're managing preloading ourselves
+            loading="eager" // Change to eager since we're managing preloading
+            fetchPriority="high"
           />
         </div>
       </AspectRatio>

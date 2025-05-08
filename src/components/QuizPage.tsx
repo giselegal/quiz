@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuizLogic } from '../hooks/useQuizLogic';
 import { UserResponse } from '@/types/quiz';
@@ -10,7 +9,9 @@ import QuizNavigation from './quiz/QuizNavigation';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { useAuth } from '../context/AuthContext';
 import { trackQuizStart, trackQuizAnswer, trackQuizComplete, trackResultView } from '@/utils/analytics';
-import { preloadImages, preloadNextQuestionImages } from '@/utils/imageUtils';
+import { preloadImages } from '@/utils/imageUtils';
+import LoadingManager from './quiz/LoadingManager';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const QuizPage: React.FC = () => {
   // Get auth context
@@ -24,6 +25,7 @@ const QuizPage: React.FC = () => {
   const [strategicAnswers, setStrategicAnswers] = useState<Record<string, string[]>>({});
   const [quizStartTracked, setQuizStartTracked] = useState(false);
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const [pageIsReady, setPageIsReady] = useState(false);
 
   // Get quiz logic functions
   const {
@@ -40,8 +42,21 @@ const QuizPage: React.FC = () => {
     handleStrategicAnswer: saveStrategicAnswer,
     submitQuizIfComplete,
     canProceed,
-    allQuestions
+    allQuestions,
+    isInitialLoadComplete
   } = useQuizLogic();
+
+  // Set page as ready when initial load is complete
+  useEffect(() => {
+    if (isInitialLoadComplete) {
+      // Small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setPageIsReady(true);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isInitialLoadComplete]);
 
   // Calcular e atualizar a porcentagem de progresso
   useEffect(() => {
@@ -58,44 +73,6 @@ const QuizPage: React.FC = () => {
     setProgressPercentage(percentage);
   }, [currentQuestionIndex, currentStrategicQuestionIndex, showingStrategicQuestions, totalQuestions]);
 
-  // Preload next question images when current question changes
-  useEffect(() => {
-    if (!currentQuestion || !nextQuestion) return;
-    
-    // Extract image URLs from next question options
-    const imageUrls = nextQuestion.options
-      .map(option => {
-        if (typeof option === 'string') return null;
-        if (option.imageUrl) return option.imageUrl;
-        return null;
-      })
-      .filter(Boolean) as string[];
-    
-    if (imageUrls.length > 0) {
-      preloadNextQuestionImages(imageUrls);
-    }
-  }, [currentQuestionIndex, nextQuestion, currentQuestion]);
-  
-  // Preload strategic questions when approaching the end of regular questions
-  useEffect(() => {
-    if (currentQuestionIndex >= totalQuestions - 2 && !showingStrategicQuestions) {
-      // When approaching end of regular questions, preload first strategic question
-      const firstStrategicQuestion = strategicQuestions[0];
-      if (firstStrategicQuestion?.imageUrl) {
-        preloadImages([firstStrategicQuestion.imageUrl], {quality: 95});
-      }
-      
-      // Also preload result page assets when near the end
-      if (currentQuestionIndex === totalQuestions - 1) {
-        // Preload transformation images for result page
-        preloadImages([
-          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
-          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp"
-        ], {quality: 95});
-      }
-    }
-  }, [currentQuestionIndex, showingStrategicQuestions, totalQuestions]);
-
   // Track quiz start on component mount and save start time
   useEffect(() => {
     if (!quizStartTracked) {
@@ -110,29 +87,11 @@ const QuizPage: React.FC = () => {
       trackQuizStart(userName, userEmail);
       setQuizStartTracked(true);
       
-      // Preload first question images
-      if (allQuestions && allQuestions.length > 0 && allQuestions[0].options) {
-        const firstQuestionImages = allQuestions[0].options
-          .map(option => {
-            if (typeof option === 'string') return null;
-            if (option.imageUrl) return option.imageUrl;
-            return null;
-          })
-          .filter(Boolean) as string[];
-        
-        if (firstQuestionImages.length > 0) {
-          preloadImages(
-            firstQuestionImages.map(url => ({ url, priority: 3 })),
-            { quality: 95, batchSize: 4 }
-          );
-        }
-      }
-      
       console.log('Quiz iniciado por', userName, userEmail ? `(${userEmail})` : '');
     }
-  }, [quizStartTracked, user, allQuestions]);
+  }, [quizStartTracked, user]);
 
-  // Handle strategic answer
+  // Handle strategic answer with improved image preloading
   const handleStrategicAnswer = useCallback((response: UserResponse) => {
     try {
       setStrategicAnswers(prev => ({
@@ -165,24 +124,21 @@ const QuizPage: React.FC = () => {
         setShowingFinalTransition(true);
         // Track quiz completion
         trackQuizComplete();
-        
-        // Preload result page assets
-        preloadImages([
-          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
-          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
-          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp",
-          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp"
-        ], {
-          quality: 95,
-          batchSize: 2
-        });
       } else {
-        // Preload next strategic question images
+        // Preload next strategic question with higher priority
         const nextIndex = currentStrategicQuestionIndex + 1;
         if (nextIndex < strategicQuestions.length) {
           const nextQuestion = strategicQuestions[nextIndex];
           if (nextQuestion.imageUrl) {
-            preloadImages([nextQuestion.imageUrl], {quality: 95});
+            preloadImages([{ url: nextQuestion.imageUrl, priority: 3 }], { quality: 95 });
+          }
+          
+          // Also preload the next-next question with lower priority if available
+          if (nextIndex + 1 < strategicQuestions.length) {
+            const nextNextQuestion = strategicQuestions[nextIndex + 1];
+            if (nextNextQuestion.imageUrl) {
+              preloadImages([{ url: nextNextQuestion.imageUrl, priority: 2 }], { quality: 95 });
+            }
           }
         }
         
@@ -278,57 +234,73 @@ const QuizPage: React.FC = () => {
   }, [currentAnswers?.length, currentQuestion]);
 
   return (
-    <div className="relative">
-      {/* Barra de progresso */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
-        <div 
-          className="h-full bg-[#b29670]"
-          style={{ width: `${progressPercentage}%` }}
-          role="progressbar"
-          aria-valuenow={progressPercentage}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        ></div>
-      </div>
-      
-      <QuizContainer>
-        <div>
-          <QuizTransitionManager
-            showingTransition={showingTransition}
-            showingFinalTransition={showingFinalTransition}
-            handleStrategicAnswer={handleStrategicAnswer}
-            strategicAnswers={strategicAnswers}
-            handleShowResult={handleShowResult}
-          />
-
-          {!showingTransition && !showingFinalTransition && (
-            <>
-              <QuizContent
-                user={user}
-                currentQuestionIndex={currentQuestionIndex}
-                totalQuestions={totalQuestions}
-                showingStrategicQuestions={showingStrategicQuestions}
-                currentStrategicQuestionIndex={currentStrategicQuestionIndex}
-                currentQuestion={currentQuestion}
-                currentAnswers={currentAnswers}
-                handleAnswerSubmit={handleAnswerSubmit}
-                handleNextClick={handleNextClick}
-                handlePrevious={handlePrevious}
-              />
-              
-              <QuizNavigation
-                currentQuestionType={currentQuestion?.id?.startsWith('strategic') ? 'strategic' : 'normal'}
-                selectedOptionsCount={currentAnswers?.length || 0}
-                isLastQuestion={isLastQuestion}
-                onNext={handleNextClick}
-                onPrevious={handlePrevious}
-                canProceed={getCurrentCanProceed()}
-              />
-            </>
-          )}
+    <LoadingManager isLoading={!pageIsReady}>
+      <div className="relative">
+        {/* Barra de progresso */}
+        <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+          <div 
+            className="h-full bg-[#b29670]"
+            style={{ width: `${progressPercentage}%` }}
+            role="progressbar"
+            aria-valuenow={progressPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          ></div>
         </div>
-      </QuizContainer>
-    </div>
+        
+        <QuizContainer>
+          <AnimatePresence mode="wait">
+            {showingTransition || showingFinalTransition ? (
+              <motion.div
+                key="transition"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <QuizTransitionManager
+                  showingTransition={showingTransition}
+                  showingFinalTransition={showingFinalTransition}
+                  handleStrategicAnswer={handleStrategicAnswer}
+                  strategicAnswers={strategicAnswers}
+                  handleShowResult={handleShowResult}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <QuizContent
+                  user={user}
+                  currentQuestionIndex={currentQuestionIndex}
+                  totalQuestions={totalQuestions}
+                  showingStrategicQuestions={showingStrategicQuestions}
+                  currentStrategicQuestionIndex={currentStrategicQuestionIndex}
+                  currentQuestion={currentQuestion}
+                  currentAnswers={currentAnswers}
+                  handleAnswerSubmit={handleAnswerSubmit}
+                  handleNextClick={handleNextClick}
+                  handlePrevious={handlePrevious}
+                />
+                
+                <QuizNavigation
+                  currentQuestionType={currentQuestion?.id?.startsWith('strategic') ? 'strategic' : 'normal'}
+                  selectedOptionsCount={currentAnswers?.length || 0}
+                  isLastQuestion={isLastQuestion}
+                  onNext={handleNextClick}
+                  onPrevious={handlePrevious}
+                  canProceed={getCurrentCanProceed()}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </QuizContainer>
+      </div>
+    </LoadingManager>
   );
 };
 
