@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -7,11 +6,9 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import OptimizedImage from './ui/OptimizedImage';
 import { preloadImages } from '@/utils/imageUtils';
-
 interface QuizIntroProps {
   onStart: (nome: string) => void;
 }
-
 export const QuizIntro: React.FC<QuizIntroProps> = ({
   onStart
 }) => {
@@ -21,72 +18,55 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const [criticalAssetsLoaded, setCriticalAssetsLoaded] = useState(false);
 
   // Important assets to preload
-  const criticalImages = [
-    "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp",
-    "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg"
-  ];
+  const criticalImages = ["https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp", "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg"];
 
   // Preload critical assets on component mount
   useEffect(() => {
     // Use the enhanced preloading system
-    preloadImages(
-      criticalImages.map(url => ({ url, priority: 3 })),
-      { 
-        batchSize: 2, 
-        quality: 95,
-        onComplete: () => {
-          setCriticalAssetsLoaded(true);
-          setImagesLoaded(true);
-          setIsLoading(false);
-        }
+    preloadImages(criticalImages.map(url => ({
+      url,
+      priority: 3
+    })), {
+      batchSize: 2,
+      quality: 95,
+      onComplete: () => {
+        setCriticalAssetsLoaded(true);
+        setImagesLoaded(true);
+        setIsLoading(false);
       }
-    );
-    
+    });
+
     // Fallback for maximum loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    
     return () => clearTimeout(timer);
   }, []);
-  
+
   // Preload first quiz question images after critical assets are loaded
   useEffect(() => {
     if (criticalAssetsLoaded) {
       // These are just examples - in a real app you would dynamically load the first question's images
-      const firstQuestionImages = [
-        "https://res.cloudinary.com/dqljyf76t/image/upload/v1744920983/Espanhol_Portugu%C3%AAs_8_cgrhuw.webp"
-      ];
-      
+      const firstQuestionImages = ["https://res.cloudinary.com/dqljyf76t/image/upload/v1744920983/Espanhol_Portugu%C3%AAs_8_cgrhuw.webp"];
       if (firstQuestionImages.length > 0) {
-        preloadImages(firstQuestionImages, { 
+        preloadImages(firstQuestionImages, {
           quality: 95,
-          batchSize: 3 
+          batchSize: 3
         });
       }
     }
   }, [criticalAssetsLoaded]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nome.trim()) {
       onStart(nome);
     }
   };
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] px-4 py-8">
-      <div className={`w-full max-w-md mx-auto bg-[#FEFEFE] shadow-lg rounded-2xl p-4 md:p-6 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+  return <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] py-[31px] mx-0 px-[5px]">
+      <div className="">
         {/* Logotipo - menor e com mais espaço embaixo */}
         <div className="flex justify-center mb-12">
-          <OptimizedImage 
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
-            alt="Logo Gisele Galvão" 
-            className="w-14 md:w-18 h-auto" 
-            width={72}
-            height={36}
-            priority={true} 
-          />
+          <OptimizedImage src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" alt="Logo Gisele Galvão" className="w-14 md:w-18 h-auto" width={72} height={36} priority={true} />
         </div>
 
         {/* Barra de carregamento dourada animada - aumentado o gap */}
@@ -95,25 +75,17 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         </div>
 
         {/* Título */}
-        <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818]">
+        <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818] px-[12px]">
           Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
         </h1>
 
         {/* Imagem - menor */}
         <div className="flex justify-center mb-6">
-          <OptimizedImage 
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
-            alt="Mulher elegante com roupas estilosas" 
-            className="w-full max-w-[220px] h-auto rounded-lg shadow-sm" 
-            width={220} 
-            height={294} 
-            objectFit="cover"
-            priority={true} 
-          />
+          <OptimizedImage src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" alt="Mulher elegante com roupas estilosas" className="w-full max-w-[220px] h-auto rounded-lg shadow-sm" width={220} height={294} objectFit="cover" priority={true} />
         </div>
 
         {/* Subtítulo */}
-        <p className="text-sm text-[#433830] text-center mb-7 max-w-md mx-auto">
+        <p className="text-sm text-[#433830] text-center mb-7 max-w-md mx-auto px-[18px]">
           Em poucos minutos, descubra seu{' '}
           <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
           looks que realmente refletem sua <span className="font-semibold text-[#b29670]">essência</span>, com
@@ -125,20 +97,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           <label htmlFor="name" className="text-xs font-semibold text-[#432818]">
             NOME
           </label>
-          <Input 
-            id="name" 
-            placeholder="Digite seu nome" 
-            value={nome} 
-            onChange={e => setNome(e.target.value)} 
-            className="w-full p-3 border-[#b29670] focus:border-[#a1835d] focus:ring-[#a1835d] bg-[#FEFEFE]" 
-            autoFocus 
-            aria-required="true" 
-          />
-          <Button 
-            type="submit" 
-            className="w-full mx-auto bg-[#b29670] hover:bg-[#a1835d] text-white py-3 px-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-3" 
-            disabled={!nome.trim()}
-          >
+          <Input id="name" placeholder="Digite seu nome" value={nome} onChange={e => setNome(e.target.value)} className="w-full p-3 border-[#b29670] focus:border-[#a1835d] focus:ring-[#a1835d] bg-[#FEFEFE]" autoFocus aria-required="true" />
+          <Button type="submit" className="w-full mx-auto bg-[#b29670] hover:bg-[#a1835d] text-white py-3 px-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-3" disabled={!nome.trim()}>
             Quero Descobrir meu Estilo Agora!
           </Button>
           <p className="text-xs text-center text-gray-500 mt-2">
@@ -146,8 +106,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           </p>
         </form>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default QuizIntro;
