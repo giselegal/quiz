@@ -22,6 +22,7 @@ interface PreloadOptions {
   onProgress?: (loaded: number, total: number) => void;
   onComplete?: () => void;
   batchSize?: number;
+  generateLowQuality?: boolean;
 }
 
 // Cache to store loaded image statuses
@@ -88,6 +89,21 @@ export const isImagePreloaded = (url: string): boolean => {
 };
 
 /**
+ * Generate low quality placeholder URL for cloudinary images
+ * @param url Original image URL
+ */
+export const getLowQualityPlaceholder = (url: string): string => {
+  if (!url || !url.includes('cloudinary.com')) return '';
+  
+  // Create a very low quality, small version for placeholders
+  return optimizeCloudinaryUrl(url, { 
+    quality: 10, 
+    format: 'auto',
+    width: 100 
+  });
+};
+
+/**
  * Preload specific images from the bank
  * @param imageIds Array of image IDs to preload
  * @param options Preload options
@@ -120,7 +136,38 @@ export const preloadImagesByUrls = (
     category: 'external',
   }));
   
-  return preloadImages(tempImages, options);
+  const { generateLowQuality = true, ...restOptions } = options;
+  
+  // If requested, also generate and cache low quality placeholders
+  if (generateLowQuality) {
+    urls.forEach(url => {
+      const lowQualityUrl = getLowQualityPlaceholder(url);
+      if (lowQualityUrl) {
+        // Add low quality version to cache
+        const optimizedUrl = optimizeCloudinaryUrl(url, { 
+          quality: options.quality || 95, 
+          format: 'auto',
+          width: options.width,
+          height: options.height
+        });
+        
+        // Update cache with low quality URL if entry exists
+        if (imageCache.has(optimizedUrl)) {
+          const entry = imageCache.get(optimizedUrl)!;
+          imageCache.set(optimizedUrl, {
+            ...entry,
+            lowQualityUrl
+          });
+        }
+        
+        // Also preload the low quality version
+        const img = new Image();
+        img.src = lowQualityUrl;
+      }
+    });
+  }
+  
+  return preloadImages(tempImages, restOptions);
 };
 
 /**
@@ -138,7 +185,8 @@ export const preloadImages = (
     height,
     onProgress,
     onComplete,
-    batchSize = 3
+    batchSize = 3,
+    generateLowQuality = true
   } = options;
   
   // Skip any already loaded or loading images
@@ -184,10 +232,17 @@ export const preloadImages = (
         height: height || img.height
       });
       
+      // Generate low quality placeholder if needed
+      let lowQualityUrl;
+      if (generateLowQuality && img.src.includes('cloudinary.com')) {
+        lowQualityUrl = getLowQualityPlaceholder(img.src);
+      }
+      
       // Mark as loading
       imageCache.set(optimizedUrl, {
         url: img.src,
-        loadStatus: 'loading'
+        loadStatus: 'loading',
+        lowQualityUrl
       });
       
       const imgElement = new Image();
@@ -198,7 +253,8 @@ export const preloadImages = (
           url: img.src,
           loadStatus: 'loaded',
           element: imgElement,
-          optimizedUrl
+          optimizedUrl,
+          lowQualityUrl
         });
         
         loadedCount++;
@@ -217,7 +273,8 @@ export const preloadImages = (
         // Mark as error
         imageCache.set(optimizedUrl, {
           url: img.src,
-          loadStatus: 'error'
+          loadStatus: 'error',
+          lowQualityUrl
         });
         
         console.error(`Failed to preload image: ${img.src}`);
@@ -267,6 +324,24 @@ export const getOptimizedImage = (
   });
   
   return optimizedUrl;
+};
+
+/**
+ * Get a low quality placeholder for an image URL
+ * @param url Original image URL
+ */
+export const getLowQualityImage = (url: string): string => {
+  if (!url) return '';
+  
+  // Check if we already have this in the cache
+  const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 95, format: 'auto' });
+  if (imageCache.has(optimizedUrl)) {
+    const entry = imageCache.get(optimizedUrl)!;
+    if (entry.lowQualityUrl) return entry.lowQualityUrl;
+  }
+  
+  // Generate a low quality version
+  return getLowQualityPlaceholder(url);
 };
 
 /**
@@ -343,5 +418,7 @@ export default {
   isImagePreloaded,
   getImageMetadata,
   preloadCriticalImages,
-  getOptimizedImage
+  getOptimizedImage,
+  getLowQualityPlaceholder,
+  getLowQualityImage
 };

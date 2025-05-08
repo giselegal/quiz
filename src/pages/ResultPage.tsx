@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useQuiz } from '@/hooks/useQuiz';
 import { useGlobalStyles } from '@/hooks/useGlobalStyles';
@@ -26,7 +25,8 @@ import SecurePurchaseElement from '@/components/result/SecurePurchaseElement';
 import { useAuth } from '@/context/AuthContext';
 import { useABTest } from '@/hooks/useABTest';
 import { Link } from 'react-router-dom';
-import { User as UserType, UserWithRole } from '@/types/user';
+import { preloadCriticalImages, getLowQualityPlaceholder } from '@/utils/imageManager';
+import ProgressiveImage from '@/components/ui/ProgressiveImage';
 
 const ResultPage: React.FC = () => {
   const {
@@ -63,14 +63,10 @@ const ResultPage: React.FC = () => {
     if (!primaryStyle) return;
     window.scrollTo(0, 0);
 
-    // Pré-carregar imagens críticas primeiro
-    const criticalImages = [globalStyles.logo || 'https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp'];
-    criticalImages.forEach(src => {
-      const img = new Image();
-      img.src = src;
-    });
+    // Immediately preload critical images for the results page
+    preloadCriticalImages('results');
 
-    // Depois carregar as imagens específicas do estilo
+    // Get the style-specific images
     const {
       category
     } = primaryStyle;
@@ -78,19 +74,37 @@ const ResultPage: React.FC = () => {
       image,
       guideImage
     } = styleConfig[category];
+    
+    // Create low quality placeholders
+    const lowQualityStyle = getLowQualityPlaceholder(image);
+    const lowQualityGuide = getLowQualityPlaceholder(guideImage);
+    
+    // Preload high quality images
     const styleImg = new Image();
     styleImg.src = `${image}?q=auto:best&f=auto&w=340`;
     styleImg.onload = () => setImagesLoaded(prev => ({
       ...prev,
       style: true
     }));
+    
     const guideImg = new Image();
     guideImg.src = `${guideImage}?q=auto:best&f=auto&w=540`;
     guideImg.onload = () => setImagesLoaded(prev => ({
       ...prev,
       guide: true
     }));
-  }, [primaryStyle, globalStyles.logo]);
+    
+    // Also preload the low quality placeholders
+    if (lowQualityStyle) {
+      const lowQualityStyleImg = new Image();
+      lowQualityStyleImg.src = lowQualityStyle;
+    }
+    
+    if (lowQualityGuide) {
+      const lowQualityGuideImg = new Image();
+      lowQualityGuideImg.src = lowQualityGuide;
+    }
+  }, [primaryStyle]);
   
   useEffect(() => {
     if (imagesLoaded.style && imagesLoaded.guide) completeLoading();
@@ -229,8 +243,17 @@ const ResultPage: React.FC = () => {
                 </AnimatedWrapper>
               </div>
               <AnimatedWrapper animation={isLowPerformance ? 'none' : 'scale'} show={true} duration={500} delay={500}>
-                <div className="max-w-[238px] mx-auto relative"> {/* Reduzido de 340px para 238px (30% menor) */}
-                  <img src={`${image}?q=auto:best&f=auto&w=238`} alt={`Estilo ${category}`} className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300" loading="eager" fetchPriority="high" width="238" height="auto" />
+                <div className="max-w-[238px] mx-auto relative">
+                  <ProgressiveImage
+                    src={`${image}?q=auto:best&f=auto&w=238`}
+                    lowQualitySrc={getLowQualityPlaceholder(image)}
+                    alt={`Estilo ${category}`}
+                    className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                    priority={true}
+                    width="238"
+                    height="auto"
+                    onLoad={() => setImagesLoaded(prev => ({ ...prev, style: true }))}
+                  />
                   {/* Elegant decorative corner */}
                   <div className="absolute -top-2 -right-2 w-8 h-8 border-t-2 border-r-2 border-[#B89B7A]"></div>
                   <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-2 border-l-2 border-[#B89B7A]"></div>
@@ -239,7 +262,16 @@ const ResultPage: React.FC = () => {
             </div>
             <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={800}>
               <div className="mt-8 max-w-[540px] mx-auto relative">
-                <img src={`${guideImage}?q=auto:best&f=auto&w=540`} alt={`Guia de Estilo ${category}`} loading="lazy" className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300" width="540" height="auto" />
+                <ProgressiveImage
+                  src={`${guideImage}?q=auto:best&f=auto&w=540`}
+                  lowQualitySrc={getLowQualityPlaceholder(guideImage)}
+                  alt={`Guia de Estilo ${category}`}
+                  className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                  priority={false}
+                  width="540"
+                  height="auto"
+                  onLoad={() => setImagesLoaded(prev => ({ ...prev, guide: true }))}
+                />
                 {/* Elegant badge */}
                 <div className="absolute -top-4 -right-4 bg-gradient-to-r from-[#B89B7A] to-[#aa6b5d] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium transform rotate-12">
                   Exclusivo

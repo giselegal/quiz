@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
 import { ShoppingCart, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { Slider } from '../ui/slider';
 import OptimizedImage from '../ui/OptimizedImage';
-import { preloadImagesByCategory, getOptimizedImage } from '@/utils/imageManager';
+import { preloadImagesByUrls, preloadCriticalImages } from '@/utils/imageManager';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -18,25 +18,48 @@ interface TransformationItem {
   name: string;
   beforeId: string;
   afterId: string;
+  lowQualityBefore?: string;
+  lowQualityAfter?: string;
 }
 
-// Correct image URLs for before/after transformations
+// Correct image URLs for before/after transformations with low quality placeholders
 const transformations: TransformationItem[] = [
   {
     beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
     afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
     name: "Adriana",
     beforeId: "transformation-adriana-before",
-    afterId: "transformation-adriana-after"
+    afterId: "transformation-adriana-after",
+    lowQualityBefore: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/antes_adriana_pmdn8y.webp",
+    lowQualityAfter: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/depois_adriana_pmdn8y.webp"
   }, 
   {
     beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp", 
     afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp",
     name: "Mariangela",
     beforeId: "transformation-mariangela-before",
-    afterId: "transformation-mariangela-after"
+    afterId: "transformation-mariangela-after",
+    lowQualityBefore: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745522326/antes_mariangela_cpugfj.webp",
+    lowQualityAfter: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745522326/depois_mariangela_cpugfj.webp"
   }
 ];
+
+// Preload all transformation images immediately when this module is loaded
+(() => {
+  // Collect all image URLs
+  const allUrls = transformations.flatMap(item => [
+    item.beforeImage, 
+    item.afterImage, 
+    item.lowQualityBefore || '', 
+    item.lowQualityAfter || ''
+  ]).filter(Boolean);
+  
+  // Preload them with high priority
+  preloadImagesByUrls(allUrls, {
+    quality: 90,
+    batchSize: 4
+  });
+})();
 
 const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ handleCTAClick }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -48,26 +71,44 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     before: false,
     after: false
   });
-  const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   
   const activeTransformation = transformations[activeIndex];
+  const beforeImageRef = useRef<HTMLImageElement>(null);
+  const afterImageRef = useRef<HTMLImageElement>(null);
   
-  // Preload all transformation images on component mount
+  // Start preloading images as soon as component mounts
   useEffect(() => {
-    // Use the image bank to preload transformation images
-    preloadImagesByCategory('transformation', {
+    const highQualityUrls = [
+      activeTransformation.beforeImage,
+      activeTransformation.afterImage
+    ];
+    
+    // Preload high-quality versions
+    preloadImagesByUrls(highQualityUrls, {
+      quality: 90,
       batchSize: 2,
-      quality: 95,
       onComplete: () => {
-        setImagesPreloaded(true);
         setImagesLoaded({
           before: true,
           after: true
         });
       }
     });
-  }, []);
+    
+    // Also preload the next transformation if available
+    const nextIndex = (activeIndex + 1) % transformations.length;
+    if (nextIndex !== activeIndex) {
+      const nextTransformation = transformations[nextIndex];
+      preloadImagesByUrls([
+        nextTransformation.beforeImage,
+        nextTransformation.afterImage
+      ], {
+        quality: 70, // Lower quality for next slide preloading
+        batchSize: 2
+      });
+    }
+  }, [activeIndex]);
   
   const handleSliderChange = (value: number[]) => {
     setSliderPosition(value[0]);
@@ -86,19 +127,14 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   };
   
   const handleButtonClick = () => {
-    // Track checkout initiation
     trackButtonClick('checkout_button', 'Iniciar Checkout', 'transformation_section');
     
-    // Se uma função de clique foi fornecida como prop, use-a
     if (handleCTAClick) {
       handleCTAClick();
     } else {
-      // Caso contrário, use o comportamento padrão
       window.location.href = 'https://pay.hotmart.com/W98977034C?checkoutMode=10&bid=1744967466912';
     }
   };
-
-  const areImagesReady = imagesLoaded.before && imagesLoaded.after;
 
   return (
     <div className="py-10">
@@ -139,34 +175,45 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
           </div>
           <div className="md:w-1/2 w-full">
             <Card className="p-6 card-elegant overflow-hidden">
-              {/* Loading state */}
-              {!areImagesReady && (
-                <div className="h-[400px] md:h-[500px] w-full flex items-center justify-center bg-[#f9f4ef]">
-                  <div className="w-12 h-12 border-4 border-[#aa6b5d] border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
-              
-              {/* Before/After image comparison with slider */}
-              <div className={`relative h-[400px] md:h-[500px] w-full mb-4 ${areImagesReady ? '' : 'hidden'}`}>
-                {/* Before image - using OptimizedImage */}
+              {/* Always show something - either low quality placeholders or high quality images */}
+              <div className="relative h-[400px] md:h-[500px] w-full mb-4">
+                {/* Before image - Show low quality first, then high quality when loaded */}
                 <div className="absolute inset-0 overflow-hidden">
-                  <OptimizedImage 
+                  {!imagesLoaded.before && activeTransformation.lowQualityBefore && (
+                    <img 
+                      src={activeTransformation.lowQualityBefore}
+                      alt={`Carregando - ${activeTransformation.name}`} 
+                      className="w-full h-full object-cover rounded-lg blur-sm"
+                      style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                    />
+                  )}
+                  <img 
+                    ref={beforeImageRef}
                     src={activeTransformation.beforeImage}
                     alt={`Antes - ${activeTransformation.name}`} 
-                    className="w-full h-full object-cover rounded-lg"
+                    className={`w-full h-full object-cover rounded-lg transition-opacity duration-500 ${imagesLoaded.before ? 'opacity-100' : 'opacity-0'}`}
                     style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-                    priority={true}
+                    onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
                   />
                 </div>
                 
-                {/* After image - using OptimizedImage */}
+                {/* After image */}
                 <div className="absolute inset-0 overflow-hidden">
-                  <OptimizedImage
+                  {!imagesLoaded.after && activeTransformation.lowQualityAfter && (
+                    <img 
+                      src={activeTransformation.lowQualityAfter}
+                      alt={`Carregando - ${activeTransformation.name}`} 
+                      className="w-full h-full object-cover rounded-lg blur-sm"
+                      style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+                    />
+                  )}
+                  <img
+                    ref={afterImageRef}
                     src={activeTransformation.afterImage}
                     alt={`Depois - ${activeTransformation.name}`} 
-                    className="w-full h-full object-cover rounded-lg"
+                    className={`w-full h-full object-cover rounded-lg transition-opacity duration-500 ${imagesLoaded.after ? 'opacity-100' : 'opacity-0'}`}
                     style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
-                    priority={true}
+                    onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
                   />
                 </div>
                 

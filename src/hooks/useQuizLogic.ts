@@ -212,7 +212,7 @@ export const useQuizLogic = () => {
     localStorage.setItem('strategicAnswers', JSON.stringify(strategicAnswers));
     console.log('Results calculated and saved to localStorage:', result);
 
-    // Begin preloading result page assets
+    // Begin preloading result page assets with high priority
     preloadImagesByUrls([
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
