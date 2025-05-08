@@ -33,7 +33,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       // Configurar tempo para esconder o efeito visual
       const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
-      }, 1500); // Aumentada a duração da animação para 1.5s
+      }, 2000); // Aumentada a duração da animação para 2s
       
       // Auto-avançar quando selecionar a terceira opção em perguntas normais
       if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
@@ -76,8 +76,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
-        {/* Botões de navegação com layout melhorado */}
-        <div className="relative w-full max-w-md flex justify-center items-center py-2">
+        {/* Container do botão com largura fixa e centralizado */}
+        <div className="relative w-full flex justify-center items-center py-2 max-w-xs mx-auto">
           {/* Botão Anterior (à esquerda quando presente) */}
           {onPrevious && (
             <Button 
@@ -93,10 +93,15 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
           <Button
             onClick={onNext}
             disabled={!canProceed}
-            className={`bg-[#B89B7A] hover:bg-[#A38A69] transition-all duration-500 mx-auto
-              ${!canProceed ? 'opacity-50' : 'opacity-100'} 
-              ${showActivationEffect ? 'animate-enhanced-pulse scale-110 shadow-lg' : ''}
+            className={`
+              transition-all duration-700
+              ${!canProceed ? 'opacity-50 bg-gray-400' : 'opacity-100 bg-[#B89B7A] hover:bg-[#A38A69]'} 
+              ${showActivationEffect ? 'animate-enhanced-pulse scale-110 shadow-md ring-2 ring-[#B89B7A]/50' : ''}
+              mx-auto
             `}
+            style={{
+              minWidth: '120px'
+            }}
           >
             {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
           </Button>
