@@ -2,8 +2,21 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Gift, Star } from 'lucide-react';
+import { optimizeCloudinaryUrl } from '@/utils/imageUtils';
 
 const BonusSection: React.FC = () => {
+  // Criar imagem otimizada de alta qualidade
+  const bonus1ImageUrl = optimizeCloudinaryUrl(
+    "https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp",
+    { quality: 95, format: 'webp' }
+  );
+
+  // Criar imagem otimizada para o segundo bônus
+  const bonus2ImageUrl = optimizeCloudinaryUrl(
+    "https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp",
+    { quality: 95, format: 'webp' }
+  );
+
   return (
     <div className="py-10">
       <h2 className="text-2xl md:text-3xl font-playfair text-[#aa6b5d] text-center mb-2">
@@ -18,18 +31,27 @@ const BonusSection: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white p-4 rounded-lg shadow-sm border border-[#B89B7A]/10 hover:shadow-md transition-shadow relative overflow-hidden">
             <div className="flex justify-center mb-4">
-              <img 
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp" 
-                alt="Bônus: Peças-chave do Guarda-roupa" 
-                className="w-full max-w-[300px] h-auto rounded-lg shadow-sm hover:scale-105 transition-transform duration-300" 
-                loading="lazy"
-                srcSet="
-                  https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_200/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp 200w,
-                  https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_300/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp 300w,
-                  https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_400/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp 400w
-                "
-                sizes="(max-width: 768px) 45vw, 300px"
-              />
+              <picture>
+                {/* Várias resoluções de imagem para responder a diferentes tamanhos de tela */}
+                <source 
+                  srcSet={`
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 200, quality: 90, format: 'webp' })} 200w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 300, quality: 90, format: 'webp' })} 300w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 400, quality: 90, format: 'webp' })} 400w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1744911668/C%C3%B3pia_de_Passo_5_Pe%C3%A7as_chaves_Documento_A4_lxmekf.webp", { width: 600, quality: 95, format: 'webp' })} 600w
+                  `}
+                  sizes="(max-width: 768px) 45vw, 300px"
+                  type="image/webp"
+                />
+                <img 
+                  src={bonus1ImageUrl} 
+                  alt="Bônus: Peças-chave do Guarda-roupa" 
+                  className="w-full max-w-[300px] h-auto rounded-lg shadow-sm hover:scale-105 transition-transform duration-300" 
+                  loading="lazy"
+                  width="300"
+                  height="420"
+                />
+              </picture>
             </div>
             <h3 className="text-lg font-medium text-[#aa6b5d] mb-2 flex items-center">
               <Gift className="w-5 h-5 mr-2 text-[#B89B7A]" />
@@ -49,18 +71,27 @@ const BonusSection: React.FC = () => {
           
           <div className="bg-white p-4 rounded-lg shadow-sm border border-[#B89B7A]/10 hover:shadow-md transition-shadow relative overflow-hidden">
             <div className="flex justify-center mb-4">
-              <img 
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp" 
-                alt="Bônus: Visagismo Facial" 
-                className="w-full max-w-[300px] h-auto rounded-lg shadow-sm hover:scale-105 transition-transform duration-300" 
-                loading="lazy"
-                srcSet="
-                  https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_200/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp 200w,
-                  https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_300/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp 300w,
-                  https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_400/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp 400w
-                "
-                sizes="(max-width: 768px) 45vw, 300px"
-              />
+              <picture>
+                {/* Várias resoluções de imagem para responder a diferentes tamanhos de tela */}
+                <source 
+                  srcSet={`
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 200, quality: 90, format: 'webp' })} 200w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 300, quality: 90, format: 'webp' })} 300w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 400, quality: 90, format: 'webp' })} 400w,
+                    ${optimizeCloudinaryUrl("https://res.cloudinary.com/dqljyf76t/image/upload/v1745515076/C%C3%B3pia_de_MOCKUPS_10_-_Copia_bvoccn.webp", { width: 600, quality: 95, format: 'webp' })} 600w
+                  `}
+                  sizes="(max-width: 768px) 45vw, 300px"
+                  type="image/webp"
+                />
+                <img 
+                  src={bonus2ImageUrl} 
+                  alt="Bônus: Visagismo Facial" 
+                  className="w-full max-w-[300px] h-auto rounded-lg shadow-sm hover:scale-105 transition-transform duration-300" 
+                  loading="lazy"
+                  width="300"
+                  height="420"
+                />
+              </picture>
             </div>
             <h3 className="text-lg font-medium text-[#aa6b5d] mb-2 flex items-center">
               <Gift className="w-5 h-5 mr-2 text-[#B89B7A]" />

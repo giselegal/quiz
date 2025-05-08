@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 
 interface QuizNavigationProps {
@@ -18,12 +19,22 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   selectedOptionsCount,
   isLastQuestion = false
 }) => {
-  // Usar diretamente o canProceed fornecido pelo componente pai
-  // em vez de recalcular com uma regra rígida
-  const isButtonEnabled = canProceed;
+  // Estado para controlar a animação de ativação do botão
+  const [showActivationEffect, setShowActivationEffect] = useState(false);
+  
+  // Verificar quando o botão se torna disponível para mostrar o efeito
+  useEffect(() => {
+    if (canProceed) {
+      setShowActivationEffect(true);
+      const timer = setTimeout(() => {
+        setShowActivationEffect(false);
+      }, 600); // A duração da animação
+      return () => clearTimeout(timer);
+    }
+  }, [canProceed]);
 
   const getHelperText = () => {
-    if (!isButtonEnabled) {
+    if (!canProceed) {
       if (currentQuestionType === 'strategic') {
         return 'Selecione 1 opção para continuar';
       }
@@ -33,29 +44,36 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center mt-6">
-      {onPrevious && (
-        <Button 
-          variant="outline" 
-          onClick={onPrevious}
-          className="text-[#8F7A6A] border-[#8F7A6A]"
-        >
-          Voltar
-        </Button>
-      )}
+    <div className="flex justify-between items-center mt-6 w-full px-4 md:px-0">
+      <div className="flex-1">
+        {onPrevious && (
+          <Button 
+            variant="outline" 
+            onClick={onPrevious}
+            className="text-[#8F7A6A] border-[#8F7A6A]"
+          >
+            Voltar
+          </Button>
+        )}
+      </div>
       
-      <div className="flex flex-col items-center ml-auto">
-        {!isButtonEnabled && (
+      <div className="flex flex-col items-center justify-center flex-1">
+        {!canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-2">{getHelperText()}</p>
         )}
         <Button
           onClick={onNext}
-          disabled={!isButtonEnabled}
-          className={`bg-[#B89B7A] hover:bg-[#A38A69] ${!isButtonEnabled ? 'opacity-50' : ''}`}
+          disabled={!canProceed}
+          className={`bg-[#B89B7A] hover:bg-[#A38A69] transition-all
+            ${!canProceed ? 'opacity-50' : 'opacity-100'}
+            ${showActivationEffect ? 'scale-105 shadow-lg' : ''}
+          `}
         >
           {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
         </Button>
       </div>
+      
+      <div className="flex-1"></div> {/* Espaçador para manter o botão centralizado */}
     </div>
   );
 };
