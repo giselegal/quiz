@@ -1,6 +1,9 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { optimizeCloudinaryUrl, getResponsiveImageUrl, getLowQualityPlaceholder, isImagePreloaded } from '@/utils/imageUtils';
+import { optimizeCloudinaryUrl, getResponsiveImageUrl, getLowQualityPlaceholder } from '@/utils/imageUtils';
+import { getImageMetadata, isImagePreloaded, getOptimizedImage } from '@/utils/imageManager';
+
 interface OptimizedImageProps {
   src: string;
   alt: string;
@@ -20,6 +23,7 @@ interface OptimizedImageProps {
  * - Estado de carregamento com placeholder
  * - Otimização automática de URLs do Cloudinary
  * - Carregamento progressivo com efeito blur
+ * - Integração com o banco de imagens
  */
 export default function OptimizedImage({
   src,
@@ -35,21 +39,38 @@ export default function OptimizedImage({
   const [error, setError] = useState(false);
   const [blurredLoaded, setBlurredLoaded] = useState(false);
 
+  // Check if this image has metadata in our image bank
+  const imageMetadata = useMemo(() => src ? getImageMetadata(src) : undefined, [src]);
+
   // Generate placeholders and optimized URLs only once
-  const placeholderSrc = React.useMemo(() => src ? getLowQualityPlaceholder(src) : '', [src]);
+  const placeholderSrc = useMemo(() => {
+    if (!src) return '';
+    return getLowQualityPlaceholder(src);
+  }, [src]);
 
   // Otimizar URLs do Cloudinary automaticamente
-  const optimizedSrc = React.useMemo(() => optimizeCloudinaryUrl(src, {
-    quality: 95,
-    format: 'auto',
-    width: width || undefined,
-    height: height || undefined
-  }), [src, width, height]);
+  const optimizedSrc = useMemo(() => {
+    if (!src) return '';
+    
+    // Use metadata width/height if available and not overridden
+    const imgWidth = width || (imageMetadata?.width || undefined);
+    const imgHeight = height || (imageMetadata?.height || undefined);
+    
+    return getOptimizedImage(src, {
+      quality: 95,
+      format: 'auto',
+      width: imgWidth,
+      height: imgHeight
+    });
+  }, [src, width, height, imageMetadata]);
 
   // Get responsive image attributes if needed
-  const responsiveImageProps = React.useMemo(() => width && width > 300 ? getResponsiveImageUrl(src) : {
-    srcSet: '',
-    sizes: ''
+  const responsiveImageProps = useMemo(() => {
+    if (!src) return { srcSet: '', sizes: '' };
+    if (width && width > 300) {
+      return getResponsiveImageUrl(src);
+    }
+    return { srcSet: '', sizes: '' };
   }, [src, width]);
 
   // For priority images, we check if they're already preloaded and update state accordingly
@@ -58,6 +79,7 @@ export default function OptimizedImage({
     setLoaded(false);
     setBlurredLoaded(false);
     setError(false);
+    
     if (src && priority) {
       if (isImagePreloaded(src)) {
         // If already preloaded, mark as loaded
@@ -80,26 +102,72 @@ export default function OptimizedImage({
       blurImg.onload = () => setBlurredLoaded(true);
     }
   }, [optimizedSrc, placeholderSrc, priority, src, onLoad]);
-  return <div style={{
-    width: width || 'auto',
-    height: height || 'auto'
-  }} className="">
-      {!loaded && !error && <>
+  
+  return (
+    <div 
+      style={{
+        width: width || 'auto',
+        height: height || 'auto'
+      }} 
+      className=""
+    >
+      {!loaded && !error && (
+        <>
           {/* Low quality placeholder image */}
-          {blurredLoaded && <img src={placeholderSrc} alt="" width={width} height={height} className={cn("absolute inset-0 w-full h-full", objectFit === 'cover' && "object-cover", objectFit === 'contain' && "object-contain", objectFit === 'fill' && "object-fill", objectFit === 'none' && "object-none", objectFit === 'scale-down' && "object-scale-down", "blur-xl scale-110" // Blur effect for placeholders
-      )} aria-hidden="true" />}
+          {blurredLoaded && (
+            <img 
+              src={placeholderSrc} 
+              alt="" 
+              width={width} 
+              height={height} 
+              className={cn(
+                "absolute inset-0 w-full h-full",
+                objectFit === 'cover' && "object-cover",
+                objectFit === 'contain' && "object-contain",
+                objectFit === 'fill' && "object-fill",
+                objectFit === 'none' && "object-none",
+                objectFit === 'scale-down' && "object-scale-down",
+                "blur-xl scale-110" // Blur effect for placeholders
+              )}
+              aria-hidden="true"
+            />
+          )}
           
           {/* Shimmer loading effect */}
           <div className="absolute inset-0 bg-gray-100 animate-pulse rounded" />
-        </>}
+        </>
+      )}
       
-      <img src={optimizedSrc} alt={alt} width={width} height={height} loading={priority ? "eager" : "lazy"} decoding={priority ? "sync" : "async"} fetchPriority={priority ? "high" : "auto"} srcSet={responsiveImageProps.srcSet || undefined} sizes={responsiveImageProps.sizes || undefined} onLoad={() => {
-      setLoaded(true);
-      onLoad?.();
-    }} onError={() => setError(true)} className="object-cover" />
+      <img 
+        src={optimizedSrc} 
+        alt={imageMetadata?.alt || alt}  // Use metadata alt if available
+        width={width} 
+        height={height}
+        loading={priority ? "eager" : "lazy"}
+        decoding={priority ? "sync" : "async"}
+        fetchPriority={priority ? "high" : "auto"}
+        srcSet={responsiveImageProps.srcSet || undefined}
+        sizes={responsiveImageProps.sizes || undefined}
+        onLoad={() => {
+          setLoaded(true);
+          onLoad?.();
+        }}
+        onError={() => setError(true)}
+        className={cn(
+          objectFit === 'cover' && "object-cover",
+          objectFit === 'contain' && "object-contain",
+          objectFit === 'fill' && "object-fill",
+          objectFit === 'none' && "object-none",
+          objectFit === 'scale-down' && "object-scale-down",
+          className
+        )}
+      />
       
-      {error && <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
           <span className="text-sm text-gray-500">Imagem não disponível</span>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 }

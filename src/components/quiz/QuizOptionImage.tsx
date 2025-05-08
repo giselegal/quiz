@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '../ui/aspect-ratio';
 import { getFallbackStyle } from '@/utils/styleUtils';
-import { optimizeCloudinaryUrl, isImagePreloaded } from '@/utils/imageUtils';
+import { isImagePreloaded, getOptimizedImage, getImageMetadata } from '@/utils/imageManager';
 
 interface QuizOptionImageProps {
   imageUrl: string;
@@ -27,9 +27,15 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   
+  // Get image metadata from our bank if available
+  const imageMetadata = useMemo(() => 
+    getImageMetadata(imageUrl),
+    [imageUrl]
+  );
+  
   // Use memoization to avoid recalculating the URL on each render
   const optimizedImageUrl = useMemo(() => 
-    optimizeCloudinaryUrl(imageUrl, {
+    getOptimizedImage(imageUrl, {
       quality: 95,
       format: 'auto',
       width: imageUrl.includes('sapatos') ? 400 : 500
@@ -75,7 +81,7 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
           
           <img
             src={optimizedImageUrl}
-            alt={altText}
+            alt={imageMetadata?.alt || altText}
             className={cn(
               "object-cover w-full h-full transition-opacity duration-300",
               !imageLoaded && "opacity-0",
