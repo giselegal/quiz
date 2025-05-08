@@ -1,8 +1,7 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { quizQuestions } from '../data/quizQuestions';
 import { QuizResult, StyleResult } from '../types/quiz';
-import { preloadImages, preloadCriticalImages } from '../utils/imageManager';
+import { preloadImagesByUrls, preloadCriticalImages } from '../utils/imageManager';
 
 export const useQuizLogic = () => {
   // 1. State declarations (all at the top)
@@ -43,16 +42,13 @@ export const useQuizLogic = () => {
 
       if (firstQuestionImages.length > 0) {
         // High priority preload for first question
-        preloadImages(
-          firstQuestionImages.map(url => ({ url, priority: 3 })),
-          { 
-            quality: 95,
-            batchSize: 4,
-            onComplete: () => {
-              setIsInitialLoadComplete(true);
-            }
+        preloadImagesByUrls(firstQuestionImages, {
+          quality: 95,
+          batchSize: 4,
+          onComplete: () => {
+            setIsInitialLoadComplete(true);
           }
-        );
+        });
 
         // Start preloading next question with lower priority
         if (nextQuestion) {
@@ -65,10 +61,10 @@ export const useQuizLogic = () => {
             .filter(Boolean) as string[];
 
           if (nextQuestionImages.length > 0) {
-            preloadImages(
-              nextQuestionImages.map(url => ({ url, priority: 2 })),
-              { quality: 95, batchSize: 2 }
-            );
+            preloadImagesByUrls(nextQuestionImages, { 
+              quality: 95, 
+              batchSize: 2 
+            });
           }
         }
       } else {
@@ -102,10 +98,10 @@ export const useQuizLogic = () => {
         .filter(Boolean) as string[];
 
       if (nextImages.length > 0) {
-        preloadImages(
-          nextImages.map(url => ({ url, priority: 2 })),
-          { quality: 95, batchSize: 3 }
-        );
+        preloadImagesByUrls(nextImages, { 
+          quality: 95, 
+          batchSize: 3 
+        });
       }
       
       // Also start preloading next-next question with lower priority
@@ -119,10 +115,10 @@ export const useQuizLogic = () => {
           .filter(Boolean) as string[];
 
         if (nextNextImages.length > 0) {
-          preloadImages(
-            nextNextImages.map(url => ({ url, priority: 1 })),
-            { quality: 95, batchSize: 2 }
-          );
+          preloadImagesByUrls(nextNextImages, { 
+            quality: 95, 
+            batchSize: 2 
+          });
         }
       }
     }
@@ -217,7 +213,7 @@ export const useQuizLogic = () => {
     console.log('Results calculated and saved to localStorage:', result);
 
     // Begin preloading result page assets
-    preloadImages([
+    preloadImagesByUrls([
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp",

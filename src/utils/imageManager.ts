@@ -1,4 +1,3 @@
-
 import { BankImage, getAllImages, getImageBySrc, getImageById } from '@/data/imageBank';
 import { optimizeCloudinaryUrl } from './imageUtils';
 
@@ -113,15 +112,15 @@ export const preloadImagesByUrls = (
   urls: string[],
   options: PreloadOptions = {}
 ) => {
-  return preloadImages(
-    urls.map(url => ({
-      src: url,
-      id: url,
-      alt: '',
-      category: 'external'
-    })),
-    options
-  );
+  // Create temporary BankImage objects for each URL
+  const tempImages: BankImage[] = urls.map(url => ({
+    id: url,
+    src: url,
+    alt: 'Preloaded image',
+    category: 'external',
+  }));
+  
+  return preloadImages(tempImages, options);
 };
 
 /**
