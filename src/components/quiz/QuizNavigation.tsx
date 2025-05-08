@@ -44,8 +44,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center mt-6 w-full px-4 md:px-0">
-      <div className="flex-1">
+    <div className="flex justify-center items-center mt-6 w-full px-4 md:px-0">
+      <div className="flex-1 text-left">
         {onPrevious && (
           <Button 
             variant="outline" 
@@ -73,7 +73,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
         </Button>
       </div>
       
-      <div className="flex-1"></div> {/* Espaçador para manter o botão centralizado */}
+      <div className="flex-1"></div>
     </div>
   );
 };

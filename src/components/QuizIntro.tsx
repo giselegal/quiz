@@ -55,15 +55,15 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FEFEFE] px-4 py-8">
-      <div className={`w-full max-w-5xl bg-[#FEFEFE] shadow-lg rounded-2xl p-4 md:p-8 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-        {/* Logotipo */}
-        <div className="flex justify-center mb-2">
+      <div className={`w-full max-w-lg bg-[#FEFEFE] shadow-lg rounded-2xl p-4 md:p-6 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+        {/* Logotipo - menor e com mais espaço embaixo */}
+        <div className="flex justify-center mb-4">
           <OptimizedImage 
             src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
             alt="Logo Gisele Galvão" 
-            className="w-32 md:w-40 h-auto" 
-            width={160} 
-            height={80} 
+            className="w-24 md:w-28 h-auto" 
+            width={112}
+            height={56}
             priority={true} 
           />
         </div>
@@ -73,89 +73,57 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           <div className="absolute inset-0 w-1/3 bg-[#b29670] animate-loading-bar rounded-full"></div>
         </div>
 
-        {/* Conteúdo flexível para desktop - duas colunas */}
-        <div className="flex flex-col md:flex-row md:items-center md:gap-8 lg:gap-12">
-          {/* Coluna da esquerda para texto em desktop */}
-          <div className="md:w-1/2 flex flex-col">
-            {/* Título */}
-            <h1 className="font-playfair text-xl md:text-2xl lg:text-3xl font-bold text-center md:text-left mb-4 md:mb-6 leading-normal text-[#432818]">
-              Chega de um guarda-roupa lotado
-              <br className="hidden md:block" />
-              e da sensação de que nada combina com você.
-            </h1>
+        {/* Título */}
+        <h1 className="font-playfair text-xl md:text-2xl lg:text-3xl font-bold text-center mb-4 leading-normal text-[#432818]">
+          Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
+        </h1>
 
-            {/* Subtítulo para desktop - aparece acima do formulário */}
-            <p className="hidden md:block text-sm md:text-base text-[#433830] mb-6 max-w-lg lg:text-lg">
-              Em poucos minutos, descubra seu{' '}
-              <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
-              looks que realmente refletem sua <span className="font-semibold text-[#b29670]">essência</span>, com
-              praticidade e <span className="font-semibold text-[#aa6b5d]">confiança</span>.
-            </p>
-
-            {/* Imagem para mobile - centralizada */}
-            <div className="md:hidden flex justify-center mb-6">
-              <OptimizedImage 
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
-                alt="Mulher elegante com roupas estilosas" 
-                className="w-full max-w-xs h-auto rounded-lg shadow-sm" 
-                width={320} 
-                height={427} 
-                objectFit="cover"
-                priority={true} 
-              />
-            </div>
-
-            {/* Subtítulo para mobile - aparece após a imagem */}
-            <p className="md:hidden text-sm text-[#433830] text-center mb-6 max-w-lg mx-auto">
-              Em poucos minutos, descubra seu{' '}
-              <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
-              looks que realmente refletem sua <span className="font-semibold text-[#b29670]">essência</span>, com
-              praticidade e <span className="font-semibold text-[#aa6b5d]">confiança</span>.
-            </p>
-          </div>
-
-          {/* Coluna da direita para imagem e formulário em desktop */}
-          <div className="md:w-1/2 flex flex-col items-center md:items-end">
-            {/* Imagem para desktop - lado direito */}
-            <div className="hidden md:block mb-6 md:mb-8">
-              <OptimizedImage 
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
-                alt="Mulher elegante com roupas estilosas" 
-                className="w-full h-auto rounded-lg shadow-sm" 
-                width={400} 
-                height={534} 
-                objectFit="cover"
-                priority={true} 
-              />
-            </div>
-
-            {/* Formulário */}
-            <form onSubmit={handleSubmit} className="w-full max-w-md flex flex-col gap-3" aria-live="polite">
-              <label htmlFor="name" className="text-sm font-semibold text-[#432818]">
-                NOME *
-              </label>
-              <Input 
-                id="name" 
-                placeholder="Digite seu nome" 
-                value={nome} 
-                onChange={e => setNome(e.target.value)} 
-                className="w-full p-3 border-[#b29670] focus:border-[#a1835d] focus:ring-[#a1835d] bg-[#FEFEFE]" 
-                autoFocus 
-                aria-required="true" 
-              />
-              <Button 
-                type="submit" 
-                className="w-full bg-[#b29670] hover:bg-[#a1835d] text-white py-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-2" 
-                disabled={!nome.trim()}
-              >
-                Quero Descobrir meu Estilo Agora!
-              </Button>
-              <p className="text-xs text-center text-gray-500 mt-2">
-                Ao clicar, você concorda com nossa política de privacidade
-              </p>
-            </form>
-          </div>
+        {/* Imagem - menor */}
+        <div className="flex justify-center mb-6">
+          <OptimizedImage 
+            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
+            alt="Mulher elegante com roupas estilosas" 
+            className="w-full max-w-xs h-auto rounded-lg shadow-sm" 
+            width={320} 
+            height={427} 
+            objectFit="cover"
+            priority={true} 
+          />
         </div>
+
+        {/* Subtítulo */}
+        <p className="text-sm text-[#433830] text-center mb-6 max-w-md mx-auto">
+          Em poucos minutos, descubra seu{' '}
+          <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
+          looks que realmente refletem sua <span className="font-semibold text-[#b29670]">essência</span>, com
+          praticidade e <span className="font-semibold text-[#aa6b5d]">confiança</span>.
+        </p>
+
+        {/* Formulário */}
+        <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto flex flex-col gap-3" aria-live="polite">
+          <label htmlFor="name" className="text-xs font-semibold text-[#432818]">
+            NOME *
+          </label>
+          <Input 
+            id="name" 
+            placeholder="Digite seu nome" 
+            value={nome} 
+            onChange={e => setNome(e.target.value)} 
+            className="w-full p-3 border-[#b29670] focus:border-[#a1835d] focus:ring-[#a1835d] bg-[#FEFEFE]" 
+            autoFocus 
+            aria-required="true" 
+          />
+          <Button 
+            type="submit" 
+            className="w-full bg-[#b29670] hover:bg-[#a1835d] text-white py-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-2" 
+            disabled={!nome.trim()}
+          >
+            Quero Descobrir meu Estilo Agora!
+          </Button>
+          <p className="text-xs text-center text-gray-500 mt-2">
+            Ao clicar, você concorda com nossa política de privacidade
+          </p>
+        </form>
       </div>
     </div>
   );
