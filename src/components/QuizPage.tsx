@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuizLogic } from '../hooks/useQuizLogic';
 import { UserResponse } from '@/types/quiz';
@@ -9,6 +10,7 @@ import QuizNavigation from './quiz/QuizNavigation';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { useAuth } from '../context/AuthContext';
 import { trackQuizStart, trackQuizAnswer, trackQuizComplete, trackResultView } from '@/utils/analytics';
+import { preloadImages, preloadNextQuestionImages } from '@/utils/imageUtils';
 
 const QuizPage: React.FC = () => {
   // Get auth context
@@ -21,12 +23,12 @@ const QuizPage: React.FC = () => {
   const [currentStrategicQuestionIndex, setCurrentStrategicQuestionIndex] = useState(0);
   const [strategicAnswers, setStrategicAnswers] = useState<Record<string, string[]>>({});
   const [quizStartTracked, setQuizStartTracked] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [progressPercentage, setProgressPercentage] = useState(0);
 
   // Get quiz logic functions
   const {
     currentQuestion,
+    nextQuestion,
     currentQuestionIndex,
     currentAnswers,
     isLastQuestion,
@@ -37,7 +39,8 @@ const QuizPage: React.FC = () => {
     calculateResults,
     handleStrategicAnswer: saveStrategicAnswer,
     submitQuizIfComplete,
-    canProceed
+    canProceed,
+    allQuestions
   } = useQuizLogic();
 
   // Calcular e atualizar a porcentagem de progresso
@@ -55,6 +58,44 @@ const QuizPage: React.FC = () => {
     setProgressPercentage(percentage);
   }, [currentQuestionIndex, currentStrategicQuestionIndex, showingStrategicQuestions, totalQuestions]);
 
+  // Preload next question images when current question changes
+  useEffect(() => {
+    if (!currentQuestion || !nextQuestion) return;
+    
+    // Extract image URLs from next question options
+    const imageUrls = nextQuestion.options
+      .map(option => {
+        if (typeof option === 'string') return null;
+        if (option.imageUrl) return option.imageUrl;
+        return null;
+      })
+      .filter(Boolean) as string[];
+    
+    if (imageUrls.length > 0) {
+      preloadNextQuestionImages(imageUrls);
+    }
+  }, [currentQuestionIndex, nextQuestion, currentQuestion]);
+  
+  // Preload strategic questions when approaching the end of regular questions
+  useEffect(() => {
+    if (currentQuestionIndex >= totalQuestions - 2 && !showingStrategicQuestions) {
+      // When approaching end of regular questions, preload first strategic question
+      const firstStrategicQuestion = strategicQuestions[0];
+      if (firstStrategicQuestion?.imageUrl) {
+        preloadImages([firstStrategicQuestion.imageUrl], {quality: 95});
+      }
+      
+      // Also preload result page assets when near the end
+      if (currentQuestionIndex === totalQuestions - 1) {
+        // Preload transformation images for result page
+        preloadImages([
+          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
+          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp"
+        ], {quality: 95});
+      }
+    }
+  }, [currentQuestionIndex, showingStrategicQuestions, totalQuestions]);
+
   // Track quiz start on component mount and save start time
   useEffect(() => {
     if (!quizStartTracked) {
@@ -69,11 +110,29 @@ const QuizPage: React.FC = () => {
       trackQuizStart(userName, userEmail);
       setQuizStartTracked(true);
       
+      // Preload first question images
+      if (allQuestions && allQuestions.length > 0 && allQuestions[0].options) {
+        const firstQuestionImages = allQuestions[0].options
+          .map(option => {
+            if (typeof option === 'string') return null;
+            if (option.imageUrl) return option.imageUrl;
+            return null;
+          })
+          .filter(Boolean) as string[];
+        
+        if (firstQuestionImages.length > 0) {
+          preloadImages(
+            firstQuestionImages.map(url => ({ url, priority: 3 })),
+            { quality: 95, batchSize: 4 }
+          );
+        }
+      }
+      
       console.log('Quiz iniciado por', userName, userEmail ? `(${userEmail})` : '');
     }
-  }, [quizStartTracked, user]);
+  }, [quizStartTracked, user, allQuestions]);
 
-  // Handle strategic answer - Remover todos os timeouts
+  // Handle strategic answer
   const handleStrategicAnswer = useCallback((response: UserResponse) => {
     try {
       setStrategicAnswers(prev => ({
@@ -106,7 +165,27 @@ const QuizPage: React.FC = () => {
         setShowingFinalTransition(true);
         // Track quiz completion
         trackQuizComplete();
+        
+        // Preload result page assets
+        preloadImages([
+          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
+          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
+          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp",
+          "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp"
+        ], {
+          quality: 95,
+          batchSize: 2
+        });
       } else {
+        // Preload next strategic question images
+        const nextIndex = currentStrategicQuestionIndex + 1;
+        if (nextIndex < strategicQuestions.length) {
+          const nextQuestion = strategicQuestions[nextIndex];
+          if (nextQuestion.imageUrl) {
+            preloadImages([nextQuestion.imageUrl], {quality: 95});
+          }
+        }
+        
         setCurrentStrategicQuestionIndex(prev => prev + 1);
       }
     } catch (error) {
@@ -118,7 +197,7 @@ const QuizPage: React.FC = () => {
     }
   }, [currentStrategicQuestionIndex, saveStrategicAnswer, totalQuestions]);
 
-  // Handle answer submission - Remover todos os timeouts
+  // Handle answer submission
   const handleAnswerSubmit = useCallback((response: UserResponse) => {
     try {
       handleAnswer(response.questionId, response.selectedOptions);
@@ -150,7 +229,7 @@ const QuizPage: React.FC = () => {
     }
   }, [currentQuestionIndex, handleAnswer, totalQuestions]);
 
-  // Handle showing result - Remover timeout
+  // Handle showing result
   const handleShowResult = useCallback(() => {
     try {
       const results = submitQuizIfComplete();
@@ -171,7 +250,7 @@ const QuizPage: React.FC = () => {
     }
   }, [strategicAnswers, submitQuizIfComplete]);
 
-  // Handle next click - Remover timeout
+  // Handle next click
   const handleNextClick = useCallback(() => {
     if (!isLastQuestion) {
       handleNext();
@@ -195,7 +274,6 @@ const QuizPage: React.FC = () => {
     const requiredSelections = currentQuestion.multiSelect || 1;
     const currentAnswersLength = currentAnswers?.length || 0;
     
-    // Simplificar a verificação para evitar cálculos desnecessários
     return currentAnswersLength >= requiredSelections;
   }, [currentAnswers?.length, currentQuestion]);
 

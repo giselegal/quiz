@@ -5,7 +5,8 @@ import { Button } from '../ui/button';
 import { ShoppingCart, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { Slider } from '../ui/slider';
-import { optimizeCloudinaryUrl } from '@/utils/imageUtils';
+import { optimizeCloudinaryUrl, preloadImages } from '@/utils/imageUtils';
+import OptimizedImage from '../ui/OptimizedImage';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -17,7 +18,7 @@ interface TransformationItem {
   name: string;
 }
 
-// Updated transformation items with separate before/after images
+// Correct image URLs for before/after transformations
 const transformations: TransformationItem[] = [
   {
     beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
@@ -41,11 +42,26 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     before: false,
     after: false
   });
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   
   const activeTransformation = transformations[activeIndex];
-
-  // Preload images to ensure they display correctly
+  
+  // Preload all transformation images on component mount
+  useEffect(() => {
+    const allImagesToPreload = transformations.flatMap(item => [
+      { url: item.beforeImage, priority: item === activeTransformation ? 2 : 1 },
+      { url: item.afterImage, priority: item === activeTransformation ? 2 : 1 }
+    ]);
+    
+    preloadImages(allImagesToPreload, {
+      batchSize: 2,
+      quality: 95,
+      onComplete: () => setImagesPreloaded(true)
+    });
+  }, []);
+  
+  // Track loading state for active transformation
   useEffect(() => {
     // Reset image loaded state when changing transformation
     setImagesLoaded({
@@ -53,22 +69,25 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
       after: false
     });
     
-    // Preload images with quality parameters
+    // Create URLs with optimized parameters
+    const beforeImgUrl = optimizeCloudinaryUrl(activeTransformation.beforeImage, { 
+      quality: 95, 
+      format: 'auto',
+      width: 800 
+    });
+    
+    const afterImgUrl = optimizeCloudinaryUrl(activeTransformation.afterImage, { 
+      quality: 95, 
+      format: 'auto',
+      width: 800 
+    });
+    
+    // Preload the active transformation images with high priority
     const beforeImg = new Image();
     const afterImg = new Image();
     
-    // Use optimized Cloudinary URLs
-    beforeImg.src = optimizeCloudinaryUrl(activeTransformation.beforeImage, { 
-      quality: 95, 
-      format: 'auto',
-      width: 800 
-    });
-    
-    afterImg.src = optimizeCloudinaryUrl(activeTransformation.afterImage, { 
-      quality: 95, 
-      format: 'auto',
-      width: 800 
-    });
+    beforeImg.src = beforeImgUrl;
+    afterImg.src = afterImgUrl;
     
     beforeImg.onload = () => setImagesLoaded(prev => ({
       ...prev,
@@ -80,12 +99,24 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
       after: true
     }));
     
+    // If we're not on first mount, preload the next set
+    if (imagesPreloaded && transformations.length > 1) {
+      const nextIndex = (activeIndex + 1) % transformations.length;
+      const nextTransformation = transformations[nextIndex];
+      
+      // Preload next transformation images with lower priority
+      preloadImages([
+        { url: nextTransformation.beforeImage, priority: 1 },
+        { url: nextTransformation.afterImage, priority: 1 }
+      ], { quality: 95 });
+    }
+    
     return () => {
       // Cleanup
       beforeImg.onload = null;
       afterImg.onload = null;
     };
-  }, [activeIndex, activeTransformation]);
+  }, [activeIndex, activeTransformation, imagesPreloaded]);
 
   const handleSliderChange = (value: number[]) => {
     setSliderPosition(value[0]);
@@ -93,6 +124,14 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
 
   const handleDotClick = (index: number) => {
     setActiveIndex(index);
+  };
+  
+  const handlePrevClick = () => {
+    setActiveIndex(prev => (prev === 0 ? transformations.length - 1 : prev - 1));
+  };
+  
+  const handleNextClick = () => {
+    setActiveIndex(prev => (prev === transformations.length - 1 ? 0 : prev + 1));
   };
   
   const handleButtonClick = () => {
@@ -149,30 +188,45 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
           </div>
           <div className="md:w-1/2 w-full">
             <Card className="p-6 card-elegant overflow-hidden">
+              {/* Loading state */}
               {!areImagesReady && (
                 <div className="h-[400px] md:h-[500px] w-full flex items-center justify-center bg-[#f9f4ef]">
                   <div className="w-12 h-12 border-4 border-[#aa6b5d] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
+              
+              {/* Before/After image comparison with slider */}
               <div className={`relative h-[400px] md:h-[500px] w-full mb-4 ${areImagesReady ? '' : 'hidden'}`}>
-                {/* Before image */}
-                <img 
-                  src={optimizeCloudinaryUrl(activeTransformation.beforeImage, { quality: 95, format: 'auto', width: 800 })} 
-                  alt={`Antes - ${activeTransformation.name}`} 
-                  className="w-full h-full object-cover rounded-lg absolute top-0 left-0"
-                  style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-                />
+                {/* Before image - fixed path and optimized */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <img 
+                    src={optimizeCloudinaryUrl(activeTransformation.beforeImage, { 
+                      quality: 95, 
+                      format: 'auto', 
+                      width: 800 
+                    })}
+                    alt={`Antes - ${activeTransformation.name}`} 
+                    className="w-full h-full object-cover rounded-lg"
+                    style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                  />
+                </div>
                 
-                {/* After image */}
-                <img 
-                  src={optimizeCloudinaryUrl(activeTransformation.afterImage, { quality: 95, format: 'auto', width: 800 })} 
-                  alt={`Depois - ${activeTransformation.name}`} 
-                  className="w-full h-full object-cover rounded-lg absolute top-0 left-0"
-                  style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
-                />
+                {/* After image - fixed path and optimized */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <img 
+                    src={optimizeCloudinaryUrl(activeTransformation.afterImage, { 
+                      quality: 95, 
+                      format: 'auto', 
+                      width: 800 
+                    })} 
+                    alt={`Depois - ${activeTransformation.name}`} 
+                    className="w-full h-full object-cover rounded-lg"
+                    style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+                  />
+                </div>
                 
                 {/* Slider control */}
-                <div className="absolute left-0 right-0 bottom-16 px-8">
+                <div className="absolute left-0 right-0 bottom-16 px-8 z-10">
                   <Slider
                     value={[sliderPosition]}
                     min={0}
@@ -185,7 +239,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                 
                 {/* Slider divider line */}
                 <div 
-                  className="absolute top-0 bottom-0 w-1 bg-white shadow-md z-10"
+                  className="absolute top-0 bottom-0 w-1 bg-white shadow-md z-20"
                   style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
                 >
                   <div className="absolute top-1/2 left-1/2 w-6 h-6 bg-white rounded-full shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab">
@@ -194,17 +248,39 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                 </div>
                 
                 {/* Labels */}
-                <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm">
+                <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm z-10">
                   Antes
                 </div>
-                <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm">
+                <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm z-10">
                   Depois
                 </div>
                 
-                <div className="absolute bottom-28 left-0 right-0 mx-auto bg-white/80 backdrop-blur-sm py-2 px-4 text-center rounded-lg max-w-xs">
+                <div className="absolute bottom-28 left-0 right-0 mx-auto bg-white/80 backdrop-blur-sm py-2 px-4 text-center rounded-lg max-w-xs z-10">
                   <p className="font-medium">{activeTransformation.name}</p>
                 </div>
+                
+                {/* Navigation arrows */}
+                {transformations.length > 1 && (
+                  <>
+                    <button 
+                      onClick={handlePrevClick}
+                      className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md z-10 hover:bg-white transition-colors"
+                      aria-label="Transformação anterior"
+                    >
+                      <ChevronLeft className="w-6 h-6 text-[#aa6b5d]" />
+                    </button>
+                    <button 
+                      onClick={handleNextClick}
+                      className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md z-10 hover:bg-white transition-colors"
+                      aria-label="Próxima transformação"
+                    >
+                      <ChevronRight className="w-6 h-6 text-[#aa6b5d]" />
+                    </button>
+                  </>
+                )}
               </div>
+              
+              {/* Navigation dots */}
               {transformations.length > 1 && (
                 <div className="flex justify-center gap-2 mt-4">
                   {transformations.map((_, index) => (

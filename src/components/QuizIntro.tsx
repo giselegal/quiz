@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import OptimizedImage from './ui/OptimizedImage';
+import { preloadImages } from '@/utils/imageUtils';
 
 interface QuizIntroProps {
   onStart: (nome: string) => void;
@@ -17,34 +18,54 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const [nome, setNome] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [criticalAssetsLoaded, setCriticalAssetsLoaded] = useState(false);
 
-  // Reduced loading time from 1000ms to 300ms
+  // Important assets to preload
+  const criticalImages = [
+    "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp",
+    "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg"
+  ];
+
+  // Preload critical assets on component mount
   useEffect(() => {
+    // Use the enhanced preloading system
+    preloadImages(
+      criticalImages.map(url => ({ url, priority: 3 })),
+      { 
+        batchSize: 2, 
+        quality: 95,
+        onComplete: () => {
+          setCriticalAssetsLoaded(true);
+          setImagesLoaded(true);
+          setIsLoading(false);
+        }
+      }
+    );
+    
+    // Fallback for maximum loading time
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 300);
+    }, 1000);
+    
     return () => clearTimeout(timer);
   }, []);
-
-  // Preload critical images
+  
+  // Preload first quiz question images after critical assets are loaded
   useEffect(() => {
-    const logoImg = new Image();
-    const mainImg = new Image();
-    let loadedCount = 0;
-    const totalImages = 2;
-    const handleImageLoad = () => {
-      loadedCount += 1;
-      if (loadedCount === totalImages) {
-        setImagesLoaded(true);
+    if (criticalAssetsLoaded) {
+      // These are just examples - in a real app you would dynamically load the first question's images
+      const firstQuestionImages = [
+        "https://res.cloudinary.com/dqljyf76t/image/upload/v1744920983/Espanhol_Portugu%C3%AAs_8_cgrhuw.webp"
+      ];
+      
+      if (firstQuestionImages.length > 0) {
+        preloadImages(firstQuestionImages, { 
+          quality: 95,
+          batchSize: 3 
+        });
       }
-    };
-    logoImg.onload = handleImageLoad;
-    mainImg.onload = handleImageLoad;
-
-    // Preload most important images with quality parameters
-    logoImg.src = "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
-    mainImg.src = "https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg";
-  }, []);
+    }
+  }, [criticalAssetsLoaded]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
