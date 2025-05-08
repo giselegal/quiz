@@ -134,4 +134,3 @@ const QuizOption: React.FC<QuizOptionProps> = ({
 };
 
 export { QuizOption };
-
