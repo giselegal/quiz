@@ -19,10 +19,12 @@ export const useQuizLogic = () => {
 
   // 2. Computed values
   const currentQuestion = quizQuestions[currentQuestionIndex];
+  const nextQuestion = quizQuestions[currentQuestionIndex + 1] || null;
   const currentAnswers = answers[currentQuestion?.id] || [];
   const canProceed = currentAnswers.length === (currentQuestion?.multiSelect || 0);
   const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
   const totalQuestions = quizQuestions.length;
+  const allQuestions = quizQuestions;
 
   // 3. Simple utility functions that don't depend on other functions
   const handleAnswer = useCallback((questionId: string, selectedOptions: string[]) => {
@@ -168,6 +170,7 @@ export const useQuizLogic = () => {
   // 7. Return all needed functions and values
   return {
     currentQuestion,
+    nextQuestion,
     currentQuestionIndex,
     currentAnswers,
     canProceed,
@@ -182,6 +185,7 @@ export const useQuizLogic = () => {
     calculateResults,
     totalQuestions,
     strategicAnswers,
-    handleStrategicAnswer
+    handleStrategicAnswer,
+    allQuestions
   };
 };
