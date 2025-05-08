@@ -33,7 +33,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       // Configurar tempo para esconder o efeito visual
       const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
-      }, 2000); // Aumentada a duração da animação para 2s
+      }, 2000);
       
       // Auto-avançar quando selecionar a terceira opção em perguntas normais
       if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
@@ -76,35 +76,40 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
-        {/* Container do botão com largura fixa e centralizado */}
-        <div className="relative w-full flex justify-center items-center py-2 max-w-xs mx-auto">
-          {/* Botão Anterior (à esquerda quando presente) */}
-          {onPrevious && (
-            <Button 
-              variant="outline" 
-              onClick={onPrevious}
-              className="text-[#8F7A6A] border-[#8F7A6A] absolute left-0"
+        {/* Container do botão com melhor alinhamento central */}
+        <div className="flex justify-center w-full">
+          {/* Contêiner com posicionamento relativo para o botão anterior */}
+          <div className="relative w-full max-w-[180px]">
+            {/* Botão Próximo (centralizado) */}
+            <Button
+              onClick={onNext}
+              disabled={!canProceed}
+              className={`
+                w-full transition-all duration-300
+                ${!canProceed 
+                  ? 'bg-gray-400 text-white opacity-50' 
+                  : 'bg-[#B89B7A] hover:bg-[#A38A69] text-white opacity-100'
+                } 
+                ${showActivationEffect 
+                  ? 'animate-enhanced-pulse scale-110 shadow-md ring-2 ring-[#B89B7A]/50' 
+                  : ''
+                }
+              `}
             >
-              Voltar
+              {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
             </Button>
-          )}
-          
-          {/* Botão Próximo (sempre centralizado) */}
-          <Button
-            onClick={onNext}
-            disabled={!canProceed}
-            className={`
-              transition-all duration-700
-              ${!canProceed ? 'opacity-50 bg-gray-400' : 'opacity-100 bg-[#B89B7A] hover:bg-[#A38A69]'} 
-              ${showActivationEffect ? 'animate-enhanced-pulse scale-110 shadow-md ring-2 ring-[#B89B7A]/50' : ''}
-              mx-auto
-            `}
-            style={{
-              minWidth: '120px'
-            }}
-          >
-            {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
-          </Button>
+            
+            {/* Botão Anterior (posicionado à esquerda absoluto) */}
+            {onPrevious && (
+              <Button 
+                variant="outline" 
+                onClick={onPrevious}
+                className="text-[#8F7A6A] border-[#8F7A6A] absolute left-0 -translate-x-[120%] top-0"
+              >
+                Voltar
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
