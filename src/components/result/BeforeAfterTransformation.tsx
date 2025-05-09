@@ -153,9 +153,12 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
           <h2 className="text-3xl md:text-4xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-3">
             A Transformação de Mulheres que Colocaram em Prática Seu Estilo de Ser
           </h2>
+          {/* Subtítulo removido conforme solicitado */}
+          {/* 
           <p className="text-lg text-[#432818] dark:text-[#d1c7b8] max-w-3xl mx-auto mt-4">
             Mulheres reais que redescobriram sua confiança e alinharam sua imagem aos seus sonhos através do poder do estilo pessoal.
           </p>
+          */}
         </div>
 
         <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-10 lg:gap-16">
