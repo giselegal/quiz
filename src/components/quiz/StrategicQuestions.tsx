@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
@@ -47,8 +46,8 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
         question={strategicQuestions[currentQuestionIndex]}
         onAnswer={onAnswer}
         currentAnswers={answers[strategicQuestions[currentQuestionIndex].id] || []}
-        autoAdvance={true}
-        onNextClick={onNextClick}
+        autoAdvance={false} // Alterado para false
+        onNextClick={onNextClick} // Manter para o botão Continuar
         showQuestionImage={true}
       />
     </AnimatedWrapper>

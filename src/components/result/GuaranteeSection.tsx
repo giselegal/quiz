@@ -1,35 +1,27 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
+import { Award } from 'lucide-react'; // Ícones para o selo
 
 const GuaranteeSection: React.FC = () => {
   return (
-    <Card className="p-6 mb-10 bg-white shadow-md border border-[#B89B7A]/20 card-elegant overflow-hidden">
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        <div className="md:w-1/3 flex justify-center">
-          <img 
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744916216/C%C3%B3pia_de_01._P%C3%A1gina_-_Produto_de_Entrada_2_hamaox.webp" 
-            alt="7 Dias de Garantia" 
-            className="w-full max-w-[200px] h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300" 
-            loading="lazy"
-            srcSet="
-              https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_150/v1744916216/C%C3%B3pia_de_01._P%C3%A1gina_-_Produto_de_Entrada_2_hamaox.webp 150w,
-              https://res.cloudinary.com/dqljyf76t/image/upload/c_scale,w_200/v1744916216/C%C3%B3pia_de_01._P%C3%A1gina_-_Produto_de_Entrada_2_hamaox.webp 200w,
-              https://res.cloudinary.com/dqljyf76t/image/upload/v1744916216/C%C3%B3pia_de_01._P%C3%A1gina_-_Produto_de_Entrada_2_hamaox.webp 300w
-            "
-            sizes="(max-width: 768px) 45vw, 200px"
-          />
+    <Card className="p-6 md:p-8 mb-10 bg-gradient-to-br from-[#fdfaf8] to-[#fbf5ef] dark:from-[#3a2e26] dark:to-[#332820] shadow-xl border border-[#B89B7A]/30 dark:border-[#E0C9B1]/30 card-elegant overflow-hidden rounded-xl">
+      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+        <div className="md:w-1/4 flex flex-col items-center justify-center text-[#B89B7A] dark:text-[#E0C9B1]">
+          <Award size={64} className="mb-3 opacity-80" strokeWidth={1.5} />
+          {/* Elemento decorativo elegante */}
+          <div className="w-24 h-1 bg-gradient-to-r from-[#B89B7A] to-[#aa6b5d] dark:from-[#D4B79F] dark:to-[#C8A88A] rounded-full"></div>
         </div>
         
-        <div className="md:w-2/3">
-          <h2 className="text-2xl font-playfair text-[#aa6b5d] mb-4">
-            Garantia de 7 Dias
+        <div className="md:w-3/4 text-center md:text-left">
+          <h2 className="text-2xl md:text-3xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-4">
+            Sua Satisfação <span className="font-semibold">Garantida</span>
           </h2>
-          <p className="text-[#432818] mb-4">
-            Se por qualquer motivo você não ficar satisfeita com o Guia de Estilo, 
-            basta solicitar o reembolso em até 7 dias após a compra.
+          <p className="text-[#432818] dark:text-[#d1c7b8] mb-3 text-base leading-relaxed">
+            Acreditamos tanto na transformação que o Guia de Estilo proporciona que oferecemos uma garantia incondicional.
+            Se por qualquer motivo você não ficar 100% satisfeita nos primeiros <strong>7 dias</strong>, basta nos enviar um e-mail e reembolsaremos o valor integral.
           </p>
-          <p className="text-[#432818]">
-            Sem perguntas, sem complicações. Sua satisfação é nossa prioridade.
+          <p className="text-[#3a3a3a] dark:text-[#c0b6a7] text-sm">
+            Sem perguntas, sem burocracia. Seu investimento é totalmente seguro.
           </p>
         </div>
       </div>

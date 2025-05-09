@@ -246,38 +246,39 @@ const ResultPage: React.FC = () => {
                 </AnimatedWrapper>
               </div>
               <AnimatedWrapper animation={isLowPerformance ? 'none' : 'scale'} show={true} duration={500} delay={100}>
-                <div className="max-w-[238px] mx-auto relative">
+                <div className="max-w-[180px] md:max-w-[238px] mx-auto relative"> {/* Diminuído para mobile */}
                   <ProgressiveImage
                     src={`${image}?q=80&f=auto&w=238`} 
                     lowQualitySrc={getLowQualityPlaceholder(image)}
                     alt={`Estilo ${category}`}
                     className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
                     priority={true}
-                    width="238"
+                    width="238" // Manter a largura base para otimização da imagem
                     height="auto"
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, style: true }))}
                   />
                   {/* Elegant decorative corners */}
-                  <div className="absolute -top-2 -right-2 w-8 h-8 border-t-2 border-r-2 border-[#B89B7A]"></div>
-                  <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-2 border-l-2 border-[#B89B7A]"></div>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 border-t-2 border-r-2 border-[#B89B7A] dark:border-[#E0C9B1]"></div>
+                  <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-2 border-l-2 border-[#B89B7A] dark:border-[#E0C9B1]"></div>
                 </div>
               </AnimatedWrapper>
             </div>
             <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={50}>
-              <div className="mt-8 max-w-[540px] mx-auto relative">
+              {/* Aumentar o destaque do Guia */}
+              <div className="mt-10 md:mt-12 max-w-[600px] mx-auto relative p-4 bg-gradient-to-br from-[#fdfaf8] to-[#fbf5ef] dark:from-[#3a2e26] dark:to-[#332820] rounded-xl shadow-xl border border-[#B89B7A]/30 dark:border-[#E0C9B1]/30">
                 <ProgressiveImage
-                  src={`${guideImage}?q=80&f=auto&w=540`}
+                  src={`${guideImage}?q=85&f=auto&w=600`} // Aumentar um pouco a qualidade e tamanho base
                   lowQualitySrc={getLowQualityPlaceholder(guideImage)}
                   alt={`Guia de Estilo ${category}`}
                   className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
                   priority={true}
-                  width="540" 
+                  width="600" 
                   height="auto"
                   onLoad={() => setImagesLoaded(prev => ({ ...prev, guide: true }))}
                 />
                 {/* Elegant badge */}
-                <div className="absolute -top-4 -right-4 bg-gradient-to-r from-[#B89B7A] to-[#aa6b5d] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium transform rotate-12">
-                  Exclusivo
+                <div className="absolute -top-4 -right-4 bg-gradient-to-r from-[#B89B7A] to-[#aa6b5d] dark:from-[#D4B79F] dark:to-[#C8A88A] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium transform rotate-12">
+                  Seu Guia Detalhado
                 </div>
               </div>
             </AnimatedWrapper>

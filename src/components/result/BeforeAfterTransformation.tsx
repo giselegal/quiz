@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
-import { ShoppingCart, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'; // Adicionado CheckCircle
+import { ShoppingCart, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { Slider } from '../ui/slider';
 import ProgressiveImage from '../ui/ProgressiveImage';
@@ -39,38 +39,19 @@ const transformations: TransformationItem[] = [
     afterId: "transformation-mariangela-after",
     width: 800,
     height: 1000
-  },
-  {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
-    name: "Camila",
-    beforeId: "transformation-camila-before",
-    afterId: "transformation-camila-after",
-    width: 800,
-    height: 1000
   }
+  // Camila removida
 ];
 
 const preloadTransformationImages = () => {
   const imageUrls: string[] = [];
-  transformations.slice(0, 2).forEach(item => {
+  transformations.slice(0, 2).forEach(item => { 
     imageUrls.push(item.beforeImage, item.afterImage);
   });
-  const secondaryUrls = transformations.slice(2).map(item => [
-    item.beforeImage, item.afterImage
-  ]).flat();
   
   preloadImagesByUrls(imageUrls, {
     quality: 80,
     batchSize: 2,
-    onComplete: () => {
-      if (secondaryUrls.length > 0) {
-        preloadImagesByUrls(secondaryUrls, { 
-          quality: 80, 
-          batchSize: 1
-        });
-      }
-    }
   });
 };
 
@@ -96,10 +77,10 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   
   useEffect(() => {
     setImagesLoaded({ before: false, after: false });
-    setSliderPosition(50); // Reset slider position
+    setSliderPosition(50);
     
     const nextIndex = (activeIndex + 1) % transformations.length;
-    if (nextIndex !== activeIndex) {
+    if (nextIndex !== activeIndex && transformations[nextIndex]) { // Adicionada verificação se transformations[nextIndex] existe
       const nextTransformation = transformations[nextIndex];
       preloadImagesByUrls([
         nextTransformation.beforeImage,
@@ -150,17 +131,17 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   };
 
   if (!activeTransformation) {
-    return null; // Ou um loader genérico
+    return null; 
   }
 
   return (
-    <div className="py-12 md:py-16 bg-gradient-to-b from-white to-[#fffaf7]">
+    <div className="py-12 md:py-16 bg-gradient-to-b from-white to-[#fffaf7] dark:from-[#2c2520] dark:to-[#251f1a]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl font-playfair text-[#aa6b5d] mb-3">
+          <h2 className="text-3xl md:text-4xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-3">
             Descubra o Poder da Imagem Intencional
           </h2>
-          <p className="text-lg text-[#432818] max-w-3xl mx-auto">
+          <p className="text-lg text-[#432818] dark:text-[#d1c7b8] max-w-3xl mx-auto">
             Veja como a consultoria de imagem transformou a vida de mulheres reais, alinhando estilo pessoal com seus objetivos e revelando sua melhor versão.
           </p>
         </div>
@@ -168,13 +149,13 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
         <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-10 lg:gap-16">
           {/* Seção de Texto */}
           <div className="text-left lg:w-2/5 order-2 lg:order-1">
-            <h3 className="text-2xl md:text-3xl font-semibold text-[#432818] mb-5 font-playfair">
-              Transforme Sua Imagem, <span className="text-[#aa6b5d]">Revele Sua Essência</span>
+            <h3 className="text-2xl md:text-3xl font-semibold text-[#432818] dark:text-[#E0C9B1] mb-5 font-playfair">
+              Transforme Sua Imagem, <span className="text-[#aa6b5d] dark:text-[#D4B79F]">Revele Sua Essência</span>
             </h3>
-            <p className="text-gray-700 mb-6 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
               Seu estilo é uma ferramenta poderosa. Não se trata apenas de roupas, mas de comunicar quem você é e aspira ser. Com a orientação certa, você pode:
             </p>
-            <ul className="space-y-3 text-gray-700 mb-8">
+            <ul className="space-y-3 text-gray-700 dark:text-gray-300 mb-8">
               {[
                 { text: "Construir looks com intenção e identidade visual." },
                 { text: "Utilizar cores, modelagens e tecidos a seu favor." },
@@ -182,7 +163,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                 { text: "Desenvolver um guarda-roupa funcional e inteligente, evitando compras por impulso." }
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-[#B89B7A] mr-3 mt-1 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-[#B89B7A] dark:text-[#D4B79F] mr-3 mt-1 flex-shrink-0" />
                   <span>{item.text}</span>
                 </li>
               ))}
@@ -199,80 +180,86 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
             >
               <span className="flex items-center justify-center gap-2.5">
                 <ShoppingCart className={`w-5 h-5 transition-transform duration-300 ${isButtonHovered ? 'scale-110' : ''}`} />
-                Quero Minha Transformação Agora
+                <span>Quero Transformar Minha Imagem</span>
               </span>
             </Button>
           </div>
 
           {/* Seção do Slider de Imagem */}
-          <div className="lg:w-3/5 w-full order-1 lg:order-2">
-            <Card className="p-4 sm:p-6 shadow-xl border-2 border-[#B89B7A]/30 rounded-xl bg-white overflow-hidden">
-              <h4 className="text-2xl font-playfair text-center text-[#aa6b5d] mb-2">
-                Transformação de {activeTransformation.name}
-              </h4>
-              <p className="text-center text-gray-600 mb-4">Arraste para ver a mudança</p>
-              
-              <div className="relative w-full max-w-lg mx-auto aspect-[4/5] overflow-hidden rounded-lg shadow-inner group bg-gray-100">
-                {isLoading && !imagesLoaded.before && !imagesLoaded.after && (
-                  <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-md flex items-center justify-center">
-                    <span className="text-gray-500">Carregando Imagens...</span>
-                  </div>
-                )}
-                <ProgressiveImage
-                  src={activeTransformation.afterImage}
-                  lowQualitySrc={getTinyPlaceholder(activeTransformation.afterImage)}
-                  alt={`Transformação de ${activeTransformation.name} - Depois`}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  priority
-                  width={activeTransformation.width}
-                  height={activeTransformation.height}
-                  onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
-                />
-                <div
-                  className="absolute inset-0 w-full h-full overflow-hidden"
-                  style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-                >
+          <div className="lg:w-3/5 order-1 lg:order-2 w-full max-w-xl mx-auto">
+            {isLoading ? (
+              <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500 dark:text-gray-400">Carregando transformação...</p>
+              </div>
+            ) : (
+              <Card className="overflow-hidden shadow-2xl rounded-xl border border-[#B89B7A]/20 dark:border-[#E0C9B1]/20 bg-white dark:bg-[#332820]">
+                <div className="relative w-full aspect-[4/5] mx-auto">
                   <ProgressiveImage
                     src={activeTransformation.beforeImage}
                     lowQualitySrc={getTinyPlaceholder(activeTransformation.beforeImage)}
-                    alt={`Transformação de ${activeTransformation.name} - Antes`}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    priority
-                    width={activeTransformation.width}
-                    height={activeTransformation.height}
+                    alt={`${activeTransformation.name} - Antes`}
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-500"
+                    style={{ opacity: imagesLoaded.before ? 1 : 0 }}
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
+                    priority
+                  />
+                  <ProgressiveImage
+                    src={activeTransformation.afterImage}
+                    lowQualitySrc={getTinyPlaceholder(activeTransformation.afterImage)}
+                    alt={`${activeTransformation.name} - Depois`}
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-500"
+                    style={{ 
+                      clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
+                      opacity: imagesLoaded.after ? 1 : 0 
+                    }}
+                    onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
+                    priority
+                  />
+                  <div 
+                    className="absolute top-0 bottom-0 bg-[#B89B7A] dark:bg-[#D4B79F] w-1.5 cursor-ew-resize"
+                    style={{ left: `calc(${sliderPosition}% - 3px)` }}
+                  >
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-md flex items-center justify-center border-2 border-[#B89B7A] dark:border-[#D4B79F]">
+                      <ChevronLeft className="w-4 h-4 text-[#B89B7A] dark:text-[#D4B79F]" />
+                      <ChevronRight className="w-4 h-4 text-[#B89B7A] dark:text-[#D4B79F]" />
+                    </div>
+                  </div>
+                  <Slider
+                    value={[sliderPosition]}
+                    onValueChange={handleSliderChange}
+                    min={0}
+                    max={100}
+                    step={0.1}
+                    className="absolute inset-0 opacity-0 cursor-ew-resize"
                   />
                 </div>
-                <Slider
-                  defaultValue={[50]}
-                  max={100}
-                  step={1}
-                  value={[sliderPosition]}
-                  onValueChange={handleSliderChange}
-                  className="absolute bottom-5 left-1/2 -translate-x-1/2 w-11/12 z-10 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-300"
-                  aria-label="Controle de antes e depois"
-                />
-              </div>
-              
-              {transformations.length > 1 && (
-                <div className="flex items-center justify-center mt-6 space-x-3">
-                  <Button onClick={handlePrevClick} variant="outline" size="icon" className="rounded-full border-[#B89B7A] text-[#B89B7A] hover:bg-[#B89B7A]/10 focus:ring-2 focus:ring-[#B89B7A]/50">
-                    <ChevronLeft className="h-5 w-5" />
-                  </Button>
-                  {transformations.map((item, index) => (
-                    <button
-                      key={item.name}
-                      onClick={() => handleDotClick(index)}
-                      className={`h-3 w-3 rounded-full transition-all duration-300 transform hover:scale-110 ${activeIndex === index ? 'bg-[#B89B7A] scale-110' : 'bg-gray-300 hover:bg-gray-400'}`}
-                      aria-label={`Ver transformação de ${item.name}`}
-                    />
-                  ))}
-                  <Button onClick={handleNextClick} variant="outline" size="icon" className="rounded-full border-[#B89B7A] text-[#B89B7A] hover:bg-[#B89B7A]/10 focus:ring-2 focus:ring-[#B89B7A]/50">
-                    <ChevronRight className="h-5 w-5" />
-                  </Button>
+                <div className="p-4 bg-white dark:bg-[#332820] rounded-b-xl">
+                  <p className="text-center text-xl font-medium text-[#432818] dark:text-[#E0C9B1] mb-2">{activeTransformation.name}</p>
+                  <div className="flex justify-center space-x-2 mt-2">
+                    {transformations.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleDotClick(index)}
+                        className={`w-3 h-3 rounded-full transition-colors ${
+                          activeIndex === index ? 'bg-[#B89B7A] dark:bg-[#D4B79F]' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                        }`}
+                        aria-label={`Ver transformação ${index + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
-              )}
-            </Card>
+              </Card>
+            )}
+             {transformations.length > 1 && (
+                <div className="flex justify-between mt-4">
+                    <Button variant="outline" onClick={handlePrevClick} className="text-[#432818] dark:text-[#d1c7b8] border-[#B89B7A] dark:border-[#E0C9B1]/50 hover:bg-[#B89B7A]/10 dark:hover:bg-[#E0C9B1]/10">
+                        <ChevronLeft className="w-5 h-5 mr-1" /> Anterior
+                    </Button>
+                    <Button variant="outline" onClick={handleNextClick} className="text-[#432818] dark:text-[#d1c7b8] border-[#B89B7A] dark:border-[#E0C9B1]/50 hover:bg-[#B89B7A]/10 dark:hover:bg-[#E0C9B1]/10">
+                        Próxima <ChevronRight className="w-5 h-5 ml-1" />
+                    </Button>
+                </div>
+            )}
           </div>
         </div>
       </div>
