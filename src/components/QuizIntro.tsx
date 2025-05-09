@@ -69,15 +69,16 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         </div>
       ) : (
         <div className="w-full max-w-md flex flex-col items-center">
-          <div className="w-full flex justify-center mb-8">
+          <div className="w-full flex flex-col items-center mb-8"> {/* Alterado para flex-col items-center para a barra */}
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
-              className="w-20 md:w-24 h-auto"
-              width={96} 
-              height={48} 
+              className="w-24 md:w-28 h-auto" /* Tamanho da logo ajustado */
+              width={112} /* Ajustado proporcionalmente */
+              height={56} /* Ajustado proporcionalmente */
               priority={true} 
             />
+            <div className="mt-2 h-0.5 w-16 bg-[#B89B7A]"></div> {/* Barra dourada adicionada */}
           </div>
 
           <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818] px-[12px]">
@@ -98,8 +99,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           <p className="text-sm text-[#433830] text-center mb-7 max-w-md mx-auto px-[18px]">
             Em poucos minutos, descubra seu{' '}
             <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
-            looks que realmente refletem sua <span className="font-semibold text-[#b29670]">essência</span>, com
-            praticidade e <span className="font-semibold text-[#aa6b5d]">confiança</span>.
+            looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com {/* Cor ajustada para melhor contraste */}
+            praticidade e <span className="font-semibold text-[#432818]">confiança</span>. {/* Cor ajustada para melhor contraste */}
           </p>
 
           <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto flex flex-col gap-3" aria-live="polite">
