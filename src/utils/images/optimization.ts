@@ -53,12 +53,23 @@ export const optimizeCloudinaryUrl = (
     transformations += `,h_${settings.height}`;
   }
   
-  // Aplica transformações à URL com tratamento adequado
+  // Adiciona nitidez para melhorar a qualidade visual
+  transformations += ',e_sharpen:60';
+  
+  // Aplica transformações à URL com tratamento adequado para versões
   if (hasTransformations) {
     // URL já tem transformações, substitui-as
     return `${baseUrlParts[0]}/upload/${transformations}/${parts.slice(1).join('/')}`;
   } else {
-    // URL não tem transformações, adiciona-as
+    // Verifica se a URL tem formato de versão (v12345)
+    const versionMatch = secondPart.match(/^(v\d+)\//);
+    if (versionMatch) {
+      const version = versionMatch[1];
+      const rest = secondPart.substring(version.length + 1);
+      // Preserva a versão na URL
+      return `${baseUrlParts[0]}/upload/${version}/${transformations}/${rest}`;
+    }
+    // URL sem versão e sem transformações
     return `${baseUrlParts[0]}/upload/${transformations}/${secondPart}`;
   }
 };
@@ -76,19 +87,29 @@ export const getLowQualityPlaceholder = (url: string, options: { width?: number,
   }
   
   // Melhorou a qualidade dos placeholders para evitar embaçamento excessivo
-  const { width = 40, quality = 35 } = options;
+  const { width = 80, quality = 50 } = options;
   
   // Extrai partes base da URL
   const baseUrlParts = url.split('/upload/');
   if (baseUrlParts.length !== 2) return url;
   
-  // Extrai o nome do arquivo (sem considerar parâmetros de transformação)
+  // Extrai versão e nome do arquivo de forma mais precisa
   const pathParts = baseUrlParts[1].split('/');
-  const fileName = pathParts[pathParts.length - 1];
+  const hasVersioning = pathParts[0].match(/^v\d+$/);
   
-  // Cria um placeholder otimizado com parâmetros aprimorados
-  // Usa um efeito de blur mais leve para melhorar a visibilidade
-  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width},e_blur:800/${fileName}`;
+  // Se tem versionamento, precisamos preservá-lo
+  if (hasVersioning && pathParts.length > 1) {
+    const version = pathParts[0];
+    const fileName = pathParts.slice(1).join('/');
+    // Usa um efeito de blur muito mais leve (300) para reduzir embaçamento
+    return `${baseUrlParts[0]}/upload/${version}/f_auto,q_${quality},w_${width},e_blur:300/${fileName}`;
+  }
+  
+  // Sem versionamento, usa apenas o nome do arquivo
+  const fileName = pathParts.join('/');
+  
+  // Usa um efeito de blur muito mais leve para reduzir o embaçamento
+  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width},e_blur:300/${fileName}`;
 };
 
 /**

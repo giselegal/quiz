@@ -186,13 +186,18 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               width={800}
               height={800}
               priority={true}
-              quality={90}
+              quality={95}  // Aumentado para 95
               objectFit="cover"
               containerClassName="rounded-lg overflow-hidden shadow-sm"
               placeholderColor="#f8f4ef"
               onLoad={() => {
-                // Registra evento de carregamento para métricas
-                console.log("[QuizIntro] Imagem principal carregada");
+                // Registra evento de carregamento para métricas e performance
+                console.log("[QuizIntro] Imagem principal carregada e exibida");
+                
+                // Pre-carga dos assets do próximo passo
+                if (criticalAssetsForQuizPreloaded) {
+                  preloadCriticalImages('quiz');
+                }
               }}
             />
           </div>
