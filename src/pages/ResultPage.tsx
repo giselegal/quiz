@@ -220,7 +220,7 @@ const ResultPage: React.FC = () => {
       <div className="container mx-auto px-4 py-6 max-w-4xl relative z-10">
         {/* Primary Style Card */}
         <Card className="p-6 mb-10 bg-white shadow-md border border-[#B89B7A]/20 card-elegant">
-          <AnimatedWrapper animation="fade" show={true} duration={600} delay={300}>
+          <AnimatedWrapper animation="fade" show={true} duration={600} delay={100}>
             <div className="text-center mb-8">
               <div className="max-w-md mx-auto mb-6">
                 <div className="flex justify-between items-center mb-2">
@@ -235,17 +235,17 @@ const ResultPage: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="space-y-4">
-                <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={400}>
+                <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={150}>
                   <p className="text-[#432818] leading-relaxed">{description}</p>
                 </AnimatedWrapper>
-                <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={600}>
+                <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={200}>
                   <div className="bg-white rounded-lg p-4 shadow-sm border border-[#B89B7A]/10 glass-panel">
                     <h3 className="text-lg font-medium text-[#432818] mb-2">Estilos que Também Influenciam Você</h3>
                     <SecondaryStylesSection secondaryStyles={secondaryStyles} />
                   </div>
                 </AnimatedWrapper>
               </div>
-              <AnimatedWrapper animation={isLowPerformance ? 'none' : 'scale'} show={true} duration={500} delay={500}>
+              <AnimatedWrapper animation={isLowPerformance ? 'none' : 'scale'} show={true} duration={500} delay={100}>
                 <div className="max-w-[238px] mx-auto relative">
                   <ProgressiveImage
                     src={`${image}?q=80&f=auto&w=238`} 
@@ -263,7 +263,7 @@ const ResultPage: React.FC = () => {
                 </div>
               </AnimatedWrapper>
             </div>
-            <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={800}>
+            <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={50}>
               <div className="mt-8 max-w-[540px] mx-auto relative">
                 <ProgressiveImage
                   src={`${guideImage}?q=80&f=auto&w=540`}

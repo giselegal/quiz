@@ -217,16 +217,6 @@ export const useQuizLogic = () => {
     localStorage.setItem('strategicAnswers', JSON.stringify(strategicAnswers)); // Save strategic answers along
     console.log('Results calculated and saved to localStorage:', result);
 
-    preloadImagesByUrls([
-      "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
-      "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
-      "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp",
-      "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp"
-    ], {
-      quality: 85, // Alterado de 95 para 85
-      batchSize: 2
-    });
-
     return result;
   }, [answers, strategicAnswers]);
 
