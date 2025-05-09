@@ -10,41 +10,24 @@ export const preloadTransformationImages = (transformations) => {
     return;
   }
 
-  // Primeiro, carregue todas as imagens de baixa qualidade para uma exibição rápida
-  transformations.forEach(transformation => {
-    if (transformation.beforeImage) {
-      const beforeLowQuality = getLowQualityPlaceholder(transformation.beforeImage);
-      if (beforeLowQuality) {
-        const imgLow = new Image();
-        imgLow.src = beforeLowQuality;
-        imgLow.decoding = "async";
-      }
-    }
-    
-    if (transformation.afterImage) {
-      const afterLowQuality = getLowQualityPlaceholder(transformation.afterImage);
-      if (afterLowQuality) {
-        const imgLow = new Image();
-        imgLow.src = afterLowQuality;
-        imgLow.decoding = "async";
-      }
-    }
-  });
-
-  // Depois, inicie o carregamento da primeira transformação em alta qualidade
+  // Pré-carregar a primeira transformação imediatamente com alta prioridade
   if (transformations[0]) {
     const firstTransformation = transformations[0];
     
+    // Antes pré-carrega com alta prioridade
     if (firstTransformation.beforeImage) {
       const imgBefore = new Image();
-      imgBefore.src = `${firstTransformation.beforeImage}?q=80&f=auto&w=400`;
+      imgBefore.src = `${firstTransformation.beforeImage}?q=85&f=auto&w=400&e_sharpen:60`;
       imgBefore.fetchPriority = "high";
+      imgBefore.decoding = "sync"; // Decodificação síncrona para a primeira imagem
     }
     
+    // Depois pré-carrega com alta prioridade
     if (firstTransformation.afterImage) {
       const imgAfter = new Image();
-      imgAfter.src = `${firstTransformation.afterImage}?q=80&f=auto&w=400`;
+      imgAfter.src = `${firstTransformation.afterImage}?q=85&f=auto&w=400&e_sharpen:60`;
       imgAfter.fetchPriority = "high";
+      imgAfter.decoding = "sync"; // Decodificação síncrona para a primeira imagem
     }
   }
 
@@ -55,12 +38,14 @@ export const preloadTransformationImages = (transformations) => {
       
       if (transformation.beforeImage) {
         const imgBefore = new Image();
-        imgBefore.src = `${transformation.beforeImage}?q=80&f=auto&w=400`;
+        imgBefore.src = `${transformation.beforeImage}?q=85&f=auto&w=400`;
+        imgBefore.decoding = "async"; // Decodificação assíncrona para as demais
       }
       
       if (transformation.afterImage) {
         const imgAfter = new Image();
-        imgAfter.src = `${transformation.afterImage}?q=80&f=auto&w=400`;
+        imgAfter.src = `${transformation.afterImage}?q=85&f=auto&w=400`;
+        imgAfter.decoding = "async"; // Decodificação assíncrona para as demais
       }
     }
   }, 2000); // Atraso para priorizar o carregamento inicial

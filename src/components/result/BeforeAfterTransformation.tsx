@@ -80,9 +80,13 @@ const BeforeAfterTransformation: React.FC = () => {
     setActiveIndex((activeIndex - 1 + transformations.length) % transformations.length);
   };
 
-  // Otimizar URL da imagem
+  // Otimizar URL da imagem - versão melhorada
   const getOptimizedImageUrl = (url) => {
-    return getHighQualityImageUrl(url) + '?q=80&f=auto&w=400';
+    const baseOptimized = getHighQualityImageUrl(url);
+    // Verifica se a URL já tem parâmetros
+    return baseOptimized.includes('?') 
+      ? `${baseOptimized}&q=85&f=auto&w=400&e_sharpen:60` 
+      : `${baseOptimized}?q=85&f=auto&w=400&e_sharpen:60`;
   };
 
   // Corrigir imagem embaçada
@@ -108,7 +112,7 @@ const BeforeAfterTransformation: React.FC = () => {
         {/* Imagens de Antes e Depois */}
         <div className="relative">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#f9f4ef]/50 z-10">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#f9f4ef]/50 z-10 backdrop-blur-sm">
               <div className="w-10 h-10 border-2 border-[#B89B7A] border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
