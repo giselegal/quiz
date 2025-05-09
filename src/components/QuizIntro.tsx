@@ -90,8 +90,10 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           <OptimizedImage 
             src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
             alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-            width={360} // Adicionado para otimização de tamanho
-            className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] h-auto rounded-lg shadow-sm object-cover mx-auto"
+            width={360} // Mantido para otimização, mas o CSS controlará o tamanho visual final
+            // Classes ajustadas para melhor responsividade mobile:
+            // w-full para ocupar a largura disponível, max-w-xs para mobile, aumentando para telas maiores.
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto rounded-lg shadow-sm object-cover mx-auto"
             priority={true} 
           />
         </div>
