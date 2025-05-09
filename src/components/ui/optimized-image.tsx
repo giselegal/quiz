@@ -51,6 +51,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   objectFit = 'cover',
   onLoad
 }) => {
+  console.log('[OptimizedImage] Props:', { src, alt, width, height, priority, quality, objectFit });
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lowQualitySrc, setLowQualitySrc] = useState<string>('');
   const [hasError, setHasError] = useState(false);
@@ -101,6 +102,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
   
   const optimizedSrc = optimizeCloudinaryUrl(src);
+  console.log('[OptimizedImage] Input src:', src);
+  console.log('[OptimizedImage] Generated optimizedSrc:', optimizedSrc);
   
   // Gerar e carregar o placeholder de baixa qualidade
   useEffect(() => {
@@ -112,6 +115,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     // Gerar LQIP apenas para imagens do Cloudinary
     if (src.includes('cloudinary.com')) {
       const lqip = getLowQualityImage(src);
+      console.log(`[OptimizedImage] Generated lowQualitySrc for ${src}:`, lqip);
       if (lqip) {
         setLowQualitySrc(lqip);
         
@@ -143,13 +147,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     console.error(`Falha ao carregar imagem: ${src}`);
   };
   
-  // Calcular a proporção de aspecto para o container
-  const aspectRatio = height / width;
-  
   // Se width e height são strings, convert para number
   const widthNum = typeof width === 'string' ? parseInt(width, 10) : width;
   const heightNum = typeof height === 'string' ? parseInt(height, 10) : height;
   
+  // Calcular a proporção de aspecto para o container
+  const aspectRatio = heightNum / widthNum; // Correção aqui
+  
+  console.log('[OptimizedImage] Rendering with:', { optimizedSrc, lowQualitySrc, imageLoaded, hasError, widthNum, heightNum, aspectRatio });
+
   return (
     <AspectRatioContainer 
       ratio={aspectRatio} 

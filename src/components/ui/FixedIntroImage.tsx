@@ -70,13 +70,18 @@ const FixedIntroImage: React.FC<FixedIntroImageProps> = ({
   className = '',
   priority = true
 }) => {
+  console.log('[FixedIntroImage] Props:', { src, alt, width, height, priority, className });
   // Obter URL de alta qualidade
   const highQualitySrc = getHighQualityUrl(src);
-  
+  console.log('[FixedIntroImage] Input src:', src);
+  console.log('[FixedIntroImage] Generated highQualitySrc:', highQualitySrc);
+
   // Calcular a proporção para o estilo
   const aspectRatio = height / width;
   const paddingBottom = `${aspectRatio * 100}%`;
-  
+
+  console.log('[FixedIntroImage] Rendering with:', { highQualitySrc, aspectRatio, paddingBottom });
+
   return (
     <div 
       className={`relative overflow-hidden ${className}`}
