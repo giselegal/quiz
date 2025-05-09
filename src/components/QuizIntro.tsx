@@ -143,12 +143,12 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
            }}
            data-section="intro">
         <div className="w-full max-w-md flex flex-col items-center justify-center text-center">
-          {/* Logo com animação de pulso e margem inferior removida para melhor centralização */}
+          {/* Logo sem animação de pulso para melhorar o desempenho */}
           <div className="flex justify-center w-full"> 
             <img
               src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
               alt="Logo Gisele Galvão"
-              className="h-auto w-32 sm:w-36 md:w-40 mx-auto animate-pulse"
+              className="h-auto w-32 sm:w-36 md:w-40 mx-auto"
               width={160}
               height={80}
               loading="eager"
