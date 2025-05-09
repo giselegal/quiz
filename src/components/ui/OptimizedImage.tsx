@@ -108,9 +108,9 @@ export default function OptimizedImage({
     <div 
       className="relative"
       style={{
-        width: width || '100%',
-        height: height || '100%',
-        ...style
+        width: style?.width || '100%', // Prioriza style.width, senão 100% para responsividade
+        height: style?.height || (height ? `${height}px` : 'auto'), // Prioriza style.height, senão a prop height em pixels, senão auto
+        ...style // Aplica o resto do style original passado via props
       }} 
     >
       {!loaded && !error && (

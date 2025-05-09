@@ -151,7 +151,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-3">
-            De Descoberta à <span className="text-brand-secondary">Expressão Autêntica</span>: Veja a Transformação
+            A Transformação de Mulheres que Colocaram em Prática Seu Estilo de Ser
           </h2>
           <p className="text-lg text-[#432818] dark:text-[#d1c7b8] max-w-3xl mx-auto mt-4">
             Mulheres reais que redescobriram sua confiança e alinharam sua imagem aos seus sonhos através do poder do estilo pessoal.
