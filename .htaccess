@@ -1,22 +1,24 @@
 # Configurações otimizadas para Hostinger (Apache)
 
-# Habilitar reescrita de URL para SPA
+# Habilitar reescrita de URL para SPA (crucial para React Router)
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
     
-    # Se o arquivo solicitado não existir, redirecionar para index.html
+    # Se o arquivo solicitado não existir fisicamente, redirecionar para index.html
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.html [L,QSA]
 </IfModule>
 
-# Definir tipos MIME corretos (crucial para resolver problemas de importação)
+# Definir tipos MIME corretos (crucial para resolver problemas de script loading)
 <IfModule mod_mime.c>
     # JavaScript
     AddType application/javascript .js
     AddType application/javascript .jsx
     AddType application/javascript .mjs
+    AddType application/javascript .ts
+    AddType application/javascript .tsx
     
     # JSON
     AddType application/json .json
@@ -24,6 +26,9 @@
     # Imagens modernas
     AddType image/webp .webp
     AddType image/avif .avif
+    AddType image/svg+xml .svg
+    AddType image/png .png
+    AddType image/jpeg .jpg .jpeg
 </IfModule>
 
 # Desabilitar sniffing de MIME types (resolver erro de import.meta)
@@ -31,7 +36,7 @@
     Header set X-Content-Type-Options "nosniff"
     
     # Cabeçalhos específicos para JavaScript
-    <FilesMatch "\.(js|jsx|mjs)$">
+    <FilesMatch "\.(js|jsx|mjs|ts|tsx)$">
         Header set Content-Type "application/javascript; charset=UTF-8"
     </FilesMatch>
     
@@ -39,9 +44,14 @@
     <FilesMatch "\.json$">
         Header set Content-Type "application/json; charset=UTF-8"
     </FilesMatch>
+    
+    # Cabeçalhos específicos para CSS
+    <FilesMatch "\.css$">
+        Header set Content-Type "text/css; charset=UTF-8"
+    </FilesMatch>
 </IfModule>
 
-# Ativar compressão
+# Ativar compressão para melhorar performance
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
 </IfModule>
@@ -83,4 +93,19 @@
     
     # Permitir conexões de terceiros para Cloudinary
     Header always set Access-Control-Allow-Origin "https://res.cloudinary.com"
+</IfModule>
+
+# Cabeçalhos de segurança para proteger contra ataques comuns
+<IfModule mod_headers.c>
+    # Desabilitar cache para index.html para garantir atualizações
+    <FilesMatch "index\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+    
+    # Habilitar cache para arquivos estáticos
+    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
 </IfModule>
