@@ -75,18 +75,30 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
 
     const currentImage = activeTransformation?.image;
     if (currentImage) {
-      preloadImagesByUrls([currentImage], { quality: 90, batchSize: 1 });
+      console.log("Attempting to load image:", currentImage); // Log para depuração
 
-      const nextIndex = (activeIndex + 1) % transformations.length;
-      if (transformations.length > 1 && transformations[nextIndex] && nextIndex !== activeIndex) {
-        const nextTransformationImage = transformations[nextIndex].image;
-        preloadImagesByUrls([nextTransformationImage], { quality: 80, batchSize: 1 });
-      }
+      // Temporariamente comentado para depuração
+      // preloadImagesByUrls([currentImage], { quality: 90, batchSize: 1 });
+
+      // const nextIndex = (activeIndex + 1) % transformations.length;
+      // if (transformations.length > 1 && transformations[nextIndex] && nextIndex !== activeIndex) {
+      //   const nextTransformationImage = transformations[nextIndex].image;
+      //   preloadImagesByUrls([nextTransformationImage], { quality: 80, batchSize: 1 });
+      // }
+
+      const timer = setTimeout(() => {
+        if (!imageLoaded) { 
+            console.warn("Image loading timed out for:", currentImage);
+            //setIsLoading(false); // Não definir isLoading como false aqui, ProgressiveImage pode ainda estar tentando
+        }
+      }, 10000); // Aumentado o timeout para 10s para dar mais tempo
+      return () => clearTimeout(timer);
+
     } else {
+      console.log("No active transformation image to load."); // Log para depuração
       setIsLoading(false); 
     }
-  // Adicionado transformations.length como dependência para garantir que o efeito seja reavaliado se o número de imagens mudar.
-  }, [activeIndex, activeTransformation, transformations.length]);
+  }, [activeIndex, activeTransformation, imageLoaded]); // Adicionado imageLoaded como dependência
 
   // Efeito para a transição automática de slides
   useEffect(() => {
@@ -204,9 +216,12 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                     className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-500"
                     style={{ opacity: imageLoaded ? 1 : 0 }}
                     onLoad={() => {
+                      console.log('ProgressiveImage onLoad triggered for:', activeTransformation.image); // Log para depuração
                       setImageLoaded(true);
-                      // setIsLoading(false); // Movido para o useEffect de imageLoaded
+                      setIsLoading(false); // Garante que o loader seja removido quando a imagem carregar
                     }}
+                    // onError prop removida pois não existe em ProgressiveImageProps
+                    // O ProgressiveImage já tem um console.error interno em seu handleError
                     priority 
                   />
                 </div>
