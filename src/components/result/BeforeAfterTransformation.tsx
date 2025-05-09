@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useGlobalStyles } from '@/hooks/useGlobalStyles';
 import { preloadTransformationImages, getHighQualityImageUrl, fixBlurryImage } from '@/utils/transformationImageUtils';
@@ -30,6 +30,7 @@ const BeforeAfterTransformation: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState({ before: false, after: false });
   const [isLoading, setIsLoading] = useState(true);
+  const AUTOPLAY_INTERVAL = 5000; // 5 seconds for auto-play
 
   const currentTransformation = transformations[activeIndex];
 
@@ -71,14 +72,22 @@ const BeforeAfterTransformation: React.FC = () => {
   }, [imageLoaded]);
 
   // Próxima transformação
-  const nextTransformation = () => {
-    setActiveIndex((activeIndex + 1) % transformations.length);
-  };
+  const nextTransformation = useCallback(() => {
+    setActiveIndex(prevIndex => (prevIndex + 1) % transformations.length);
+  }, [transformations.length]);
 
   // Transformação anterior
-  const prevTransformation = () => {
-    setActiveIndex((activeIndex - 1 + transformations.length) % transformations.length);
-  };
+  const prevTransformation = useCallback(() => {
+    setActiveIndex(prevIndex => (prevIndex - 1 + transformations.length) % transformations.length);
+  }, [transformations.length]);
+
+  // Auto-play carousel
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      nextTransformation();
+    }, AUTOPLAY_INTERVAL);
+    return () => clearTimeout(timer);
+  }, [activeIndex, nextTransformation]);
 
   // Otimizar URL da imagem - versão melhorada
   const getOptimizedImageUrl = (url) => {
@@ -185,6 +194,24 @@ const BeforeAfterTransformation: React.FC = () => {
             />
           ))}
         </div>
+      </div>
+
+      {/* Restored Section: Headline, Description List, CTA Button */}
+      <div className="mt-8 text-center">
+        <h3 className="text-3xl font-playfair font-bold text-[#432818] mb-4">
+          Descubra Sua Melhor Versão
+        </h3>
+        <ul className="list-disc list-inside text-left max-w-md mx-auto text-[#432818]/80 space-y-2 mb-6">
+          <li>Eleve sua autoestima e confiança.</li>
+          <li>Comunique seu estilo pessoal com clareza.</li>
+          <li>Alcance seus objetivos com uma imagem poderosa.</li>
+        </ul>
+        <button 
+          className={`${globalStyles.primaryButton} py-3 px-8 text-lg w-full sm:w-auto rounded-lg`}
+          onClick={() => window.open('https://pay.hotmart.com/N74003734E?checkoutMode=10', '_blank')} // Example CTA action
+        >
+          Quero Minha Transformação!
+        </button>
       </div>
     </div>
   );
