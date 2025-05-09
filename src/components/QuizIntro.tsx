@@ -68,24 +68,28 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           <p className="text-[#432818] mt-4">Carregando...</p> 
         </div>
       ) : (
-        <div className="w-full max-w-md flex flex-col items-center">
-          <div className="w-full flex flex-col items-center mb-8"> {/* Alterado para flex-col items-center para a barra */}
-            <OptimizedImage 
-              src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
-              alt="Logo Gisele Galvão" 
-              className="w-24 md:w-28 h-auto" /* Tamanho da logo ajustado */
-              width={112} /* Ajustado proporcionalmente */
-              height={56} /* Ajustado proporcionalmente */
-              priority={true} 
-            />
-            <div className="mt-2 h-0.5 w-16 bg-[#B89B7A]"></div> {/* Barra dourada adicionada */}
+        <div className="w-full max-w-md flex flex-col items-center px-4"> {/* Adicionado padding horizontal */}
+          {/* Seção da Logo e Barra */}
+          <div className="w-full flex flex-col items-center mb-6 md:mb-8">
+            <div className="w-28 sm:w-32 md:w-36"> {/* Contêiner responsivo para a logo */}
+              <OptimizedImage 
+                src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
+                alt="Logo Gisele Galvão" 
+                className="h-auto w-full" // Imagem preenche o contêiner, altura automática
+                width={144} // Maior largura (w-36) para otimização da URL
+                height={72}  // Mantém aspect ratio 2:1
+                priority={true} 
+                objectFit="contain" // Garante que a logo não seja cortada
+              />
+            </div>
+            <div className="mt-3 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded"></div> {/* Barra dourada responsiva e estilizada */}
           </div>
 
-          <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818] px-[12px]">
+          <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818]"> {/* Removido px desnecessário */}
             Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
           </h1>
 
-          <div className="flex justify-center mb-6 w-full px-0">
+          <div className="flex justify-center mb-6 w-full"> {/* Removido px-0 desnecessário */}
             <OptimizedImage 
               src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
               alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
