@@ -108,8 +108,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     >
       <div className="w-full max-w-md flex flex-col items-center">
         {/* Seção da Logo e Barra */}
-        <div className="w-full mb-6 md:mb-8">
-          <div className="w-28 sm:w-32 md:w-36 mx-auto"> 
+        <div className="w-full flex flex-col items-center mb-6 md:mb-8"> {/* Aplicado flex e items-center aqui */}
+          {/* Container da Logo: largura definida, centralizado pelo items-center do pai */}
+          <div className="w-28 sm:w-32 md:w-36">  {/* Removido mx-auto */}
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
@@ -120,7 +121,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               objectFit="contain"
             />
           </div>
-          <div className="mt-3 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded mx-auto"></div>
+          {/* Barra Dourada: largura definida, centralizada pelo items-center do pai */}
+          <div className="mt-3 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded"></div> {/* Removido mx-auto */}
         </div>
 
         <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818]">
