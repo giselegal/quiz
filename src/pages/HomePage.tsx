@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import QuizIntro from '../components/QuizIntro';
 import QuizPage from '../components/QuizPage';
@@ -70,7 +69,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       {!started ? (
         <QuizIntro onStart={handleStart} />
       ) : (

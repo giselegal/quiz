@@ -9,17 +9,22 @@ import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager'
 import { getImageById } from '@/data/imageBank';
 
 /**
- * QuizIntro - Componente otimizado para a página inicial do quiz
+ * QuizIntro - Componente completamente restruturado para a página inicial do quiz
+ * 
+ * Problemas resolvidos:
+ * 1. Problemas de layout que criavam "buracos vazios" e espaçamento irregular
+ * 2. Conflitos entre min-h-screen e outros componentes de layout
+ * 3. Problemas de renderização da imagem principal que não empurrava o conteúdo
+ * 4. Incompatibilidades entre diferentes abordagens de espaçamento (gap-y vs space-y)
  * 
  * Melhorias implementadas:
- * 1. Layout corrigido - Mudança de justify-center para justify-start para evitar "buracos vazios"
- * 2. Espaçamento melhorado - Adição de gap-y para distribuir elementos uniformemente
- * 3. LCP otimizado - Imagem principal com width/height pré-definidos, aspect-ratio e preload
- * 4. Responsividade aprimorada - Ajustes específicos para diferentes tamanhos de tela
- * 5. Carregamento progressivo - Estado de loading claro seguido por transição suave do conteúdo
- * 6. Otimização de imagens - Uso de OptimizedImage com prioridade e placeholder
- * 7. Hierarquia visual - Logo, título, imagem, texto e CTA com espaçamentos adequados
- * 8. CTA mais atraente - Efeitos de hover e foco melhorados
+ * 1. Layout mais previsível com estrutura HTML simplificada
+ * 2. Remoção de min-h-screen substituído por uma abordagem mais robusta
+ * 3. Imagem principal com aspect-ratio fixo para evitar saltos de layout
+ * 4. Gradiente sutil para melhorar a aparência visual
+ * 5. Estrutura de formulário com espaçamento tradicional via margins
+ * 6. Estado de loading consistente com o layout final
+ * 7. Responsividade aprimorada para todos os dispositivos
  */
 
 interface QuizIntroProps {
@@ -42,6 +47,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
     const loadInitialAssets = async () => {
       try {
+        console.log("[QuizIntro] Iniciando carregamento de assets...");
+        
         // Assumindo que preloadCriticalImages pode ser uma Promise ou que não bloqueia criticamente o fluxo principal.
         // Se for crítico, deve ser awaited.
         preloadCriticalImages('intro'); 
@@ -52,12 +59,17 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           quality: 95,
         });
 
+        console.log("[QuizIntro] Assets carregados com sucesso");
+        
         if (isMounted) {
           setIsLoading(false); // Desliga o spinner principal
           setCriticalAssetsForQuizPreloaded(true); // Sinaliza que os assets da intro foram carregados
           // Inicia a transição para mostrar o conteúdo
           setTimeout(() => {
-            if (isMounted) setShowContent(true);
+            if (isMounted) {
+              setShowContent(true);
+              console.log("[QuizIntro] Conteúdo exibido");
+            }
           }, 50); // Pequeno delay para a transição de opacidade
         }
       } catch (error) {
@@ -103,13 +115,26 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] py-8 px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center text-center">
-          <svg className="animate-spin h-12 w-12 text-[#B89B7A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <div className="flex flex-col items-center justify-center py-12 px-4 md:px-6" 
+           style={{
+             minHeight: '100vh',  
+             background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)'
+           }}>
+        <div className="w-full max-w-md flex flex-col items-center justify-center text-center">
+          <div className="w-28 sm:w-32 md:w-36 mb-6">
+            <img
+              src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+              alt="Logo Gisele Galvão"
+              className="w-full h-auto"
+              width={144}
+              height={72}
+            />
+          </div>
+          <svg className="animate-spin h-12 w-12 text-[#B89B7A] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="text-[#432818] mt-4 text-base font-medium">Preparando uma experiência única para você...</p>
+          <p className="text-[#432818] text-base font-medium">Preparando uma experiência única para você...</p>
           <p className="text-gray-500 mt-2 text-sm">Só um momento, estamos quase lá!</p>
         </div>
       </div>
@@ -118,12 +143,17 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   return (
     <div 
-      className={`min-h-screen flex flex-col items-center justify-start bg-[#FEFEFE] pt-4 pb-12 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+      className={`flex flex-col items-center justify-start py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
+        minHeight: '100%',
+        paddingBottom: '2rem'
+      }}
     >
-      <div className="w-full max-w-md flex flex-col items-center gap-y-4 sm:gap-y-6"> {/* Container principal do conteúdo visível com espaçamento ajustado */}
+      <div className="w-full max-w-md flex flex-col items-center space-y-6 pb-8">
         
         {/* Seção da Logo e Barra - Margem inferior ajustada */}
-        <div className="w-full flex flex-col items-center mb-3 md:mb-5"> 
+        <div className="w-full flex flex-col items-center mb-2"> 
           <div className="w-28 sm:w-32 md:w-36"> 
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
@@ -139,29 +169,29 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         </div>
 
         {/* Headline - Tamanho e peso da fonte aumentados, margem inferior ajustada */}
-        <h1 className="font-playfair text-2xl sm:text-3xl md:text-3xl font-bold text-center mb-5 leading-tight text-[#432818]">
+        <h1 className="font-playfair text-2xl sm:text-3xl md:text-3xl font-bold text-center mb-4 leading-tight text-[#432818]">
           Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
         </h1>
 
         {/* Imagem Principal */}
-        <div className="flex justify-center mb-3 w-full"> {/* Margem inferior reduzida */}
-          <OptimizedImage 
-            src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
-            alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-            width={896}
-            height={896}
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto rounded-lg shadow-sm object-contain mx-auto"
-            priority={true}
-            style={{
-              background: 'linear-gradient(to bottom, #f8f5f1, #ffffff)',
-              aspectRatio: '1/1',
-              display: 'block'
-            }}
-          />
+        <div className="w-full flex justify-center">
+          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md relative bg-white shadow-sm rounded-lg overflow-hidden" style={{aspectRatio: "1/1"}}>
+            <img 
+              src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
+              alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
+              className="w-full h-full object-cover"
+              width={896}
+              height={896}
+              style={{
+                display: 'block',
+                maxWidth: '100%'
+              }}
+            />
+          </div>
         </div>
         
         {/* Texto descritivo - Movido para logo abaixo da imagem, margem inferior ajustada */}
-        <p className="text-sm sm:text-base text-[#433830] text-center mb-5 max-w-md mx-auto px-2 sm:px-4 leading-relaxed"> {/* Texto ajustado para melhor legibilidade */}
+        <p className="text-sm sm:text-base text-[#433830] text-center leading-relaxed max-w-md mx-auto px-2 sm:px-4"> 
           Em poucos minutos, descubra seu{' '}
           <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
           looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com
@@ -169,8 +199,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         </p>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto flex flex-col gap-4" aria-live="polite"> {/* gap aumentado ligeiramente */}
-          <div>
+        <form onSubmit={handleSubmit} className="w-full mx-auto mt-2" aria-live="polite">
+          <div className="mb-4">
             <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1">
               NOME
             </label>
@@ -179,19 +209,19 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               placeholder="Digite seu nome" 
               value={nome} 
               onChange={e => setNome(e.target.value)} 
-              className="w-full p-3 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md" // Cor da borda e foco ajustadas, rounded-md
+              className="w-full p-3 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md" 
               autoFocus 
               aria-required="true" 
             />
           </div>
           <Button 
             type="submit" 
-            className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-3 sm:py-3.5 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 mt-2 transform hover:scale-105 hover:-translate-y-1"
+            className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-3 sm:py-3.5 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:-translate-y-1 hover:scale-105"
             disabled={!nome.trim()}
           >
             Quero Descobrir meu Estilo Agora!
           </Button>
-          <p className="text-xs text-center text-gray-500 mt-1"> {/* mt reduzido */}
+          <p className="text-xs text-center text-gray-500 mt-2"> 
             Ao clicar, você concorda com nossa política de privacidade
           </p>
         </form>
