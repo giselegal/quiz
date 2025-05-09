@@ -13,97 +13,59 @@ export const optimizeCloudinaryUrl = (
 ): string => {
   if (!url) return '';
   if (!url.includes('cloudinary.com')) return url;
-  
-  // Define configurações padrão
-  const {
-    quality = 85,
-    format = 'auto',
-    width,
-    height,
-    crop = 'limit',
-    removeParams = [] // Parâmetros para remover
-  } = settings;
-  
-  // Detecta se a URL já tem transformações
-  const parts = url.split('/upload/');
-  if (parts.length !== 2) return url;
-  
-  let baseUrlParts = parts;
-  let secondPart = baseUrlParts[1];
-  
-  // Remove parâmetros problemáticos se especificados
-  if (removeParams.length > 0) {
-    // Verifica se a URL tem versão (v12345)
-    const versionMatch = secondPart.match(/^(v\d+)\//);
-    let version = '';
-    let finalPath = secondPart;
 
-    if (versionMatch) {
-      version = versionMatch[1] + '/';
-      finalPath = secondPart.substring(version.length);
+  try {
+    // Divide a URL em partes
+    const uploadMarker = '/image/upload/';
+    const parts = url.split(uploadMarker);
+    if (parts.length !== 2) {
+      console.warn('[ImageManager] URL structure unexpected:', url);
+      return url;
     }
 
-    // Remove parâmetros específicos de transformação
-    let transformParts = finalPath.split('/')[0].split(',');
-    transformParts = transformParts.filter(part => {
-      // Manter o parâmetro se não estiver na lista de remoção
-      return !removeParams.some(param => part.startsWith(param));
-    });
+    const baseUrl = parts[0] + uploadMarker;
+    const pathAfterUpload = parts[1];
 
-    // Remonta a URL sem os parâmetros removidos
-    if (finalPath.includes('/')) {
-      const rest = finalPath.split('/').slice(1).join('/');
-      finalPath = transformParts.join(',') + '/' + rest;
-    } else {
-      finalPath = transformParts.join(',');
+    // Regex melhorada para encontrar a versão e o public_id, ignorando TODAS as transformações
+    const versionAndPublicIdPattern = /^(?:.*?\/)*?(v\d+\/)?([^/]+(?:\/[^/]+)*)$/;
+    const match = pathAfterUpload.match(versionAndPublicIdPattern);
+
+    if (!match) {
+      console.warn('[ImageManager] Could not parse version and public_id:', pathAfterUpload);
+      return url;
     }
 
-    // Atualiza a segunda parte da URL com versão (se existir) e caminho processado
-    secondPart = version + finalPath;
-    baseUrlParts[1] = secondPart;
-  }
-  const hasTransformations = secondPart.includes('/') && 
-                            !/v\d+\//.test(secondPart.split('/')[0]); // Distingue transforms de version strings
-  
-  // Constrói a string de transformação
-  let transformations = `f_${format === 'auto' ? 'auto' : format},q_${quality}`;
-  
-  // Adiciona crop mode se especificado
-  if (crop) {
-    transformations += `,c_${crop}`;
-  }
-  
-  // Adiciona dimensões se especificadas
-  if (width) {
-    transformations += `,w_${width}`;
-  } else if (settings.width) {
-    transformations += `,w_${settings.width}`;
-  }
-  
-  if (height) {
-    transformations += `,h_${height}`;
-  } else if (settings.height) {
-    transformations += `,h_${settings.height}`;
-  }
-  
-  // Adiciona nitidez para melhorar a qualidade visual
-  transformations += ',e_sharpen:60';
-  
-  // Aplica transformações à URL com tratamento adequado para versões
-  if (hasTransformations) {
-    // URL já tem transformações, substitui-as
-    return `${baseUrlParts[0]}/upload/${transformations}/${parts.slice(1).join('/')}`;
-  } else {
-    // Verifica se a URL tem formato de versão (v12345)
-    const versionMatch = secondPart.match(/^(v\d+)\//);
-    if (versionMatch) {
-      const version = versionMatch[1];
-      const rest = secondPart.substring(version.length + 1);
-      // Preserva a versão na URL
-      return `${baseUrlParts[0]}/upload/${version}/${transformations}/${rest}`;
-    }
-    // URL sem versão e sem transformações
-    return `${baseUrlParts[0]}/upload/${transformations}/${secondPart}`;
+    const version = match[1] || ''; // Inclui o 'v' e a barra se existir
+    const publicId = match[2];
+
+    // Define configurações padrão
+    const {
+      quality = 85,
+      format = 'auto',
+      width,
+      height,
+      crop = 'limit'
+    } = settings;
+
+    // Constrói transformações otimizadas
+    const transforms = [
+      `f_${format}`,            // Formato (auto por padrão)
+      `q_${quality}`,           // Qualidade conforme settings
+      'dpr_auto',               // Densidade de pixel automática
+      crop ? `c_${crop}` : '',  // Modo de crop conforme settings
+      width ? `w_${width}` : '', // Largura se especificada
+      height ? `h_${height}` : '', // Altura se especificada
+      'e_sharpen:60'            // Nitidez moderada
+    ].filter(Boolean).join(',');
+
+    // Construir URL final: baseUrl + transformações + versão (se existir) + publicId
+    const finalUrl = `${baseUrl}${transforms}/${version}${publicId}`;
+    console.log('[ImageManager] Optimized URL:', finalUrl);
+    return finalUrl;
+
+  } catch (error) {
+    console.error('[ImageManager] Error optimizing URL:', error);
+    return url; // Retorna URL original em caso de erro
   }
 };
 

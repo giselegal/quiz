@@ -1,50 +1,48 @@
-
 /**
  * Inicializa o Pixel do Facebook
  */
 import { getPixelId, getCurrentFunnelConfig, getFacebookToken, getCtaUrl, getUtmCampaign, trackFunnelEvent } from '@/services/pixelManager';
 
 export const initFacebookPixel = () => {
-  if (typeof window !== 'undefined') {
-    // Verifica se o Pixel já foi inicializado para evitar duplicações
+  if (typeof window === 'undefined') return;
+
+  try {
+    // Espera até que o fbq esteja disponível
     if (!window.fbq) {
-      // Código do Pixel do Facebook
-      (function(f, b, e, v, n, t, s) {
-        if (f.fbq) return;
-        n = f.fbq = function() {
-          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-        };
-        if (!f._fbq) f._fbq = n;
-        n.push = n;
-        n.loaded = !0;
-        n.version = '2.0';
-        n.queue = [];
-        t = b.createElement(e);
-        t.async = !0;
-        t.src = v;
-        s = b.getElementsByTagName(e)[0];
-        if (s && s.parentNode) {
-          s.parentNode.insertBefore(t, s);
-        }
-      })(window as any, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-      
-      // Inicializa o Pixel com o ID do funil atual
-      const pixelId = getPixelId();
-      if (window.fbq) {
-        window.fbq('init', pixelId);
-        // Rastreia a visualização de página
-        window.fbq('track', 'PageView');
-      }
-      
-      console.log('Facebook Pixel initialized with ID:', pixelId);
-      
-      // Registra adicionalmente o funil atual para análises
-      const funnelConfig = getCurrentFunnelConfig();
-      console.log('Current funnel:', funnelConfig.funnelName, '(', funnelConfig.utmCampaign, ')');
-    } else {
-      console.log('Facebook Pixel already initialized');
+      console.log('Facebook Pixel não está disponível ainda, aguardando...');
+      setTimeout(initFacebookPixel, 100);
+      return;
     }
+
+    // Obtém o ID do pixel para o funil atual
+    const pixelId = getPixelId();
+    console.log('Inicializando Facebook Pixel com ID:', pixelId);
+
+    // Inicializa o Pixel
+    window.fbq('init', pixelId);
+    window.fbq('track', 'PageView');
+    
+    // Registra adicionalmente o funil atual para análises
+    const funnelConfig = getCurrentFunnelConfig();
+    console.log('Funil atual:', funnelConfig.funnelName, '(', funnelConfig.utmCampaign, ')');
+
+  } catch (error) {
+    console.error('Erro ao inicializar o Facebook Pixel:', error);
   }
+};
+
+// Utilitário para adicionar parâmetros UTM aos eventos
+const addUtmParamsToEvent = (eventData: Record<string, any> = {}) => {
+  try {
+    const storedParams = localStorage.getItem('utm_parameters');
+    if (storedParams) {
+      const utmParams = JSON.parse(storedParams);
+      return { ...eventData, ...utmParams };
+    }
+  } catch (error) {
+    console.error('Erro ao adicionar parâmetros UTM:', error);
+  }
+  return eventData;
 };
 
 /**
