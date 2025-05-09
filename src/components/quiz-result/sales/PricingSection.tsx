@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Clock, Lock, Check } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import SecurePurchaseElement from '@/components/result/SecurePurchaseElement';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface PricingSectionProps {
   price?: string;
@@ -110,7 +110,9 @@ const PricingSection: React.FC<PricingSectionProps> = ({
             <span className="flex items-center gap-2">
               {isLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="inline-block">
+                    <LoadingSpinner size="xs" color="#FFFFFF" />
+                  </div>
                   <span>Processando...</span>
                 </>
               ) : (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { StyleResult } from '@/types/quiz';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { UnifiedTemplateModal } from './modals/UnifiedTemplateModal';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export type EditorTab = 'quiz' | 'result' | 'sales';
 
@@ -138,7 +138,7 @@ export const UnifiedVisualEditor: React.FC<UnifiedVisualEditorProps> = ({
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white rounded-lg p-6 flex items-center gap-3">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+            <LoadingSpinner size="sm" color="#3b82f6" />
             <span>Salvando alterações...</span>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -8,6 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { EditorTab } from '../UnifiedVisualEditor';
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 // Dummy template data - in a real application, these would come from an API or database
 const quizTemplates = [
@@ -229,7 +229,7 @@ export const UnifiedTemplateModal: React.FC<UnifiedTemplateModalProps> = ({
         {isLoading && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
             <div className="flex flex-col items-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[#B89B7A] mb-2" />
+              <LoadingSpinner size="lg" color="#B89B7A" className="mb-2" />
               <p>Aplicando template...</p>
             </div>
           </div>

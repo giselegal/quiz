@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { QuizComponentType, QuizStage, QuizBuilderState } from '@/types/quizBuilder';
@@ -13,6 +12,7 @@ import QuizPreview from './preview/QuizPreview';
 import { ResultPageConfig } from '@/types/resultPageConfig';
 import { resultPageStorage } from '@/services/resultPageStorage';
 import { createBuilderStateFromQuiz, loadQuizResultConfig } from '@/services/quizBuilderService';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export const QuizBuilder: React.FC = () => {
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
@@ -195,7 +195,7 @@ export const QuizBuilder: React.FC = () => {
   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#1A1F2C]">
-        <Loader2 className="h-12 w-12 text-[#9b87f5] animate-spin mb-4" />
+        <LoadingSpinner size="lg" color="#9b87f5" className="mb-4" />
         <p className="text-white text-lg">Carregando construtor de quiz...</p>
       </div>
     );
