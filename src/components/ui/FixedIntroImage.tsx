@@ -30,55 +30,44 @@ function getHighQualityUrl(url: string): string {
   const parts = url.split(uploadMarker);
   if (parts.length !== 2) {
     console.warn('[FixedIntroImage] URL structure unexpected (no /image/upload/ marker):', url);
-    return url; // Retorna a URL original se a estrutura for inesperada
+    return url;
   }
 
   const baseUrl = parts[0] + uploadMarker;
-  const pathAfterUpload = parts[1];
+  let pathAfterUpload = parts[1];
 
-  let version = '';
-  let publicId = '';
+  // Regex para encontrar a versão e o public_id, ignorando TODAS as transformações
+  const versionAndPublicIdPattern = /^(?:.*?\/)*?(v\d+\/)?([^/]+(?:\/[^/]+)*)$/;
+  const match = pathAfterUpload.match(versionAndPublicIdPattern);
 
-  // Regex para extrair a versão (opcional, ex: "v123/") e o public_id,
-  // ignorando quaisquer transformações ("pastas" de transformação) que venham antes da versão ou do public_id.
-  const pathPattern = /^(?:[^/]+\/)*(v\d+\/)?(.+)$/;
-  const pathMatch = pathAfterUpload.match(pathPattern);
-
-  if (pathMatch) {
-    // pathMatch[1] é o grupo da versão (ex: "v123/") ou undefined se não houver versão.
-    // pathMatch[2] é o grupo do public_id (ex: "imagem.jpg" ou "pasta/imagem.jpg").
-    if (pathMatch[1]) {
-      version = pathMatch[1]; // Captura a versão, que já inclui a barra no final.
-    }
-    publicId = pathMatch[2];
-  } else {
-    // Fallback: se a regex não casar (improvável para URLs Cloudinary válidas mas possível para estruturas muito simples),
-    // assume que todo o pathAfterUpload é o public_id.
-    publicId = pathAfterUpload;
-    console.warn('[FixedIntroImage] Regex did not match path, assuming entire path is publicId:', pathAfterUpload);
+  if (!match) {
+    console.warn('[FixedIntroImage] Could not parse version and public_id:', pathAfterUpload);
+    return url;
   }
-  
-  // console.log('[FixedIntroImage] Parsed URL parts - Base:', baseUrl, 'Version:', version, 'PublicID:', publicId);
 
-  // Novas transformações de alta qualidade a serem aplicadas.
-  const newTransforms = [
+  const version = match[1] || ''; // Inclui o 'v' e a barra se existir
+  const publicId = match[2];
+
+  console.log('[FixedIntroImage] Parsed parts:', {
+    baseUrl,
+    version,
+    publicId,
+    originalPath: pathAfterUpload
+  });
+
+  // Aplicar apenas nossas transformações otimizadas
+  const transforms = [
     'f_auto',         // Formato automático (webp/avif)
-    'q_95',           // Qualidade muito alta (95%)
+    'q_95',          // Alta qualidade (95%)
     'dpr_auto',       // Densidade de pixel automática
-    'e_sharpen:60'    // Nitidez para melhorar qualidade visual
+    'w_auto',         // Largura automática
+    'c_limit',        // Limitar redimensionamento
+    'e_sharpen:60'    // Nitidez moderada
   ].join(',');
-  // console.log('[FixedIntroImage] New transforms to apply:', newTransforms);
 
-  // Montar a URL final: baseUrl + newTransforms + / + version (se existir) + publicId
-  // A barra entre newTransforms e version/publicId é adicionada explicitamente.
-  // A 'version', se existir, já contém uma barra no final (ex: "v123/").
-  let finalUrl = `${baseUrl}${newTransforms}/`;
-  if (version) {
-    finalUrl += version; // Adiciona a versão (ex: v12345/) que já tem a barra
-  }
-  finalUrl += publicId; // Adiciona o ID público (ex: imagem.jpg ou pasta/imagem.jpg)
-
-  console.log('[FixedIntroImage] getHighQualityUrl output:', finalUrl);
+  // Construir URL final: baseUrl + transformações + versão (se existir) + publicId
+  const finalUrl = `${baseUrl}${transforms}/${version}${publicId}`;
+  console.log('[FixedIntroImage] Final URL:', finalUrl);
   return finalUrl;
 }
 
