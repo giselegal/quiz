@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useQuiz } from '@/hooks/useQuiz';
 import { useGlobalStyles } from '@/hooks/useGlobalStyles';
@@ -102,7 +101,7 @@ const ResultPagePrototype: React.FC = () => {
     const priceInfo = {
       regularPrice: 'R$ 175,00',
       currentPrice: 'R$ 39,00',
-      installments: '4X de R$ 10,86 sem juros'
+      installments: '4X de R$ 10,86'
     };
     
     if (currentVariation?.content?.pricing) {

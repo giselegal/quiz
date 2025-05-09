@@ -588,7 +588,7 @@ const ABTestManagerPage: React.FC = () => {
                                       };
                                       handleUpdateVariationContent(variation.id, 'pricing', pricing);
                                     }}
-                                    placeholder="4X de R$ 10,86 sem juros"
+                                    placeholder="4X de R$ 10,86"
                                     className="mt-1"
                                   />
                                 </div>

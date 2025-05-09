@@ -8,6 +8,20 @@ import OptimizedImage from './ui/OptimizedImage';
 import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
 import { getImageById } from '@/data/imageBank';
 
+/**
+ * QuizIntro - Componente otimizado para a página inicial do quiz
+ * 
+ * Melhorias implementadas:
+ * 1. Layout corrigido - Mudança de justify-center para justify-start para evitar "buracos vazios"
+ * 2. Espaçamento melhorado - Adição de gap-y para distribuir elementos uniformemente
+ * 3. LCP otimizado - Imagem principal com width/height pré-definidos, aspect-ratio e preload
+ * 4. Responsividade aprimorada - Ajustes específicos para diferentes tamanhos de tela
+ * 5. Carregamento progressivo - Estado de loading claro seguido por transição suave do conteúdo
+ * 6. Otimização de imagens - Uso de OptimizedImage com prioridade e placeholder
+ * 7. Hierarquia visual - Logo, título, imagem, texto e CTA com espaçamentos adequados
+ * 8. CTA mais atraente - Efeitos de hover e foco melhorados
+ */
+
 interface QuizIntroProps {
   onStart: (nome: string) => void;
 }
@@ -104,12 +118,12 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   return (
     <div 
-      className={`min-h-screen flex flex-col items-center justify-start bg-[#FEFEFE] py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+      className={`min-h-screen flex flex-col items-center justify-start bg-[#FEFEFE] pt-4 pb-12 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
     >
-      <div className="w-full max-w-md flex flex-col items-center gap-y-6"> {/* Container principal do conteúdo visível e gap-y-6 adicionado */}
+      <div className="w-full max-w-md flex flex-col items-center gap-y-4 sm:gap-y-6"> {/* Container principal do conteúdo visível com espaçamento ajustado */}
         
-        {/* Seção da Logo e Barra - Margem inferior reduzida */}
-        <div className="w-full flex flex-col items-center mb-4 md:mb-6"> 
+        {/* Seção da Logo e Barra - Margem inferior ajustada */}
+        <div className="w-full flex flex-col items-center mb-3 md:mb-5"> 
           <div className="w-28 sm:w-32 md:w-36"> 
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
@@ -137,12 +151,17 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             width={896}
             height={896}
             className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto rounded-lg shadow-sm object-contain mx-auto"
-            priority={true} 
+            priority={true}
+            style={{
+              background: 'linear-gradient(to bottom, #f8f5f1, #ffffff)',
+              aspectRatio: '1/1',
+              display: 'block'
+            }}
           />
         </div>
         
         {/* Texto descritivo - Movido para logo abaixo da imagem, margem inferior ajustada */}
-        <p className="text-sm text-[#433830] text-center mb-6 max-w-md mx-auto px-4"> {/* px ajustado e mb ajustado */}
+        <p className="text-sm sm:text-base text-[#433830] text-center mb-5 max-w-md mx-auto px-2 sm:px-4 leading-relaxed"> {/* Texto ajustado para melhor legibilidade */}
           Em poucos minutos, descubra seu{' '}
           <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
           looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com
@@ -167,7 +186,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           </div>
           <Button 
             type="submit" 
-            className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-3.5 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 mt-2 transform hover:scale-105" // Cores, padding, fonte, sombra e transição/hover ajustados
+            className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-3 sm:py-3.5 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 mt-2 transform hover:scale-105 hover:-translate-y-1"
             disabled={!nome.trim()}
           >
             Quero Descobrir meu Estilo Agora!

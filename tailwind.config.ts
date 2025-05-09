@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -22,14 +21,19 @@ export default {
       fontSize: {
         '2xs': '0.65rem',
       },
+      scale: {
+        '102': '1.02',
+      },
       fontFamily: {
         playfair: ["Playfair Display", "serif"],
         inter: ["Inter", "sans-serif"],
       },
       colors: {
-        primary: "#B89B7A",
-        secondary: "#432818",
-        background: "#fefefe",
+        brand: {
+          primary: "#B89B7A",
+          secondary: "#432818",
+          background: "#fefefe",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -149,6 +153,7 @@ export default {
       },
       scale: {
         '115': '1.15',
+        '102': '1.02',
       },
       backgroundImage: {
         'gradient-gold': 'linear-gradient(to right, #B89B7A, #432818)',

@@ -77,28 +77,40 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     if (currentImage) {
       console.log("Attempting to load image:", currentImage); // Log para depuração
 
-      // Temporariamente comentado para depuração
-      // preloadImagesByUrls([currentImage], { quality: 90, batchSize: 1 });
+      // Precarrega a imagem atual
+      const img = new Image();
+      img.src = currentImage;
+      img.onload = () => {
+        setImageLoaded(true);
+        setIsLoading(false);
+        console.log("Image loaded successfully:", currentImage);
+      };
+      img.onerror = (err) => {
+        console.error("Failed to load image:", currentImage, err);
+        setIsLoading(false);
+      };
 
-      // const nextIndex = (activeIndex + 1) % transformations.length;
-      // if (transformations.length > 1 && transformations[nextIndex] && nextIndex !== activeIndex) {
-      //   const nextTransformationImage = transformations[nextIndex].image;
-      //   preloadImagesByUrls([nextTransformationImage], { quality: 80, batchSize: 1 });
-      // }
+      // Precarrega a próxima imagem (se houver mais de uma)
+      const nextIndex = (activeIndex + 1) % transformations.length;
+      if (transformations.length > 1 && transformations[nextIndex] && nextIndex !== activeIndex) {
+        const nextTransformationImage = transformations[nextIndex].image;
+        const nextImg = new Image();
+        nextImg.src = nextTransformationImage;
+      }
 
       const timer = setTimeout(() => {
         if (!imageLoaded) { 
-            console.warn("Image loading timed out for:", currentImage);
-            //setIsLoading(false); // Não definir isLoading como false aqui, ProgressiveImage pode ainda estar tentando
+          console.warn("Image loading timed out for:", currentImage);
+          setIsLoading(false); // Definir isLoading como false para não bloquear a UI
         }
-      }, 10000); // Aumentado o timeout para 10s para dar mais tempo
+      }, 5000); // Reduzido para 5s
       return () => clearTimeout(timer);
 
     } else {
       console.log("No active transformation image to load."); // Log para depuração
       setIsLoading(false); 
     }
-  }, [activeIndex, activeTransformation, imageLoaded]); // Adicionado imageLoaded como dependência
+  }, [activeIndex, activeTransformation]); // Removido imageLoaded da dependência para evitar loops
 
   // Efeito para a transição automática de slides
   useEffect(() => {
