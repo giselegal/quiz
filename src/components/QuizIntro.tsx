@@ -74,7 +74,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
-              className="w-14 md:w-18 h-auto" 
+              className="w-14 md:w-16 h-auto" // Alterado de md:w-18 para md:w-16
               width={72} 
               height={36} 
               priority={true} 

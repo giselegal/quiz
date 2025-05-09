@@ -86,47 +86,43 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
 
   return (
     <div className="mt-6 w-full px-4 md:px-0">
-      {/* Container centralizado para todos os elementos */}
       <div className="flex flex-col items-center w-full">
-        {/* Texto ajuda acima do botão */}
-        {!canProceed && (
+        {!canProceed && currentQuestionType !== 'strategic' && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
-        {/* Container do botão com melhor alinhamento central */}
-        <div className="flex justify-center w-full">
-          {/* Contêiner com posicionamento relativo para o botão anterior */}
-          <div className="relative w-full max-w-[180px]">
-            {/* Botão Próximo (centralizado) */}
+        <div className="flex justify-center items-center w-full gap-3">
+          {onPrevious && (
+            <Button 
+              variant="outline" 
+              onClick={onPrevious}
+              className="text-[#8F7A6A] border-[#8F7A6A] hover:bg-[#F3E8E6]/50 hover:text-[#A38A69] py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-opacity-50"
+            >
+              Voltar
+            </Button>
+          )}
+
+          {/* O botão "Próximo" só será renderizado se não for uma questão estratégica OU se for estratégica e puder prosseguir */}
+          {/* Para questões estratégicas, o botão "Continuar" é renderizado dentro de QuizQuestion.tsx */}
+          {currentQuestionType !== 'strategic' && (
             <Button
               onClick={onNext}
               disabled={!canProceed}
               className={`
-                w-full transition-all duration-300
+                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50
                 ${!canProceed 
-                  ? 'bg-gray-400 text-white opacity-50' 
-                  : 'bg-[#B89B7A] hover:bg-[#A38A69] text-white opacity-100'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
                 } 
                 ${showActivationEffect 
-                  ? 'animate-enhanced-pulse scale-110 shadow-md ring-2 ring-[#B89B7A]/50' 
+                  ? 'animate-enhanced-pulse ring-2 ring-brand-primary/70 scale-105 shadow-lg' 
                   : ''
                 }
               `}
             >
               {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
             </Button>
-            
-            {/* Botão Anterior (posicionado à esquerda absoluto) */}
-            {onPrevious && (
-              <Button 
-                variant="outline" 
-                onClick={onPrevious}
-                className="text-[#8F7A6A] border-[#8F7A6A] absolute left-0 -translate-x-[120%] top-0"
-              >
-                Voltar
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>
