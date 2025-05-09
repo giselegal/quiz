@@ -7,11 +7,20 @@ export const initFacebookPixel = () => {
   if (typeof window === 'undefined') return;
 
   try {
-    // Espera até que o fbq esteja disponível
+    // Verifica se o objeto fbq já existe
     if (!window.fbq) {
-      console.log('Facebook Pixel não está disponível ainda, aguardando...');
-      setTimeout(initFacebookPixel, 100);
-      return;
+      // Se não existir, criamos o script do Facebook Pixel manualmente
+      (function(f,b,e,v,n,t,s) {
+        if (f.fbq) return; n=f.fbq=function() {
+          n.callMethod ? n.callMethod.apply(n,arguments) : n.queue.push(arguments)
+        };
+        if (!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
+        n.queue=[]; t=b.createElement(e); t.async=!0;
+        t.src=v; s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)
+      })(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      
+      console.log('Facebook Pixel script carregado manualmente');
     }
 
     // Obtém o ID do pixel para o funil atual
@@ -31,19 +40,7 @@ export const initFacebookPixel = () => {
   }
 };
 
-// Utilitário para adicionar parâmetros UTM aos eventos
-const addUtmParamsToEvent = (eventData: Record<string, any> = {}) => {
-  try {
-    const storedParams = localStorage.getItem('utm_parameters');
-    if (storedParams) {
-      const utmParams = JSON.parse(storedParams);
-      return { ...eventData, ...utmParams };
-    }
-  } catch (error) {
-    console.error('Erro ao adicionar parâmetros UTM:', error);
-  }
-  return eventData;
-};
+// Utilitário para adicionar parâmetros UTM aos eventos - REMOVIDO - duplicado abaixo
 
 /**
  * Rastreia um evento de geração de lead

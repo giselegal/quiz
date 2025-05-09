@@ -4,7 +4,8 @@ import { AuthProvider } from './context/AuthContext';
 import { QuizProvider } from './context/QuizContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
-import { initFacebookPixel, captureUTMParameters } from './utils/analytics';
+import { captureUTMParameters } from './utils/analytics';
+import { loadFacebookPixel } from './utils/facebookPixel';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import CriticalCSSLoader from './components/CriticalCSSLoader';
 import { initialCriticalCSS, heroCriticalCSS } from './utils/critical-css';
@@ -53,7 +54,7 @@ const App = () => {
   // Inicializar analytics na montagem do componente
   useEffect(() => {
     // Inicializar Facebook Pixel
-    initFacebookPixel();
+    loadFacebookPixel();
     
     // Capturar UTM parameters para analytics de marketing
     captureUTMParameters();

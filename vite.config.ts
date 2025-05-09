@@ -5,12 +5,12 @@ import { componentTagger } from "lovable-tagger";
 import compression from "vite-plugin-compression";
 
 export default defineConfig(({ mode }) => ({
+  root: '.',  // Definindo o diretório raiz onde está o index.html principal
   server: {
     host: "::",
     port: 8080,
     headers: {
-      // Adiciona os headers MIME type corretos
-      'Content-Type': 'application/javascript; charset=utf-8',
+      // Adiciona os headers MIME type corretos para desenvolvimento
       'X-Content-Type-Options': 'nosniff',
     },
   },
@@ -49,9 +49,13 @@ export default defineConfig(({ mode }) => ({
           'analytics': [
             './src/services/pixelManager.ts',
             './src/utils/analytics.ts'
-          ],
+          ]
         },
-      },
+        // Garante o MIME type correto para todos os assets
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
     },
     chunkSizeWarningLimit: 1000,
     // Desativa sourcemap em produção para reduzir tamanho

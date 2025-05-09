@@ -9,8 +9,12 @@ import FixedIntroImage from './ui/FixedIntroImage';
 import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
 import { getImageById } from '@/data/imageBank';
 import { LoadingSpinner } from './ui/loading-spinner';
-// Importar script de correção de imagens embaçadas diretamente
+// Importar AutoFixedImages para resolver problemas de imagens borradas
+import AutoFixedImages from './ui/AutoFixedImages';
+// Importar script personalizado para correção de imagens embaçadas
 import '../utils/fix-blurry-images.js';
+// Importar função de correção específica para o quiz de introdução
+import { fixBlurryIntroQuizImages } from '@/utils/fixBlurryIntroQuizImages';
 
 /**
  * QuizIntro - Componente completamente restruturado para a página inicial do quiz
@@ -109,6 +113,16 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   }, [criticalAssetsForQuizPreloaded]);
 
+  useEffect(() => {
+    // Aplicar correção específica para imagens borradas quando o componente for montado
+    if (showContent && !isLoading) {
+      // Pequeno atraso para garantir que as imagens foram renderizadas
+      setTimeout(() => {
+        fixBlurryIntroQuizImages();
+      }, 100);
+    }
+  }, [showContent, isLoading]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nome.trim()) {
@@ -147,14 +161,15 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   }
 
   return (
-    <div 
-      className={`flex flex-col items-center justify-start py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
-      style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
-        minHeight: '100%',
-        paddingBottom: '2rem'
-      }}
-    >
+    <AutoFixedImages>
+      <div 
+        className={`flex flex-col items-center justify-start py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+        style={{
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
+          minHeight: '100%',
+          paddingBottom: '2rem'
+        }}
+      >
       <div className="w-full max-w-md flex flex-col items-center space-y-6 pb-8">
         
         {/* Seção da Logo e Barra - Margem inferior ajustada */}
@@ -231,6 +246,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         </form>
       </div>
     </div>
+    </AutoFixedImages>
   );
 };
 

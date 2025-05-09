@@ -18,7 +18,7 @@
     <meta name="twitter:image" content="https://giselegalvao.com.br/" />
     
     <!-- Preload critical resources -->
-    <link rel="modulepreload" href="/src/main.tsx" fetchpriority="high" />
+    <link rel="preload" href="/src/main.tsx" as="script" fetchpriority="high" />
     <link rel="modulepreload" href="/src/App.tsx" fetchpriority="high" />
     <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto:good,w_720,dpr_auto,e_sharpen:60/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.png" fetchpriority="high" type="image/png" />
     <link rel="preload" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto:good,w_200,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" as="image" fetchpriority="high" type="image/webp" />
@@ -81,11 +81,11 @@
     </noscript>
     
     <!-- Análises e scripts externos (otimizados) -->
-    <script async defer src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script async defer src="https://static.cloudflareinsights.com/beacon.min.js"></script>
+    <script type="text/javascript" async defer src="https://cdn.gpteng.co/gptengineer.js"></script>
+    <script type="text/javascript" async defer src="https://static.cloudflareinsights.com/beacon.min.js"></script>
     
     <!-- Facebook Pixel Code -->
-    <script>
+    <script type="text/javascript">
       !function(f,b,e,v,n,t,s) {
         if(f.fbq)return;n=f.fbq=function(){n.callMethod?
         n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -104,6 +104,6 @@
         <div class="loading-spinner"></div>
       </div>
     </div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script src="/src/main.tsx"></script>
   </body>
 </html>
