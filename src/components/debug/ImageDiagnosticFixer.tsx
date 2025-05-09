@@ -1,11 +1,11 @@
 /**
- * Componente de diagnóstico de imagens para desenvolvimento
- * Adicione este componente temporariamente às páginas para analisar problemas em imagens
+ * Componente de diagnóstico e correção de imagens para desenvolvimento
+ * Este componente identifica e corrige problemas de imagens embaçadas
  */
 import React, { useEffect, useState } from 'react';
-import { analyzeImageUrl, checkRenderedImages, generateImageReport } from '../utils/images/diagnostic';
-import { analyzeImageUrl as jsAnalyzeImageUrl } from '../utils/ImageChecker';
-import { replaceBlurryIntroImages, isLikelyBlurryImage, getHighQualityImageUrl } from '../utils/images/blurry-image-fixer';
+import { analyzeImageUrl, checkRenderedImages, generateImageReport } from '../../utils/images/diagnostic';
+import { analyzeImageUrl as jsAnalyzeImageUrl } from '../../utils/ImageChecker';
+import { replaceBlurryIntroImages, isLikelyBlurryImage, getHighQualityImageUrl } from '../../utils/images/blurry-image-fixer';
 
 // Estilos para o componente de diagnóstico
 const diagnosticStyles = {
@@ -77,6 +77,16 @@ const diagnosticStyles = {
     marginRight: '5px',
     fontSize: '11px',
   },
+  fixButton: {
+    backgroundColor: '#4CAF50',
+    border: 'none',
+    padding: '5px 10px',
+    borderRadius: '4px',
+    color: 'white',
+    cursor: 'pointer',
+    marginRight: '5px',
+    fontSize: '11px',
+  },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -102,16 +112,25 @@ const diagnosticStyles = {
     color: 'white',
     fontSize: '10px',
     marginLeft: '5px',
+  },
+  statusBadge: {
+    display: 'inline-block',
+    padding: '2px 6px',
+    borderRadius: '10px',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    fontSize: '10px',
   }
 };
 
-const ImageDiagnosticDebugger = () => {
+const ImageDiagnosticFixer = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [imageIssues, setImageIssues] = useState([]);
   const [customUrl, setCustomUrl] = useState('');
   const [customUrlAnalysis, setCustomUrlAnalysis] = useState(null);
   const [summary, setSummary] = useState(null);
   const [fixStatus, setFixStatus] = useState({ fixed: 0, total: 0 });
+  const [isFixingAll, setIsFixingAll] = useState(false);
 
   // Executar diagnóstico ao montar o componente
   useEffect(() => {
@@ -161,6 +180,13 @@ const ImageDiagnosticDebugger = () => {
         // Verificar se a URL indica que é um placeholder com blur
         if (img.src.includes('e_blur')) {
           console.log('🔎 Imagem com parâmetro de blur URL detectada:', img.src);
+          blurryCount++;
+          highlightBlurryImage(img);
+        }
+        
+        // Verificar se a URL tem parâmetros de baixa qualidade
+        if (img.src.includes('q_35') || img.src.includes('q_40') || img.src.includes('q_50')) {
+          console.log('🔎 Imagem com qualidade baixa detectada:', img.src);
           blurryCount++;
           highlightBlurryImage(img);
         }
@@ -290,6 +316,42 @@ const ImageDiagnosticDebugger = () => {
       console.log('⚠️ Não foi possível otimizar mais esta imagem.');
     }
   };
+  
+  // Corrigir todas as imagens embaçadas
+  const fixAllBlurryImages = () => {
+    setIsFixingAll(true);
+    console.log('🔧 Corrigindo todas as imagens embaçadas...');
+    
+    // 1. Corrigir imagens identificadas com problemas pelo diagnóstico
+    if (imageIssues && imageIssues.length > 0) {
+      imageIssues.forEach(issue => {
+        if (issue.element) {
+          fixBlurryImage(issue.element);
+        }
+      });
+    }
+    
+    // 2. Usar o utilitário especializado para imagens da introdução
+    const stats = replaceBlurryIntroImages();
+    setFixStatus(prev => ({ 
+      fixed: prev.fixed + stats.replaced,
+      total: prev.total + stats.total
+    }));
+    
+    // 3. Verificar todas as imagens com o atributo data-blurry-image
+    const markedBlurryImages = document.querySelectorAll('[data-blurry-image="true"]');
+    markedBlurryImages.forEach(img => fixBlurryImage(img));
+    
+    // 4. Verificar imagens da introdução do quiz especificamente
+    const introImages = document.querySelectorAll('.quiz-intro img, [data-section="intro"] img');
+    console.log(`🔍 Verificando também ${introImages.length} imagens da introdução...`);
+    introImages.forEach(img => fixBlurryImage(img));
+    
+    setTimeout(() => {
+      setIsFixingAll(false);
+      runDiagnostic(); // Atualizar diagnóstico após correções
+    }, 3000);
+  };
 
   if (process.env.NODE_ENV !== 'development') {
     return null;
@@ -316,6 +378,24 @@ const ImageDiagnosticDebugger = () => {
       
       {isExpanded && (
         <div style={diagnosticStyles.content as React.CSSProperties}>
+          {/* Status da correção */}
+          <div style={diagnosticStyles.section as React.CSSProperties}>
+            <div style={diagnosticStyles.sectionTitle as React.CSSProperties}>Status da Correção</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>Imagens corrigidas: {fixStatus.fixed} / {fixStatus.total}</div>
+              <div style={diagnosticStyles.statusBadge as React.CSSProperties}>
+                {isFixingAll ? 'Corrigindo...' : 'Pronto'}
+              </div>
+            </div>
+            <button 
+              style={diagnosticStyles.fixButton as React.CSSProperties}
+              onClick={fixAllBlurryImages}
+              disabled={isFixingAll}
+            >
+              {isFixingAll ? 'Corrigindo imagens...' : 'Corrigir TODAS as imagens embaçadas'}
+            </button>
+          </div>
+          
           {summary && (
             <div style={diagnosticStyles.section as React.CSSProperties}>
               <div style={diagnosticStyles.sectionTitle as React.CSSProperties}>Resumo</div>
@@ -408,31 +488,6 @@ const ImageDiagnosticDebugger = () => {
               Verificar novamente
             </button>
             <button 
-              <button 
-              style={{...diagnosticStyles.button as React.CSSProperties, backgroundColor: '#4CAF50'}}
-              onClick={() => {
-                console.log('🔧 Corrigindo todas as imagens embaçadas...');
-                
-                // Corrigir todas as imagens identificadas com problemas
-                if (imageIssues && imageIssues.length > 0) {
-                  imageIssues.forEach(issue => {
-                    if (issue.element) {
-                      fixBlurryImage(issue.element);
-                    }
-                  });
-                }
-                
-                // Usar o utilitário especializado para introdução
-                const stats = replaceBlurryIntroImages();
-                setFixStatus(prev => ({ 
-                  fixed: prev.fixed + stats.replaced,
-                  total: prev.total + stats.total
-                }));
-              }}
-            >
-              Corrigir todas as imagens
-            </button>
-            <button 
               style={diagnosticStyles.button as React.CSSProperties}
               onClick={() => {
                 console.log('Relatório completo gerado:', generateImageReport());
@@ -451,4 +506,4 @@ const ImageDiagnosticDebugger = () => {
   );
 };
 
-export default ImageDiagnosticDebugger;
+export default ImageDiagnosticFixer;
