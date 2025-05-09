@@ -466,9 +466,6 @@ export const getOptimizedImageUrl = (
   return `${baseUrlParts[0]}/upload/${transformString}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
 };
 
-// Export new utility functions
-export { getOptimizedImageUrl, getResponsiveImageSources };
-
 // Initialize the cache on module load
 initializeImageCache();
 
