@@ -51,7 +51,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       if (shouldAutoAdvance) {
         const newTimer = setTimeout(() => {
           onNext(); // Chama a função para avançar para a próxima questão/etapa
-        }, 800); // Pequeno delay antes de avançar automaticamente (ex: 0.8 segundos)
+        }, 1500); // Aumentado para 1.5 segundos para o efeito visual ser mais perceptível antes do avanço
         setAutoAdvanceTimer(newTimer);
       }
       
@@ -115,7 +115,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
                   : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
                 } 
                 ${showActivationEffect 
-                  ? 'animate-enhanced-pulse ring-2 ring-brand-primary/70 scale-105 shadow-lg' 
+                  ? 'animate-enhanced-pulse ring-4 ring-brand-primary/70 scale-105 shadow-lg relative before:absolute before:inset-0 before:rounded-lg before:bg-white/30 before:animate-pulse' 
                   : ''
                 }
               `}
