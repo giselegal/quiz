@@ -77,7 +77,7 @@ export const isImagePreloaded = (url: string): boolean => {
   if (!url) return false;
   
   // First optimize the URL if needed
-  const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 95, format: 'auto' });
+  const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 80, format: 'auto' });
   
   // Check if the image is in the cache and loaded
   if (imageCache.has(optimizedUrl)) {
@@ -95,12 +95,12 @@ export const isImagePreloaded = (url: string): boolean => {
 export const getLowQualityPlaceholder = (url: string): string => {
   if (!url || !url.includes('cloudinary.com')) return '';
   
+  // Extract base URL parts to create tiny placeholder
+  const baseUrlParts = url.split('/upload/');
+  if (baseUrlParts.length !== 2) return url;
+  
   // Create a very low quality, small version for placeholders
-  return optimizeCloudinaryUrl(url, { 
-    quality: 10, 
-    format: 'auto',
-    width: 100 
-  });
+  return `${baseUrlParts[0]}/upload/f_auto,q_10,w_20/${baseUrlParts[1].split('/').slice(1).join('/')}`;
 };
 
 /**
@@ -145,7 +145,7 @@ export const preloadImagesByUrls = (
       if (lowQualityUrl) {
         // Add low quality version to cache
         const optimizedUrl = optimizeCloudinaryUrl(url, { 
-          quality: options.quality || 95, 
+          quality: options.quality || 80,  // Reduced from 95 to 80
           format: 'auto',
           width: options.width,
           height: options.height
@@ -163,6 +163,8 @@ export const preloadImagesByUrls = (
         // Also preload the low quality version
         const img = new Image();
         img.src = lowQualityUrl;
+        img.decoding = "sync"; // Fast decode for placeholders
+        img.fetchPriority = "high"; // High priority for tiny placeholders
       }
     });
   }
@@ -406,6 +408,71 @@ export const preloadImagesByCategory = (
     preloadImages(images, options);
   }
 };
+
+/**
+ * Create responsive image sources for different screen sizes
+ * @param url Base image URL
+ * @param sizes Array of sizes to generate
+ * @return Object with srcset and sizes attributes
+ */
+export const getResponsiveImageSources = (
+  url: string,
+  sizes: number[] = [400, 600, 800, 1200]
+): { srcSet: string, sizes: string } => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return { srcSet: url, sizes: '100vw' };
+  }
+  
+  // Extract base URL parts
+  const baseUrlParts = url.split('/upload/');
+  if (baseUrlParts.length !== 2) return { srcSet: url, sizes: '100vw' };
+  
+  // Generate srcSet with multiple sizes
+  const srcSet = sizes.map(size => {
+    const optimizedUrl = `${baseUrlParts[0]}/upload/f_auto,q_80,w_${size}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
+    return `${optimizedUrl} ${size}w`;
+  }).join(', ');
+  
+  return {
+    srcSet,
+    sizes: '(max-width: 768px) 100vw, 50vw'
+  };
+};
+
+/**
+ * Get an optimized version of any image URL with explicit dimensions
+ * @param url Original image URL
+ * @param options Width, height, and quality options
+ */
+export const getOptimizedImageUrl = (
+  url: string, 
+  options: { width?: number, height?: number, quality?: number } = {}
+): string => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  
+  // Extract base URL parts
+  const baseUrlParts = url.split('/upload/');
+  if (baseUrlParts.length !== 2) return url;
+  
+  const { width = 800, quality = 80 } = options;
+  
+  // Build transformation string
+  let transformString = `f_auto,q_${quality}`;
+  
+  if (width) {
+    transformString += `,w_${width}`;
+  }
+  
+  if (options.height) {
+    transformString += `,h_${options.height}`;
+  }
+  
+  // Return optimized URL
+  return `${baseUrlParts[0]}/upload/${transformString}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
+};
+
+// Export new utility functions
+export { getOptimizedImageUrl, getResponsiveImageSources };
 
 // Initialize the cache on module load
 initializeImageCache();

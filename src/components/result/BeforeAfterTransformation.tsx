@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
@@ -17,45 +18,70 @@ interface TransformationItem {
   name: string;
   beforeId: string;
   afterId: string;
+  width?: number;
+  height?: number;
 }
 
-// Updated transformations array with new image URLs
+// Optimized transformations array with responsive image sizes
 const transformations: TransformationItem[] = [
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
+    // Explicit size parameters added directly to image URLs for optimal loading
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
     name: "Adriana",
     beforeId: "transformation-adriana-before",
-    afterId: "transformation-adriana-after"
+    afterId: "transformation-adriana-after",
+    width: 800,
+    height: 1000
   }, 
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
     name: "Mariangela",
     beforeId: "transformation-mariangela-before",
-    afterId: "transformation-mariangela-after"
+    afterId: "transformation-mariangela-after",
+    width: 800,
+    height: 1000
   },
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
     name: "Camila",
     beforeId: "transformation-camila-before",
-    afterId: "transformation-camila-after"
+    afterId: "transformation-camila-after",
+    width: 800,
+    height: 1000
   }
 ];
 
-// Preload all transformation images on component mount - but don't wait for them
+// Improved preload function with optimized image loading strategy
 const preloadTransformationImages = () => {
-  // Extract all image URLs
-  const imageUrls = transformations.flatMap(item => [
-    item.beforeImage, 
-    item.afterImage
-  ]);
+  // Create an array of image sources with both full size and low quality placeholders
+  const imageUrls: string[] = [];
   
-  // Preload high quality images in batches
+  // First, load just the first two transformations' images at high quality
+  transformations.slice(0, 2).forEach(item => {
+    imageUrls.push(item.beforeImage, item.afterImage);
+  });
+  
+  // Load the rest later with lower priority
+  const secondaryUrls = transformations.slice(2).map(item => [
+    item.beforeImage, item.afterImage
+  ]).flat();
+  
+  // Preload the high priority images first
   preloadImagesByUrls(imageUrls, {
-    quality: 80,
-    batchSize: 2
+    quality: 80, // Reduced quality for faster loading
+    batchSize: 2,
+    onComplete: () => {
+      // After high priority images are loaded, load the rest
+      if (secondaryUrls.length > 0) {
+        preloadImagesByUrls(secondaryUrls, { 
+          quality: 80, 
+          batchSize: 1
+        });
+      }
+    }
   });
 };
 
@@ -75,10 +101,10 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   useEffect(() => {
     preloadTransformationImages();
     
-    // After a short delay, set loading to false to ensure at least low quality images are shown
+    // After a shorter delay, show at least the placeholder
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 500); // Reduced from 1000ms to 500ms for faster initial render
     
     return () => clearTimeout(timer);
   }, []);
@@ -98,7 +124,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
         nextTransformation.beforeImage,
         nextTransformation.afterImage
       ], {
-        quality: 80,
+        quality: 80, // Reduced from 95 to 80
         batchSize: 2
       });
     }
@@ -135,6 +161,17 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     } else {
       window.location.href = 'https://pay.hotmart.com/W98977034C?checkoutMode=10&bid=1744967466912';
     }
+  };
+
+  // Generate tiny placeholder URLs for faster initial display
+  const getTinyPlaceholder = (url: string) => {
+    // Extract base URL without any transformations
+    const baseUrlParts = url.split('/upload/');
+    if (baseUrlParts.length !== 2) return url;
+    
+    // Create a very tiny, low quality placeholder for instant loading
+    const tinyPlaceholder = `${baseUrlParts[0]}/upload/f_auto,q_20,w_20/${baseUrlParts[1].split('/').slice(1).join('/')}`;
+    return tinyPlaceholder;
   };
 
   return (
@@ -176,7 +213,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
           </div>
           <div className="md:w-1/2 w-full">
             <Card className="p-6 card-elegant overflow-hidden">
-              {/* Improved image slider with better loading states */}
+              {/* Improved image slider with optimized loading */}
               <div className="relative h-[400px] md:h-[500px] w-full mb-4">
                 {isLoading ? (
                   <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
@@ -184,27 +221,31 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                   </div>
                 ) : (
                   <>
-                    {/* Before image with low quality placeholder */}
+                    {/* Before image with tiny quality placeholder */}
                     <div className="absolute inset-0 overflow-hidden">
                       <ProgressiveImage 
                         src={activeTransformation.beforeImage}
-                        lowQualitySrc={getLowQualityPlaceholder(activeTransformation.beforeImage)}
+                        lowQualitySrc={getTinyPlaceholder(activeTransformation.beforeImage)}
                         alt={`Antes - ${activeTransformation.name}`}
                         className="w-full h-full"
                         priority={activeIndex === 0}
+                        width={activeTransformation.width || 800}
+                        height={activeTransformation.height || 1000}
                         style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                         onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
                       />
                     </div>
                     
-                    {/* After image with low quality placeholder */}
+                    {/* After image with tiny quality placeholder */}
                     <div className="absolute inset-0 overflow-hidden">
                       <ProgressiveImage
                         src={activeTransformation.afterImage}
-                        lowQualitySrc={getLowQualityPlaceholder(activeTransformation.afterImage)}
+                        lowQualitySrc={getTinyPlaceholder(activeTransformation.afterImage)}
                         alt={`Depois - ${activeTransformation.name}`}
                         className="w-full h-full" 
                         priority={activeIndex === 0}
+                        width={activeTransformation.width || 800}
+                        height={activeTransformation.height || 1000}
                         style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
                         onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
                       />

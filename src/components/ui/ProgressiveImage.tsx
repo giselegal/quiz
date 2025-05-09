@@ -36,7 +36,7 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     setHasError(false);
     
     // Check if image is already in browser cache
-    if (imageRef.current?.complete) {
+    if (imageRef.current?.complete && imageRef.current?.naturalWidth > 0) {
       setIsLoaded(true);
       if (onLoad) onLoad();
     }
@@ -46,14 +46,20 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     setIsLoaded(true);
     if (onLoad) onLoad();
     
-    // Log performance metrics
+    // Log performance metrics for priority images only
     if (priority) {
-      console.log(`Priority image loaded: ${src}`);
+      console.log(`Priority image loaded: ${src.substring(0, 50)}...`);
       
       // Report to performance observer if available
       if ('performance' in window && 'mark' in performance) {
         try {
           performance.mark(`img-loaded-${src.substring(0, 20)}`);
+          
+          // If we have the PerformanceObserver API available, use it to track LCP
+          if ('PerformanceObserver' in window) {
+            // This is just for monitoring, no actual dependency
+            console.log('Image loaded that might affect LCP');
+          }
         } catch (e) {
           // Ignore errors with performance marking
         }
@@ -67,12 +73,12 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
 
   const handleError = () => {
     setHasError(true);
-    console.error(`Failed to load image: ${src}`);
+    console.error(`Failed to load image: ${src.substring(0, 50)}...`);
   };
 
   return (
     <div className={cn("relative overflow-hidden", className)} style={style}>
-      {/* Low quality placeholder - improved transition */}
+      {/* Low quality placeholder - improved for faster loading */}
       {lowQualitySrc && !isLoaded && (
         <img
           src={lowQualitySrc}
@@ -81,13 +87,15 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
             "w-full h-full object-cover absolute inset-0 blur-sm transition-opacity duration-300",
             isLowQualityLoaded ? "opacity-100" : "opacity-0"
           )}
-          width={width}
-          height={height}
+          width={width || "100%"}
+          height={height || "auto"}
           onLoad={handleLowQualityLoad}
+          loading="eager"
+          decoding="sync"
         />
       )}
       
-      {/* Actual image with improved loading state */}
+      {/* Actual image with improved loading attributes */}
       <img
         ref={imageRef}
         src={src}
@@ -96,8 +104,8 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
           "w-full h-full object-cover transition-all duration-500",
           isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-[1.02]"
         )}
-        width={width}
-        height={height}
+        width={width || "100%"}
+        height={height || "auto"}
         loading={priority ? "eager" : "lazy"}
         decoding={priority ? "sync" : "async"}
         fetchPriority={priority ? "high" : "auto"}

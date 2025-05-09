@@ -1,4 +1,3 @@
-
 /**
  * Helper function to generate Cloudinary optimization parameters
  * @param url Original Cloudinary URL
@@ -19,32 +18,33 @@ export const optimizeCloudinaryUrl = (
     return url;
   }
 
-  // Default optimization options with higher quality
+  // Default optimization options with better quality/size tradeoff
   const defaults = {
     width: 0,
     height: 0,
-    quality: 95, // Increased from 90 to 95 for better image quality
+    quality: 80, // Reduced from 95 to 80 for better performance
     format: 'auto',
     crop: 'fill'
   };
 
   const settings = { ...defaults, ...options };
   
-  // Check if URL already has transformation parameters
-  if (
-    url.includes('/upload/q_') || 
-    url.includes('/upload/f_') ||
-    url.includes('?q=')
-  ) {
-    // If URL already has quality and format parameters, don't modify it
-    return url;
-  }
+  // Extract base URL parts to handle URLs with existing transformations
+  const baseUrlParts = url.split('/upload/');
+  if (baseUrlParts.length !== 2) return url;
+  
+  // Extract any path after the version ID (vXXXXXX)
+  const secondPart = baseUrlParts[1];
+  const parts = secondPart.split('/');
+  
+  // Check if there are existing transformations
+  const hasTransformations = parts[0].includes('_') || parts[0].includes(',') || parts[0].startsWith('f_');
   
   // Build transformation string
-  let transformations = 'f_' + settings.format;
+  let transformations = `f_${settings.format}`;
   
   if (settings.quality) {
-    transformations += ',q_' + settings.quality;
+    transformations += `,q_${settings.quality}`;
   }
   
   if (settings.width && settings.height) {
@@ -55,8 +55,14 @@ export const optimizeCloudinaryUrl = (
     transformations += `,h_${settings.height}`;
   }
   
-  // Apply transformations to URL, ensuring we're not duplicating parameters
-  return url.replace(/\/upload\//, `/upload/${transformations}/`);
+  // Apply transformations to URL with proper handling of existing transformations
+  if (hasTransformations) {
+    // URL already has transformations, replace them
+    return `${baseUrlParts[0]}/upload/${transformations}/${parts.slice(1).join('/')}`;
+  } else {
+    // URL has no transformations, add them
+    return `${baseUrlParts[0]}/upload/${transformations}/${secondPart}`;
+  }
 };
 
 /**
@@ -245,3 +251,87 @@ export const preloadNextQuestionImages = (nextQuestionImages: string[]): void =>
     { quality: 95, batchSize: 4 }
   );
 };
+
+/**
+ * Intelligently extract dimensions from Cloudinary URLs
+ * @param url Cloudinary image URL
+ * @returns Object with width and height if found
+ */
+export const extractDimensionsFromUrl = (url: string): { width?: number, height?: number } => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return {};
+  }
+  
+  const dimensions: { width?: number, height?: number } = {};
+  
+  // Look for width parameter
+  const widthMatch = url.match(/[,/]w_(\d+)/);
+  if (widthMatch && widthMatch[1]) {
+    dimensions.width = parseInt(widthMatch[1], 10);
+  }
+  
+  // Look for height parameter
+  const heightMatch = url.match(/[,/]h_(\d+)/);
+  if (heightMatch && heightMatch[1]) {
+    dimensions.height = parseInt(heightMatch[1], 10);
+  }
+  
+  return dimensions;
+};
+
+/**
+ * Improved low quality placeholder generator with explicit dimensions
+ * @param url Original URL of the image
+ * @param options Width and quality options
+ * @returns Low quality placeholder image URL
+ */
+export const getLowQualityPlaceholder = (url: string, options: { width?: number, quality?: number } = {}): string => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url;
+  }
+  
+  const { width = 20, quality = 10 } = options;
+  
+  // Extract base URL parts
+  const baseUrlParts = url.split('/upload/');
+  if (baseUrlParts.length !== 2) return url;
+  
+  // Create an optimized tiny placeholder
+  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
+};
+
+/**
+ * Check if a browser supports modern image formats
+ * @returns Object with support flags
+ */
+export const checkImageFormatSupport = (): { webp: boolean, avif: boolean } => {
+  const result = { webp: false, avif: false };
+  
+  // Check for WebP support (simplified version)
+  if (typeof document !== 'undefined') {
+    const canvas = document.createElement('canvas');
+    if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
+      result.webp = true;
+    }
+  }
+  
+  // AVIF detection would require more complex logic
+  // For now, we assume no AVIF support
+  
+  return result;
+};
+
+/**
+ * Get optimal format based on browser support
+ * @returns Best available format
+ */
+export const getOptimalImageFormat = (): 'auto' | 'webp' | 'jpg' => {
+  const support = checkImageFormatSupport();
+  
+  if (support.avif) return 'auto'; // Cloudinary will serve AVIF if available
+  if (support.webp) return 'webp';
+  return 'auto'; // Default to auto which will typically serve JPEG
+};
+
+// Export new utility functions
+export { extractDimensionsFromUrl, checkImageFormatSupport, getOptimalImageFormat };
