@@ -115,7 +115,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
                   : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
                 } 
                 ${showActivationEffect 
-                  ? 'animate-enhanced-pulse ring-4 ring-brand-primary/70 scale-105 shadow-lg relative before:absolute before:inset-0 before:rounded-lg before:bg-white/30 before:animate-pulse' 
+                  ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação atualizado
                   : ''
                 }
               `}
