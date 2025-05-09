@@ -19,6 +19,7 @@ export interface PreloadOptions {
   quality?: number;
   width?: number;
   height?: number;
+  format?: 'auto' | 'webp' | 'avif';
   onProgress?: (loaded: number, total: number) => void;
   onComplete?: () => void;
   batchSize?: number;

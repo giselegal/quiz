@@ -85,9 +85,12 @@ const PricingSection: React.FC<PricingSectionProps> = ({
         {/* Payment method images */}
         <div className="mt-3 mb-4 text-center">
           <img
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744920983/Espanhol_Portugu%C3%AAs_8_cgrhuw.webp"
+            src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto:good,w_320/v1744920983/Espanhol_Portugu%C3%AAs_8_cgrhuw.webp"
             alt="Métodos de pagamento"
             className="w-full max-w-xs mx-auto"
+            width={320}
+            height={48}
+            loading="lazy"
           />
         </div>
 

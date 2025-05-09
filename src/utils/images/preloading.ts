@@ -98,6 +98,7 @@ export const preloadImages = (
     quality = 95,
     width,
     height,
+    format = 'auto',
     onProgress,
     onComplete,
     batchSize = 3,
@@ -108,7 +109,7 @@ export const preloadImages = (
   const imagesToLoad = images.filter(img => {
     const optimizedUrl = optimizeCloudinaryUrl(img.src, { 
       quality, 
-      format: 'auto',
+      format,
       width,
       height
     });
@@ -137,7 +138,7 @@ export const preloadImages = (
     batch.forEach(img => {
       const optimizedUrl = optimizeCloudinaryUrl(img.src, { 
         quality, 
-        format: 'auto',
+        format,
         width: width || img.width,
         height: height || img.height
       });
@@ -253,8 +254,13 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
       break;
     case 'results':
       minPriority = 3;
-      // Also preload transformation images
-      preloadImagesByCategory('transformation', { quality: 95, batchSize: 2 });
+      // Also preload transformation images with optimized settings
+      preloadImagesByCategory('transformation', { 
+        quality: 75, 
+        batchSize: 2,
+        width: 800, // Limit width to improve loading
+        format: 'webp' // Use modern format
+      });
       categoryFilter = undefined;
       break;
     case 'strategic':
@@ -271,10 +277,12 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
       : meetsMinPriority;
   });
   
-  // Preload these images
+  // Preload these images with optimized settings
   preloadImages(highPriorityImages, {
-    quality: 95,
+    quality: 80, // Lower quality is usually sufficient for preloading
     batchSize: 3,
+    width: page === 'intro' ? 800 : 600, // Limit width based on context
+    format: 'webp', // Use modern format
     onComplete: () => {
       console.log(`Preloaded ${highPriorityImages.length} critical images for ${page}`);
     }

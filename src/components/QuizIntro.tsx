@@ -175,11 +175,12 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         <div className="w-full flex justify-center">
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md relative bg-white shadow-sm rounded-lg overflow-hidden" style={{aspectRatio: "1/1"}}>
             <img 
-              src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
+              src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto:good,w_800/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.webp'} 
               alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
               className="w-full h-full object-cover"
-              width={896}
-              height={896}
+              width={800}
+              height={800}
+              fetchPriority="high"
               style={{
                 display: 'block',
                 maxWidth: '100%'
