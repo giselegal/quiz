@@ -3,8 +3,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
 import { ShoppingCart, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
-import ProgressiveImage from '../ui/ProgressiveImage';
-import { preloadImagesByUrls, getLowQualityPlaceholder } from '@/utils/imageManager';
+import OptimizedImage from '../ui/OptimizedImage';
+import { preloadImagesByUrls, getLowQualityPlaceholder, getTinyPlaceholder } from '@/utils/imageManager';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -221,20 +221,18 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
             ) : (
               <Card className="overflow-hidden shadow-2xl rounded-xl border border-[#B89B7A]/20 dark:border-[#E0C9B1]/20 bg-white dark:bg-[#332820]">
                 <div className="relative w-full aspect-[4/5] mx-auto">
-                  <ProgressiveImage
+                  <OptimizedImage
                     src={activeTransformation.image}
-                    lowQualitySrc={getTinyPlaceholder(activeTransformation.image)}
                     alt={`${activeTransformation.name} - Transformação`}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-500"
-                    style={{ opacity: imageLoaded ? 1 : 0 }}
+                    width={activeTransformation.width || 800}
+                    height={activeTransformation.height || 1000}
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl"
                     onLoad={() => {
-                      console.log('ProgressiveImage onLoad triggered for:', activeTransformation.image); // Log para depuração
+                      console.log('OptimizedImage onLoad triggered for:', activeTransformation.image);
                       setImageLoaded(true);
-                      setIsLoading(false); // Garante que o loader seja removido quando a imagem carregar
+                      setIsLoading(false);
                     }}
-                    // onError prop removida pois não existe em ProgressiveImageProps
-                    // O ProgressiveImage já tem um console.error interno em seu handleError
-                    priority 
+                    priority={true}
                   />
                 </div>
                 <div className="p-4 bg-white dark:bg-[#332820] rounded-b-xl">

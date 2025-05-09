@@ -26,7 +26,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useABTest } from '@/hooks/useABTest';
 import { Link } from 'react-router-dom';
 import { preloadCriticalImages, getLowQualityPlaceholder } from '@/utils/imageManager';
-import ProgressiveImage from '@/components/ui/ProgressiveImage';
+import { resultPageCriticalCSS } from '@/utils/critical-css';
+import CriticalCSSLoader from '@/components/CriticalCSSLoader';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 const ResultPage: React.FC = () => {
   const {
@@ -247,14 +249,13 @@ const ResultPage: React.FC = () => {
               </div>
               <AnimatedWrapper animation={isLowPerformance ? 'none' : 'scale'} show={true} duration={500} delay={100}>
                 <div className="max-w-[180px] md:max-w-[238px] mx-auto relative"> {/* Diminuído para mobile */}
-                  <ProgressiveImage
-                    src={`${image}?q=80&f=auto&w=238`} 
-                    lowQualitySrc={getLowQualityPlaceholder(image)}
+                  <OptimizedImage 
+                    src={image}
                     alt={`Estilo ${category}`}
+                    width={238}
+                    height={238 * 1.3}
                     className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
                     priority={true}
-                    width="238" // Manter a largura base para otimização da imagem
-                    height="auto"
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, style: true }))}
                   />
                   {/* Elegant decorative corners */}
@@ -266,14 +267,13 @@ const ResultPage: React.FC = () => {
             <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={50}>
               {/* Aumentar o destaque do Guia */}
               <div className="mt-10 md:mt-12 max-w-[600px] mx-auto relative p-4 bg-gradient-to-br from-[#fdfaf8] to-[#fbf5ef] dark:from-[#3a2e26] dark:to-[#332820] rounded-xl shadow-xl border border-[#B89B7A]/30 dark:border-[#E0C9B1]/30">
-                <ProgressiveImage
-                  src={`${guideImage}?q=85&f=auto&w=600`} // Aumentar um pouco a qualidade e tamanho base
-                  lowQualitySrc={getLowQualityPlaceholder(guideImage)}
+                <OptimizedImage
+                  src={guideImage}
                   alt={`Guia de Estilo ${category}`}
+                  width={600}
+                  height={400}
                   className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
                   priority={true}
-                  width="600" 
-                  height="auto"
                   onLoad={() => setImagesLoaded(prev => ({ ...prev, guide: true }))}
                 />
                 {/* Elegant badge */}

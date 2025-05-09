@@ -6,6 +6,8 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import { initFacebookPixel, captureUTMParameters } from './utils/analytics';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import CriticalCSSLoader from './components/CriticalCSSLoader';
+import { initialCriticalCSS, heroCriticalCSS } from './utils/critical-css';
 
 // Componente de loading para Suspense
 const LoadingFallback = () => (
@@ -83,6 +85,10 @@ const App = () => {
       <QuizProvider>
         <TooltipProvider>
           <Router>
+            {/* Injetar CSS crítico para melhorar o First Contentful Paint */}
+            <CriticalCSSLoader cssContent={initialCriticalCSS} id="initial-critical" removeOnLoad={true} />
+            <CriticalCSSLoader cssContent={heroCriticalCSS} id="hero-critical" removeOnLoad={true} />
+            
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<HomePage />} />

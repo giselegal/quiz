@@ -51,8 +51,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     
     const [, baseUrl, pathAndOptions] = match;
     
+    // Transformações avançadas para melhorar a performance
+    const transforms = [
+      'f_auto',              // formato automático (webp/avif para navegadores compatíveis)
+      `q_auto:${quality}`,   // qualidade adaptativa
+      `w_${width}`,          // largura exata
+      'dpr_auto',            // densidade de pixel adaptativa
+      'c_limit',             // modo de corte limitado
+      'e_sharpen:60'         // leve nitidez para melhorar a qualidade percebida
+    ].join(',');
+    
     // Adicionar ou substituir parâmetros de otimização
-    return `${baseUrl}f_auto,q_auto:${quality},w_${width}/${pathAndOptions.replace(/\.[^.]+$/, '.webp')}`;
+    return `${baseUrl}${transforms}/${pathAndOptions.replace(/\.[^.]+$/, '.webp')}`;
   };
   
   const optimizedSrc = optimizeCloudinaryUrl(src);
