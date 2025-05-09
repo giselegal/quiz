@@ -70,22 +70,24 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       ) : (
         <div className="w-full max-w-md flex flex-col items-center px-4"> {/* Adicionado padding horizontal */}
           {/* Seção da Logo e Barra */}
-          <div className="w-full flex flex-col items-center mb-6 md:mb-8">
-            <div className="w-28 sm:w-32 md:w-36"> {/* Contêiner responsivo para a logo */}
+          <div className="w-full mb-6 md:mb-8"> {/* Container para Logo e Barra - w-full, centralização dos filhos via mx-auto */}
+            {/* Container da Logo: largura definida, centralizado com mx-auto */}
+            <div className="w-28 sm:w-32 md:w-36 mx-auto"> 
               <OptimizedImage 
                 src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
                 alt="Logo Gisele Galvão" 
-                className="h-auto w-full" // Imagem preenche o contêiner, altura automática
+                className="block h-auto w-full" // Imagem como block, preenche o contêiner
                 width={144} // Maior largura (w-36) para otimização da URL
                 height={72}  // Mantém aspect ratio 2:1
                 priority={true} 
                 objectFit="contain" // Garante que a logo não seja cortada
               />
             </div>
-            <div className="mt-3 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded"></div> {/* Barra dourada responsiva e estilizada */}
+            {/* Barra Dourada: largura definida, centralizada com mx-auto */}
+            <div className="mt-3 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded mx-auto"></div>
           </div>
 
-          <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818]"> {/* Removido px desnecessário */}
+          <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818]">
             Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
           </h1>
 
