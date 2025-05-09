@@ -59,57 +59,53 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const optimizeCloudinaryUrl = (url: string, currentQuality: number, currentWidth: number): string => {
     console.log('[OptimizedImage] optimizeCloudinaryUrl input:', url);
-    if (!url || !url.includes('cloudinary.com')) {
+    if (!url || (!url.includes('cloudinary.com') && !url.includes('res.cloudinary.com'))) {
       console.log('[OptimizedImage] URL is not Cloudinary or empty, returning as is:', url);
       return url;
     }
-
+  
     const uploadMarker = '/image/upload/';
     const parts = url.split(uploadMarker);
     if (parts.length !== 2) {
-      console.warn('[OptimizedImage] URL structure unexpected (no /image/upload/ marker):', url);
+      console.warn('[OptimizedImage] URL structure unexpected (no /upload/ marker):', url);
       return url;
     }
-
+  
     const baseUrl = parts[0] + uploadMarker;
-    const pathAfterUpload = parts[1];
-
-    let version = '';
-    let publicId = '';
-
-    // Regex para extrair a versão (opcional, ex: "v123/") e o public_id.
-    // Esta regex tenta ignorar as transformações existentes antes da versão ou do public_id.
-    const pathPattern = /^(?:[^/]+\/)*?(v\d+\/)?([^\/?]+)/;
-    const pathMatch = pathAfterUpload.match(pathPattern);
-
-    if (pathMatch) {
-      if (pathMatch[1]) {
-        version = pathMatch[1]; // Captura a versão com a barra: "v123/"
-      }
-      publicId = pathMatch[2]; // Captura o public_id: "image.jpg" ou "folder/image.jpg"
-    } else {
-      publicId = pathAfterUpload.split('?')[0]; // Fallback: Pega tudo até um possível query string
-      console.warn('[OptimizedImage] Regex did not fully match path, fallback publicId:', publicId, 'from path:', pathAfterUpload);
+    let pathAfterUpload = parts[1];
+  
+    // Regex melhorada para encontrar a versão e o public_id, ignorando TODAS as transformações
+    const versionAndPublicIdPattern = /^(?:.*?\/)*?(v\d+\/)?([^/]+(?:\/[^/]+)*)$/;
+    const match = pathAfterUpload.match(versionAndPublicIdPattern);
+  
+    if (!match) {
+      console.warn('[OptimizedImage] Could not parse version and public_id:', pathAfterUpload);
+      return url;
     }
-    
-    // console.log('[OptimizedImage] Parsed URL parts - Base:', baseUrl, 'Version:', version, 'PublicID:', publicId);
-
-    const newTransforms = [
-      'f_auto',
-      `q_auto:${currentQuality}`, // Usa a qualidade passada para a função
-      `w_${currentWidth}`,       // Usa a largura passada para a função
-      'dpr_auto',
-      'c_limit',
-      'e_sharpen:60'
+  
+    const version = match[1] || ''; // Inclui o 'v' e a barra se existir
+    const publicId = match[2];
+  
+    console.log('[OptimizedImage] Parsed parts:', {
+      baseUrl,
+      version,
+      publicId,
+      originalPath: pathAfterUpload
+    });
+  
+    // Aplicar transformações otimizadas
+    const transforms = [
+      'f_auto',                    // Formato automático (webp/avif)
+      `q_${currentQuality}`,       // Qualidade conforme parâmetro
+      `w_${currentWidth}`,         // Largura conforme parâmetro
+      'dpr_auto',                  // Densidade de pixel automática
+      'c_limit',                   // Limitar redimensionamento
+      'e_sharpen:60'               // Nitidez moderada
     ].join(',');
-
-    let finalUrl = `${baseUrl}${newTransforms}/`;
-    if (version) {
-      finalUrl += version; // version já tem a barra
-    }
-    finalUrl += publicId;
-
-    console.log('[OptimizedImage] optimizeCloudinaryUrl output:', finalUrl);
+  
+    // Construir URL final: baseUrl + transformações + versão (se existir) + publicId
+    const finalUrl = `${baseUrl}${transforms}/${version}${publicId}`;
+    console.log('[OptimizedImage] Final URL:', finalUrl);
     return finalUrl;
   };
 
