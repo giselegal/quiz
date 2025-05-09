@@ -24,7 +24,9 @@
           fetchpriority="high"
           type="image/webp" />
     
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" as="style" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'" />
     <meta name="description" content="Descubra seu estilo pessoal com nosso quiz interativo" />
     
     <!-- Critical CSS for faster initial rendering -->
@@ -67,6 +69,8 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script async defer src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script async defer src="https://connect.facebook.net/en_US/fbevents.js"></script>
+    <script async defer src="https://static.cloudflareinsights.com/beacon.min.js"></script>
   </body>
 </html>

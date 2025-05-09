@@ -4,7 +4,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import OptimizedImage from './ui/OptimizedImage';
+import { OptimizedImage } from './ui/optimized-image';
 import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
 import { getImageById } from '@/data/imageBank';
 import { LoadingSpinner } from './ui/loading-spinner';
@@ -173,18 +173,15 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
         {/* Imagem Principal */}
         <div className="w-full flex justify-center">
-          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md relative bg-white shadow-sm rounded-lg overflow-hidden" style={{aspectRatio: "1/1"}}>
-            <img 
-              src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto:good,w_800/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.webp'} 
+          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+            <OptimizedImage 
+              src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.webp'} 
               alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-              className="w-full h-full object-cover"
               width={800}
               height={800}
-              fetchPriority="high"
-              style={{
-                display: 'block',
-                maxWidth: '100%'
-              }}
+              priority={true}
+              quality={75}
+              containerClassName="rounded-lg overflow-hidden shadow-sm"
             />
           </div>
         </div>
