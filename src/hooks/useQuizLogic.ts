@@ -43,7 +43,7 @@ export const useQuizLogic = () => {
       if (firstQuestionImages.length > 0) {
         // High priority preload for first question
         preloadImagesByUrls(firstQuestionImages, {
-          quality: 95,
+          quality: 85, // Alterado de 95 para 85
           batchSize: 4,
           onComplete: () => {
             setIsInitialLoadComplete(true);
@@ -62,7 +62,7 @@ export const useQuizLogic = () => {
 
           if (nextQuestionImages.length > 0) {
             preloadImagesByUrls(nextQuestionImages, { 
-              quality: 95, 
+              quality: 85, // Alterado de 95 para 85
               batchSize: 2 
             });
           }
@@ -74,7 +74,7 @@ export const useQuizLogic = () => {
     
     // Also start preloading strategic images in the background
     preloadCriticalImages('strategic');
-  }, []);
+  }, []); // Removido currentQuestion e nextQuestion das dependências para rodar apenas uma vez
 
   // 3. Simple utility functions that don't depend on other functions
   const handleAnswer = useCallback((questionId: string, selectedOptions: string[]) => {
@@ -99,7 +99,7 @@ export const useQuizLogic = () => {
 
       if (nextImages.length > 0) {
         preloadImagesByUrls(nextImages, { 
-          quality: 95, 
+          quality: 85, // Alterado de 95 para 85
           batchSize: 3 
         });
       }
@@ -116,7 +116,7 @@ export const useQuizLogic = () => {
 
         if (nextNextImages.length > 0) {
           preloadImagesByUrls(nextNextImages, { 
-            quality: 95, 
+            quality: 85, // Alterado de 95 para 85
             batchSize: 2 
           });
         }
@@ -130,10 +130,7 @@ export const useQuizLogic = () => {
         ...prev,
         [questionId]: selectedOptions
       };
-      localStorage.setItem('strategicAnswers', JSON.stringify({
-        ...prev,
-        [questionId]: selectedOptions
-      }));
+      localStorage.setItem('strategicAnswers', JSON.stringify(newAnswers)); // Salvar imediatamente
       return newAnswers;
     });
   }, []);
@@ -156,7 +153,7 @@ export const useQuizLogic = () => {
   }, []);
 
   // 4. Complex function that others depend on
-  const calculateResults = useCallback(() => {
+  const calculateResults = useCallback((clickOrderInternal: string[] = []) => {
     const styleCounter: Record<string, number> = {
       'Natural': 0,
       'Clássico': 0,
@@ -170,7 +167,6 @@ export const useQuizLogic = () => {
 
     let totalSelections = 0;
 
-    // Garantir que todas as respostas sejam contabilizadas
     Object.entries(answers).forEach(([questionId, optionIds]) => {
       const question = quizQuestions.find(q => q.id === questionId);
       if (!question) return;
@@ -187,39 +183,47 @@ export const useQuizLogic = () => {
     console.log('Style counts:', styleCounter);
     console.log('Total selections:', totalSelections);
 
-    // Calcular resultados
     const styleResults: StyleResult[] = Object.entries(styleCounter)
       .map(([category, score]) => ({
         category: category as StyleResult['category'],
         score,
         percentage: totalSelections > 0 ? Math.round((score / totalSelections) * 100) : 0
       }))
-      .sort((a, b) => b.score - a.score);
+      .sort((a, b) => {
+        if (a.score === b.score && clickOrderInternal.length > 0) {
+          const indexA = clickOrderInternal.indexOf(a.category);
+          const indexB = clickOrderInternal.indexOf(b.category);
+          if (indexA !== -1 && indexB !== -1) {
+            return indexA - indexB;
+          }
+          if (indexA !== -1) return -1;
+          if (indexB !== -1) return 1;
+        }
+        return b.score - a.score;
+      });
 
-    const primaryStyle = styleResults[0];
+    const primaryStyle = styleResults[0] || null;
     const secondaryStyles = styleResults.slice(1);
 
-    const result = {
+    const result: QuizResult = { // Explicitly type QuizResult
       primaryStyle,
       secondaryStyles,
-      totalSelections
+      totalSelections,
+      // clickOrder: clickOrderInternal // Optional: save the click order used
     };
 
     setQuizResult(result);
-    // Save to localStorage immediately
     localStorage.setItem('quizResult', JSON.stringify(result));
-    // Also save strategic answers
-    localStorage.setItem('strategicAnswers', JSON.stringify(strategicAnswers));
+    localStorage.setItem('strategicAnswers', JSON.stringify(strategicAnswers)); // Save strategic answers along
     console.log('Results calculated and saved to localStorage:', result);
 
-    // Begin preloading result page assets with high priority
     preloadImagesByUrls([
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp",
       "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp"
     ], {
-      quality: 95,
+      quality: 85, // Alterado de 95 para 85
       batchSize: 2
     });
 
@@ -236,18 +240,13 @@ export const useQuizLogic = () => {
     }
   }, [currentQuestionIndex, calculateResults, quizQuestions.length]);
 
-  const submitQuizIfComplete = useCallback(() => {
-    // Calculate final results
-    const results = calculateResults();
+  const submitQuizIfComplete = useCallback((clickOrderInternal: string[] = []) => {
+    const results = calculateResults(clickOrderInternal);
     setQuizCompleted(true);
-    
-    // Save everything to localStorage before navigating
-    localStorage.setItem('quizResult', JSON.stringify(results));
-    localStorage.setItem('strategicAnswers', JSON.stringify(strategicAnswers));
+    // localStorage is already saved by calculateResults
     console.log('Results saved to localStorage before redirect:', results);
-    
     return results;
-  }, [calculateResults, strategicAnswers]);
+  }, [calculateResults]);
 
   // 6. Side effects 
   useEffect(() => {

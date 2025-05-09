@@ -1,54 +1,31 @@
-
 import { StyleResult, QuizResult } from '@/types/quiz';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // Adicionado useCallback
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useQuizLogic } from './useQuizLogic'; // Importar o hook de lógica principal
 
 export const useQuiz = () => {
-  const [primaryStyle, setPrimaryStyle] = useState<StyleResult | null>(null);
-  const [secondaryStyles, setSecondaryStyles] = useState<StyleResult[]>([]);
+  const {
+    quizResult, 
+    calculateResults, 
+    resetQuiz: resetLogicQuiz, // Renomear para evitar conflito
+    // Outros estados e funções de useQuizLogic podem ser importados se necessário
+  } = useQuizLogic();
+
   const [isSubmittingResults, setIsSubmittingResults] = useState(false);
   const navigate = useNavigate();
   
-  useEffect(() => {
-    try {
-      const savedResult = localStorage.getItem('quizResult');
-      if (savedResult) {
-        const parsedResult = JSON.parse(savedResult) as QuizResult;
-        setPrimaryStyle(parsedResult.primaryStyle);
-        setSecondaryStyles(parsedResult.secondaryStyles || []);
-      } else {
-        console.log('No quiz result found in localStorage');
-        // If we're in development or on the editor page, use mock data
-        if (window.location.href.includes('/admin/editor') || process.env.NODE_ENV === 'development') {
-          console.log('Using mock data for editor');
-          setPrimaryStyle({
-            category: 'Romântico',
-            score: 8,
-            percentage: 30
-          });
-          setSecondaryStyles([
-            {
-              category: 'Sexy',
-              score: 7,
-              percentage: 26
-            },
-            {
-              category: 'Dramático',
-              score: 4,
-              percentage: 15
-            }
-          ]);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading quiz result:', error);
-    }
-  }, []);
+  // Os estados primaryStyle e secondaryStyles agora são derivados de quizResult de useQuizLogic
+  const primaryStyle = quizResult?.primaryStyle || null;
+  const secondaryStyles = quizResult?.secondaryStyles || [];
 
+  // Funções como startQuiz e submitAnswers podem permanecer aqui se envolverem chamadas de API específicas
+  // ou lógica de UI que não pertence ao core do quiz.
   const startQuiz = async (name: string, email: string, quizId: string) => {
     try {
       console.log(`Starting quiz for ${name} (${email}) with quiz ID ${quizId}`);
+      // Aqui poderia haver uma chamada de API para registrar o início do quiz
+      // Por enquanto, retorna um mock
       return { id: '1', name, email };
     } catch (error) {
       toast({
@@ -65,6 +42,7 @@ export const useQuiz = () => {
   ) => {
     try {
       console.log('Submitting answers:', answers);
+      // Aqui poderia haver uma chamada de API para salvar respostas parciais
     } catch (error) {
       toast({
         title: "Erro ao salvar respostas",
@@ -75,47 +53,57 @@ export const useQuiz = () => {
     }
   };
   
-  const submitResults = async (results: QuizResult, clickOrder: string[]) => {
+  // submitResults agora usa calculateResults de useQuizLogic
+  const submitResults = useCallback(async (clickOrder: string[]) => {
     try {
       setIsSubmittingResults(true);
-      console.log("Results submitted:", results);
+      console.log("Submitting results with click order:", clickOrder);
       
-      // Save results to localStorage
-      localStorage.setItem('quizResult', JSON.stringify(results));
+      // A lógica de cálculo e salvamento no localStorage já está em useQuizLogic
+      const finalResults = calculateResults(clickOrder); // Passa clickOrder para desempate
       
-      // Update state
-      setPrimaryStyle(results.primaryStyle);
-      setSecondaryStyles(results.secondaryStyles || []);
-      
-      // Implement tie-breaking logic based on click order
-      if (results.secondaryStyles.length > 1) {
-        results.secondaryStyles.sort((a, b) => {
-          if (a.score === b.score) {
-            return clickOrder.indexOf(a.category) - clickOrder.indexOf(b.category);
-          }
-          return b.score - a.score;
+      if (finalResults) {
+        console.log("Final results from useQuizLogic:", finalResults);
+        // A navegação pode ocorrer aqui ou ser gerenciada pelo componente que chama submitResults
+        // navigate('/resultado'); // Exemplo de navegação
+      } else {
+        // Tratar caso onde resultados não puderam ser calculados
+        toast({
+          title: "Erro ao calcular resultados",
+          description: "Não foi possível finalizar o quiz. Tente novamente.",
+          variant: "destructive",
         });
       }
-      
-      // Start preloading results page images
-      // (we'll handle this in the transition component)
-      
-      return true; // Return success flag instead of redirecting
     } catch (error) {
+      console.error("Error submitting results:", error);
       toast({
-        title: "Erro ao salvar resultados",
-        description: "Por favor, tente novamente.",
+        title: "Erro ao submeter resultados",
+        description: "Ocorreu um problema ao finalizar o quiz.",
         variant: "destructive",
       });
+    } finally {
       setIsSubmittingResults(false);
-      throw error;
     }
-  };
-  
-  const navigateToResults = () => {
-    navigate('/resultado');
-  };
-  
+  }, [calculateResults, navigate]); // Adicionado navigate às dependências
+
+  // A função de reset pode chamar a função de reset do useQuizLogic
+  const resetQuiz = useCallback(() => {
+    resetLogicQuiz();
+    // Qualquer lógica adicional de reset específica de useQuiz pode vir aqui
+    console.log('Quiz reset from useQuiz');
+  }, [resetLogicQuiz]);
+
+  // Efeito para carregar dados mock apenas se não houver resultado e estiver no editor/dev
+  // Esta lógica pode ser específica demais para useQuizLogic e pode permanecer aqui.
+  useEffect(() => {
+    if (!quizResult && (window.location.href.includes('/admin/editor') || process.env.NODE_ENV === 'development')) {
+      console.log('Using mock data for editor as quizResult is null in useQuiz');
+      // Se precisar setar mock data, idealmente useQuizLogic deveria ter uma função para isso,
+      // ou o componente que precisa do mock data o faria diretamente.
+      // Por ora, esta lógica de mock data está efetivamente desabilitada pois primaryStyle/secondaryStyles são derivados.
+    }
+  }, [quizResult]); // Depende de quizResult de useQuizLogic
+
   return {
     primaryStyle,
     secondaryStyles,
@@ -123,7 +111,9 @@ export const useQuiz = () => {
     startQuiz,
     submitAnswers,
     submitResults,
-    navigateToResults
+    resetQuiz,
+    // Expor quizResult diretamente se os componentes precisarem de mais dados
+    quizResult 
   };
 };
 
