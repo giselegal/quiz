@@ -177,14 +177,14 @@ const imageBank: ImageCategory[] = [
     images: [
       {
         id: 'main-logo',
-        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp', // URL Limpa
         alt: 'Logo Gisele Galvão',
         category: 'branding',
         preloadPriority: 5
       },
       {
         id: 'intro-image',
-        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto:good,w_800/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.webp',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.webp', // URL Limpa
         alt: 'Mulher elegante com roupas estilosas',
         category: 'branding',
         preloadPriority: 5,
