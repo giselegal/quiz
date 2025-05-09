@@ -64,6 +64,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   });
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAfterImage, setShowAfterImage] = useState(false); // Novo estado para controlar a transição automática
   
   const activeTransformation = transformations[activeIndex];
   
@@ -77,10 +78,11 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   
   useEffect(() => {
     setImagesLoaded({ before: false, after: false });
-    setSliderPosition(50);
+    setSliderPosition(50); // Reset slider position
+    setShowAfterImage(false); // Começa mostrando a imagem "antes"
     
     const nextIndex = (activeIndex + 1) % transformations.length;
-    if (nextIndex !== activeIndex && transformations[nextIndex]) { // Adicionada verificação se transformations[nextIndex] existe
+    if (nextIndex !== activeIndex && transformations[nextIndex]) {
       const nextTransformation = transformations[nextIndex];
       preloadImagesByUrls([
         nextTransformation.beforeImage,
@@ -90,6 +92,15 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
         batchSize: 2
       });
     }
+
+    // Lógica para transição automática de imagem
+    const imageTransitionInterval = setInterval(() => {
+      setShowAfterImage(prevShowAfter => !prevShowAfter);
+    }, 4000); // Alterna a cada 4 segundos
+
+    return () => {
+      clearInterval(imageTransitionInterval); // Limpa o intervalo ao mudar de slide ou desmontar
+    };
   }, [activeIndex]);
   
   useEffect(() => {
@@ -98,9 +109,10 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     }
   }, [imagesLoaded]);
   
-  const handleSliderChange = (value: number[]) => {
-    setSliderPosition(value[0]);
-  };
+  // Remover handleSliderChange ou comentar, pois o slider manual não será mais o principal
+  // const handleSliderChange = (value: number[]) => {
+  //   setSliderPosition(value[0]);
+  // };
 
   const handleDotClick = (index: number) => {
     setActiveIndex(index);
@@ -139,10 +151,10 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-3">
-            Descubra o Poder da Imagem Intencional
+            Descubra como o <strong className="font-semibold">estilo pessoal claro</strong> te ensina a <strong className="font-semibold">"vestir-se de você"</strong> com <strong className="font-semibold">confiança</strong> e <strong className="font-semibold">autenticidade</strong>, alinhando sua <strong className="font-semibold">verdadeira essência</strong> com seus <strong className="font-semibold">objetivos</strong>.
           </h2>
-          <p className="text-lg text-[#432818] dark:text-[#d1c7b8] max-w-3xl mx-auto">
-            Veja como a consultoria de imagem transformou a vida de mulheres reais, alinhando estilo pessoal com seus objetivos e revelando sua melhor versão.
+          <p className="text-lg text-[#432818] dark:text-[#d1c7b8] max-w-3xl mx-auto mt-4">
+            Veja o exemplo de mulheres reais.
           </p>
         </div>
 
@@ -194,6 +206,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
             ) : (
               <Card className="overflow-hidden shadow-2xl rounded-xl border border-[#B89B7A]/20 dark:border-[#E0C9B1]/20 bg-white dark:bg-[#332820]">
                 <div className="relative w-full aspect-[4/5] mx-auto">
+                  {/* Imagem "Antes" - sempre visível no fundo */}
                   <ProgressiveImage
                     src={activeTransformation.beforeImage}
                     lowQualitySrc={getTinyPlaceholder(activeTransformation.beforeImage)}
@@ -203,18 +216,20 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
                     priority
                   />
+                  {/* Imagem "Depois" - transição de opacidade */}
                   <ProgressiveImage
                     src={activeTransformation.afterImage}
                     lowQualitySrc={getTinyPlaceholder(activeTransformation.afterImage)}
                     alt={`${activeTransformation.name} - Depois`}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-500"
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-1000 ease-in-out" // Duração da transição
                     style={{ 
-                      clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
-                      opacity: imagesLoaded.after ? 1 : 0 
+                      opacity: showAfterImage && imagesLoaded.after ? 1 : 0 // Controla a visibilidade com base no estado
                     }}
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
                     priority
                   />
+                  {/* Remover o slider visual e o controle manual do slider, se desejado, ou apenas ocultá-lo */}
+                  {/* 
                   <div 
                     className="absolute top-0 bottom-0 bg-[#B89B7A] dark:bg-[#D4B79F] w-1.5 cursor-ew-resize"
                     style={{ left: `calc(${sliderPosition}% - 3px)` }}
@@ -226,12 +241,13 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                   </div>
                   <Slider
                     value={[sliderPosition]}
-                    onValueChange={handleSliderChange}
+                    onValueChange={handleSliderChange} // Comentado ou removido
                     min={0}
                     max={100}
                     step={0.1}
-                    className="absolute inset-0 opacity-0 cursor-ew-resize"
+                    className="absolute inset-0 opacity-0 cursor-ew-resize" // Pode manter invisível para navegação por teclado se necessário
                   />
+                  */}
                 </div>
                 <div className="p-4 bg-white dark:bg-[#332820] rounded-b-xl">
                   <p className="text-center text-xl font-medium text-[#432818] dark:text-[#E0C9B1] mb-2">{activeTransformation.name}</p>
