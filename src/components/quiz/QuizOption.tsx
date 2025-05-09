@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { QuizOption as QuizOptionType } from '@/types/quiz';
@@ -13,6 +12,7 @@ interface QuizOptionProps {
   type: 'text' | 'image' | 'both';
   questionId?: string;
   isDisabled?: boolean;
+  isStrategicOption?: boolean; // Nova prop
 }
 
 const QuizOption: React.FC<QuizOptionProps> = ({
@@ -21,7 +21,8 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   onSelect,
   type,
   questionId,
-  isDisabled = false
+  isDisabled = false,
+  isStrategicOption = false // Padrão para false
 }) => {
   const isMobile = useIsMobile();
   const is3DQuestion = option.imageUrl?.includes('sapatos') || option.imageUrl?.includes('calca');
@@ -35,12 +36,16 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         // Para opções de texto - manter borda amarela
         if (type === 'text') {
           optionRef.current.style.borderColor = '#b29670';
-          optionRef.current.style.boxShadow = '0 4px 8px rgba(178, 150, 112, 0.25)';
+          optionRef.current.style.boxShadow = isStrategicOption 
+            ? '0 6px 12px rgba(178, 150, 112, 0.35)' // Sombra mais pronunciada para estratégicas
+            : '0 4px 8px rgba(178, 150, 112, 0.25)';
         } 
         // Para opções de imagem - sem borda, apenas sombra
         else {
           optionRef.current.style.borderColor = 'transparent';
-          optionRef.current.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.2)';
+          optionRef.current.style.boxShadow = isStrategicOption 
+            ? '0 15px 30px rgba(0, 0, 0, 0.25)' // Sombra mais pronunciada para estratégicas
+            : '0 12px 24px rgba(0, 0, 0, 0.2)';
         }
       } else {
         if (type === 'text') {
@@ -52,7 +57,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         }
       }
     }
-  }, [isSelected, type]);
+  }, [isSelected, type, isStrategicOption]);
   
   // Manipulador de clique customizado com debounce
   const handleClick = () => {
@@ -65,7 +70,9 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         // Aplicar sombra correspondente ao estado
         optionRef.current.style.boxShadow = isSelected 
           ? '0 2px 4px rgba(0, 0, 0, 0.05)' 
-          : '0 12px 24px rgba(0, 0, 0, 0.2)';
+          : (isStrategicOption 
+              ? (type === 'text' ? '0 6px 12px rgba(178, 150, 112, 0.35)' : '0 15px 30px rgba(0, 0, 0, 0.25)') 
+              : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)'));
       }
       // Chamar onSelect com um pequeno atraso para evitar flash
       setTimeout(() => {

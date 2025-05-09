@@ -17,6 +17,7 @@ interface QuizQuestionProps {
   onNextClick?: () => void;
   onPreviousClick?: () => void;
   showQuestionImage?: boolean;
+  isStrategicQuestion?: boolean; // Nova prop
 }
 
 const QuizQuestion: React.FC<QuizQuestionProps> = ({
@@ -27,10 +28,11 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   hideTitle = false,
   onNextClick,
   onPreviousClick,
-  showQuestionImage = false
+  showQuestionImage = false,
+  isStrategicQuestion = false // Padrão para false
 }) => {
   const isMobile = useIsMobile();
-  const isStrategicQuestion = question.id.startsWith('strategic');
+  // const isStrategicQuestion = question.id.startsWith('strategic'); // Removido para usar a prop
   const hasImageOptions = question.type !== 'text';
   const [imageError, setImageError] = useState(false);
   const { scrollToQuestion } = useQuestionScroll();
@@ -60,15 +62,13 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     });
 
     // Auto advance if:
-    // 1. It's a strategic question and we have a selection
-    // 2. Auto advance is enabled and we've reached the required number of selections
-    // 3. onNextClick function is provided
+    // 1. Auto advance is enabled (and not strategic) and we've reached the required number of selections
     const shouldAutoAdvance = 
-      (isStrategicQuestion && newSelectedOptions.length > 0) || 
-      (autoAdvance && newSelectedOptions.length === question.multiSelect);
+      !isStrategicQuestion && // Não avançar automaticamente para questões estratégicas
+      autoAdvance && 
+      newSelectedOptions.length === question.multiSelect;
     
     if (shouldAutoAdvance && onNextClick) {
-      // Remover o atraso para evitar efeitos de flash
       onNextClick();
     }
   };
@@ -138,12 +138,26 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
             isDisabled={!currentAnswers.includes(option.id) && 
               !isStrategicQuestion && 
               currentAnswers.length >= question.multiSelect}
+            isStrategicOption={isStrategicQuestion} // Passar para QuizOption
           />
         ))}
       </div>
       
+      {/* Botão Continuar para Questões Estratégicas */}
+      {isStrategicQuestion && onNextClick && (
+        <div className="mt-8 text-center">
+          <Button 
+            onClick={onNextClick}
+            disabled={currentAnswers.length === 0}
+            className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+          >
+            Continuar <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
+      )}
+
       <div className="flex justify-between items-center gap-3 mt-6">
-        {!autoAdvance && (
+        {!autoAdvance && !isStrategicQuestion && ( // Não mostrar para estratégicas
           <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 text-center font-medium">
             Selecione {question.multiSelect} {question.multiSelect === 1 ? 'Opção' : 'Opções'} para avançar
           </p>

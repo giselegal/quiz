@@ -46,9 +46,10 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
         question={strategicQuestions[currentQuestionIndex]}
         onAnswer={onAnswer}
         currentAnswers={answers[strategicQuestions[currentQuestionIndex].id] || []}
-        autoAdvance={false} // Alterado para false
-        onNextClick={onNextClick} // Manter para o botão Continuar
+        autoAdvance={false}
+        onNextClick={onNextClick} 
         showQuestionImage={true}
+        isStrategicQuestion={true}
       />
     </AnimatedWrapper>
   );
