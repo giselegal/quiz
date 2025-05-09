@@ -22,10 +22,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   // Preload critical assets on component mount
   useEffect(() => {
-    // Use our new image manager to preload critical intro images
     preloadCriticalImages('intro');
-    
-    // Preload specific images by their IDs from the image bank
     preloadImagesByIds(['main-logo', 'intro-image'], {
       batchSize: 2,
       quality: 95,
@@ -36,17 +33,17 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       }
     });
 
-    // Fallback for maximum loading time
     const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+      if (isLoading) {
+        setIsLoading(false);
+      }
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
   // Preload first quiz question images after critical assets are loaded
   useEffect(() => {
     if (criticalAssetsLoaded) {
-      // Start preloading the first question images
       preloadCriticalImages('quiz');
     }
   }, [criticalAssetsLoaded]);
@@ -61,45 +58,42 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const introImageDetails = getImageById('intro-image');
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] py-[31px] mx-0 px-[5px]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] py-8 px-4 md:px-6">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center h-screen">
-          {/* Você pode adicionar um spinner ou loader simples aqui se desejar um fallback geral */}
-          <p className="text-[#432818]">Carregando...</p> 
+          <svg className="animate-spin h-10 w-10 text-[#B89B7A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="text-[#432818] mt-4">Carregando...</p> 
         </div>
       ) : (
-        <div className="w-full max-w-md">
-          {/* Logotipo - menor e com mais espaço embaixo */}
-          <div className="flex justify-center mb-12">
+        <div className="w-full max-w-md flex flex-col items-center">
+          <div className="w-full flex justify-center mb-8">
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
-              className="w-14 md:w-16 h-auto" // Alterado de md:w-18 para md:w-16
-              width={72} 
-              height={36} 
+              className="w-20 md:w-24 h-auto"
+              width={96} 
+              height={48} 
               priority={true} 
             />
           </div>
 
-          {/* Título */}
           <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818] px-[12px]">
             Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
           </h1>
 
-          {/* Imagem - ajustada para melhor responsividade e centralização */}
-          <div className="flex justify-center mb-6 w-full px-4">
+          <div className="flex justify-center mb-6 w-full px-0">
             <OptimizedImage 
               src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
               alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-              width={360} // Mantido para otimização, mas o CSS controlará o tamanho visual final
-              // Classes ajustadas para melhor responsividade mobile:
-              // w-full para ocupar a largura disponível, max-w-xs para mobile, aumentando para telas maiores.
-              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto rounded-lg shadow-sm object-cover mx-auto"
+              width={360}
+              className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto rounded-lg shadow-sm object-contain mx-auto"
               priority={true} 
             />
           </div>
 
-          {/* Subtítulo */}
           <p className="text-sm text-[#433830] text-center mb-7 max-w-md mx-auto px-[18px]">
             Em poucos minutos, descubra seu{' '}
             <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
@@ -107,7 +101,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             praticidade e <span className="font-semibold text-[#aa6b5d]">confiança</span>.
           </p>
 
-          {/* Formulário - ajustado para melhor responsividade */}
           <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto flex flex-col gap-3" aria-live="polite">
             <label htmlFor="name" className="text-xs font-semibold text-[#432818]">
               NOME
