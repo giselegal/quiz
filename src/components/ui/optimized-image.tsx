@@ -62,53 +62,71 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
    * Detecta se a URL já tem transformações para não aplicar duplicadamente.
    */
   const optimizeCloudinaryUrl = (url: string): string => {
+    console.log('[OptimizedImage] Original src for optimization:', url);
     if (!url.includes('cloudinary.com')) {
-        // Adicionado log para URLs não Cloudinary
         console.log('[OptimizedImage] URL is not Cloudinary, returning as is:', url);
         return url;
     }
 
-    // Regex para capturar a base da URL, transformações existentes (opcional e não capturado para uso),
-    // versão (opcional) e o public_id (caminho do arquivo)
-    const cloudinaryPattern = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(?:[^/]+?\/)?(?:(v\d+)\/)?(.+)$/;
-    const match = url.match(cloudinaryPattern);
-
-    if (!match) {
-        console.warn('[OptimizedImage] URL looks like Cloudinary but does not match expected pattern:', url);
-        return url; // Retorna a URL original se não corresponder ao padrão
+    const uploadMarker = '/image/upload/';
+    const parts = url.split(uploadMarker);
+    if (parts.length !== 2) {
+        console.warn('[OptimizedImage] URL structure unexpected (no /image/upload/ marker):', url);
+        return url;
     }
 
-    const [, cloudUrlBase, existingVersionPath, publicIdFilePath] = match;
-    // existingTransformationsPath (o segundo grupo de captura (?:[^/]+?\/)?) é ignorado intencionalmente.
+    const baseUrl = parts[0] + uploadMarker;
+    const pathAfterUpload = parts[1];
+    // console.log('[OptimizedImage] Base URL:', baseUrl, 'Path after upload:', pathAfterUpload);
 
-    // Logs para depuração da análise da URL
-    // console.log('[OptimizedImage] Parsing URL for optimization:', url);
-    // console.log('[OptimizedImage] Parsed components:', { cloudUrlBase, existingVersionPath, publicIdFilePath });
+    let version = '';
+    let publicId = '';
 
+    // Regex para extrair a versão (opcional, ex: "v123/") e o public_id,
+    // ignorando quaisquer transformações ("pastas") que venham antes da versão ou do public_id.
+    const pathPattern = /^(?:[^/]+\/)*(v\d+\/)?(.+)$/;
+    const pathMatch = pathAfterUpload.match(pathPattern);
+
+    if (pathMatch) {
+        // pathMatch[1] é o grupo da versão (ex: "v123/") ou undefined se não houver versão.
+        // pathMatch[2] é o grupo do public_id (ex: "imagem.jpg" ou "pasta/imagem.jpg").
+        if (pathMatch[1]) {
+            version = pathMatch[1]; // Captura a versão, que já inclui a barra no final.
+        }
+        publicId = pathMatch[2];
+    } else {
+        // Fallback: se a regex não casar (improvável para URLs Cloudinary válidas mas possível para estruturas muito simples),
+        // assume que todo o pathAfterUpload é o public_id.
+        publicId = pathAfterUpload;
+        console.warn('[OptimizedImage] Regex did not match path, assuming entire path is publicId:', pathAfterUpload);
+    }
+    
+    // console.log('[OptimizedImage] Parsed URL parts - Version:', version, 'PublicID:', publicId);
+
+    // Novas transformações a serem aplicadas.
+    // A prop 'quality' é um número, então `q_auto:${quality}` é usado para qualidade adaptativa com base nesse número.
+    // `w_${width}` define a largura exata.
     const newTransforms = [
-      'f_auto',        // Formato automático
-      `q_${quality}`,  // Qualidade baseada na prop (ex: q_80)
-      `w_${width}`,    // Largura baseada na prop
-      'dpr_auto',      // Densidade de pixel automática
-      'c_limit',       // Modo de corte: redimensiona a imagem para caber nas dimensões sem cortar.
-      'e_sharpen:60'   // Aplica um leve efeito de nitidez
+        'f_auto',             // Formato automático (webp/avif para navegadores compatíveis)
+        `q_auto:${quality}`,  // Qualidade adaptativa (ex: q_auto:80 se quality for 80)
+        `w_${width}`,         // Largura exata baseada na prop width
+        'dpr_auto',           // Densidade de pixel adaptativa (para retina displays)
+        'c_limit',            // Modo de corte: redimensiona para caber, preservando proporção, sem aumentar se for menor.
+        'e_sharpen:60'        // Leve nitidez para melhorar a qualidade percebida
     ].join(',');
+    // console.log('[OptimizedImage] New transforms to apply:', newTransforms);
 
-    let finalOptimizedUrl = cloudUrlBase;
-    finalOptimizedUrl += newTransforms + '/';
-
-    if (existingVersionPath) {
-      finalOptimizedUrl += existingVersionPath + '/'; // Adiciona a versão se existir
+    // Montar a URL final: baseUrl + newTransforms + / + version (se existir) + publicId
+    // A barra entre newTransforms e version/publicId é adicionada explicitamente.
+    // A 'version', se existir, já contém uma barra no final (ex: "v123/").
+    let finalUrl = `${baseUrl}${newTransforms}/`;
+    if (version) {
+        finalUrl += version;
     }
+    finalUrl += publicId;
 
-    finalOptimizedUrl += publicIdFilePath; // Adiciona o caminho público do arquivo
-
-    // Logs para depuração da URL gerada
-    // console.log('[OptimizedImage] Original src for optimization:', url);
-    // console.log('[OptimizedImage] Applied new transforms:', newTransforms);
-    // console.log('[OptimizedImage] Resulting optimizedSrc:', finalOptimizedUrl);
-
-    return finalOptimizedUrl;
+    console.log('[OptimizedImage] Resulting optimizedSrc:', finalUrl);
+    return finalUrl;
   };
 
   const optimizedSrc = optimizeCloudinaryUrl(src);
