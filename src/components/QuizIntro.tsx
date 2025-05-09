@@ -128,7 +128,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         <div className="w-full max-w-md flex flex-col items-center justify-center text-center">
           <div className="w-28 sm:w-32 md:w-36 mb-6">
             <OptimizedImage
-              src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_95,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
               alt="Logo Gisele Galvão"
               className="w-full h-auto"
               width={144}
@@ -161,7 +161,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         <div className="w-full flex flex-col items-center mb-2"> 
           <div className="w-28 sm:w-32 md:w-36"> 
             <OptimizedImage 
-              src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
+              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_95,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
               className="block h-auto w-full"
               width={144}
