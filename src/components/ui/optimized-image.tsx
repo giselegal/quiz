@@ -56,104 +56,85 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [lowQualitySrc, setLowQualitySrc] = useState<string>('');
   const [hasError, setHasError] = useState(false);
   const [placeholderFading, setPlaceholderFading] = useState(false);
-  
-  /**
-   * Otimiza URLs do Cloudinary aplicando transformações para melhor qualidade e performance.
-   * Detecta se a URL já tem transformações para não aplicar duplicadamente.
-   */
-  const optimizeCloudinaryUrl = (url: string): string => {
-    console.log('[OptimizedImage] Original src for optimization:', url);
-    if (!url.includes('cloudinary.com')) {
-        console.log('[OptimizedImage] URL is not Cloudinary, returning as is:', url);
-        return url;
+
+  const optimizeCloudinaryUrl = (url: string, currentQuality: number, currentWidth: number): string => {
+    console.log('[OptimizedImage] optimizeCloudinaryUrl input:', url);
+    if (!url || !url.includes('cloudinary.com')) {
+      console.log('[OptimizedImage] URL is not Cloudinary or empty, returning as is:', url);
+      return url;
     }
 
     const uploadMarker = '/image/upload/';
     const parts = url.split(uploadMarker);
     if (parts.length !== 2) {
-        console.warn('[OptimizedImage] URL structure unexpected (no /image/upload/ marker):', url);
-        return url;
+      console.warn('[OptimizedImage] URL structure unexpected (no /image/upload/ marker):', url);
+      return url;
     }
 
     const baseUrl = parts[0] + uploadMarker;
     const pathAfterUpload = parts[1];
-    // console.log('[OptimizedImage] Base URL:', baseUrl, 'Path after upload:', pathAfterUpload);
 
     let version = '';
     let publicId = '';
 
-    // Regex para extrair a versão (opcional, ex: "v123/") e o public_id,
-    // ignorando quaisquer transformações ("pastas") que venham antes da versão ou do public_id.
-    const pathPattern = /^(?:[^/]+\/)*(v\d+\/)?(.+)$/;
+    // Regex para extrair a versão (opcional, ex: "v123/") e o public_id.
+    // Esta regex tenta ignorar as transformações existentes antes da versão ou do public_id.
+    const pathPattern = /^(?:[^/]+\/)*?(v\d+\/)?([^\/?]+)/;
     const pathMatch = pathAfterUpload.match(pathPattern);
 
     if (pathMatch) {
-        // pathMatch[1] é o grupo da versão (ex: "v123/") ou undefined se não houver versão.
-        // pathMatch[2] é o grupo do public_id (ex: "imagem.jpg" ou "pasta/imagem.jpg").
-        if (pathMatch[1]) {
-            version = pathMatch[1]; // Captura a versão, que já inclui a barra no final.
-        }
-        publicId = pathMatch[2];
+      if (pathMatch[1]) {
+        version = pathMatch[1]; // Captura a versão com a barra: "v123/"
+      }
+      publicId = pathMatch[2]; // Captura o public_id: "image.jpg" ou "folder/image.jpg"
     } else {
-        // Fallback: se a regex não casar (improvável para URLs Cloudinary válidas mas possível para estruturas muito simples),
-        // assume que todo o pathAfterUpload é o public_id.
-        publicId = pathAfterUpload;
-        console.warn('[OptimizedImage] Regex did not match path, assuming entire path is publicId:', pathAfterUpload);
+      publicId = pathAfterUpload.split('?')[0]; // Fallback: Pega tudo até um possível query string
+      console.warn('[OptimizedImage] Regex did not fully match path, fallback publicId:', publicId, 'from path:', pathAfterUpload);
     }
     
-    // console.log('[OptimizedImage] Parsed URL parts - Version:', version, 'PublicID:', publicId);
+    // console.log('[OptimizedImage] Parsed URL parts - Base:', baseUrl, 'Version:', version, 'PublicID:', publicId);
 
-    // Novas transformações a serem aplicadas.
-    // A prop 'quality' é um número, então `q_auto:${quality}` é usado para qualidade adaptativa com base nesse número.
-    // `w_${width}` define a largura exata.
     const newTransforms = [
-        'f_auto',             // Formato automático (webp/avif para navegadores compatíveis)
-        `q_auto:${quality}`,  // Qualidade adaptativa (ex: q_auto:80 se quality for 80)
-        `w_${width}`,         // Largura exata baseada na prop width
-        'dpr_auto',           // Densidade de pixel adaptativa (para retina displays)
-        'c_limit',            // Modo de corte: redimensiona para caber, preservando proporção, sem aumentar se for menor.
-        'e_sharpen:60'        // Leve nitidez para melhorar a qualidade percebida
+      'f_auto',
+      `q_auto:${currentQuality}`, // Usa a qualidade passada para a função
+      `w_${currentWidth}`,       // Usa a largura passada para a função
+      'dpr_auto',
+      'c_limit',
+      'e_sharpen:60'
     ].join(',');
-    // console.log('[OptimizedImage] New transforms to apply:', newTransforms);
 
-    // Montar a URL final: baseUrl + newTransforms + / + version (se existir) + publicId
-    // A barra entre newTransforms e version/publicId é adicionada explicitamente.
-    // A 'version', se existir, já contém uma barra no final (ex: "v123/").
     let finalUrl = `${baseUrl}${newTransforms}/`;
     if (version) {
-        finalUrl += version;
+      finalUrl += version; // version já tem a barra
     }
     finalUrl += publicId;
 
-    console.log('[OptimizedImage] Resulting optimizedSrc:', finalUrl);
+    console.log('[OptimizedImage] optimizeCloudinaryUrl output:', finalUrl);
     return finalUrl;
   };
 
-  const optimizedSrc = optimizeCloudinaryUrl(src);
-  console.log('[OptimizedImage] Input src:', src);
-  console.log('[OptimizedImage] Generated optimizedSrc:', optimizedSrc);
-  
-  // Gerar e carregar o placeholder de baixa qualidade
+  const optimizedSrc = optimizeCloudinaryUrl(src, quality, width); // Passa quality e width
+  // ... (console.logs existentes para optimizedSrc e input src podem ser mantidos ou removidos se muito verboso)
+
   useEffect(() => {
-    // Resetar estados quando a fonte muda
     setImageLoaded(false);
     setHasError(false);
     setPlaceholderFading(false);
-    
-    // Gerar LQIP apenas para imagens do Cloudinary
-    if (src.includes('cloudinary.com')) {
-      const lqip = getLowQualityImage(src);
+
+    if (src && src.includes('cloudinary.com')) {
+      // Para LQIP, podemos usar uma largura menor e qualidade bem baixa
+      const lqip = getLowQualityImage(src); // getLowQualityImage também precisa ser robusto
       console.log(`[OptimizedImage] Generated lowQualitySrc for ${src}:`, lqip);
       if (lqip) {
         setLowQualitySrc(lqip);
-        
-        // Pré-carregar a imagem de baixa qualidade
         const imgPlaceholder = new Image();
         imgPlaceholder.src = lqip;
         imgPlaceholder.decoding = "async";
       }
+    } else {
+      setLowQualitySrc(''); // Limpa se não for cloudinary
     }
-  }, [src]);
+  }, [src, width, quality]); // Adiciona width e quality como dependências se forem usados para gerar LQIP dinamicamente
 
   // Lidar com o carregamento da imagem
   const handleImageLoad = () => {
@@ -179,22 +160,25 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const widthNum = typeof width === 'string' ? parseInt(width, 10) : width;
   const heightNum = typeof height === 'string' ? parseInt(height, 10) : height;
   
-  // Calcular a proporção de aspecto para o container
-  const aspectRatio = heightNum / widthNum; // Correção aqui
-  
-  console.log('[OptimizedImage] Rendering with:', { optimizedSrc, lowQualitySrc, imageLoaded, hasError, widthNum, heightNum, aspectRatio });
+  // Garante que widthNum e heightNum são números válidos e > 0 antes de dividir
+  const numericAspectRatio = (widthNum && heightNum && widthNum > 0 && heightNum > 0) ? heightNum / widthNum : 1; // Default aspect ratio 1:1
+
+  // Convertendo o aspectRatio numérico para string para o AspectRatioContainer
+  const stringAspectRatio = String(numericAspectRatio);
+
+  console.log('[OptimizedImage] Rendering with:', { optimizedSrc, lowQualitySrc, imageLoaded, hasError, widthNum, heightNum, stringAspectRatio });
 
   return (
     <AspectRatioContainer 
-      ratio={aspectRatio} 
+      ratio={stringAspectRatio} // Passando a string
       className={`${containerClassName} relative overflow-hidden`}
       bgColor={placeholderColor}
     >
-      {/* Placeholder de baixa qualidade - visível enquanto a imagem principal carrega */}
+      {/* Placeholder de baixa qualidade */}
       {lowQualitySrc && !imageLoaded && !hasError && (
         <img
           src={lowQualitySrc}
-          alt={alt}
+          alt={`${alt} placeholder`}
           width={widthNum}
           height={heightNum}
           className={`w-full h-full object-${objectFit} absolute inset-0 transition-all duration-500 ease-in-out ${className} ${placeholderFading ? 'opacity-50' : 'opacity-100'}`}
@@ -219,7 +203,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         />
       )}
       
-      {/* Mensagem de erro caso o carregamento falhe */}
+      {/* Mensagem de erro */}
       {hasError && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
           Não foi possível carregar a imagem
