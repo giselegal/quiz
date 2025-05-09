@@ -57,11 +57,15 @@ export const preloadImagesByUrls = (
   // If requested, also generate and cache low quality placeholders
   if (generateLowQuality) {
     urls.forEach(url => {
-      const lowQualityUrl = getLowQualityPlaceholder(url);
+      const lowQualityUrl = getLowQualityPlaceholder(url, {
+        width: 40,   // Better quality placeholders
+        quality: 35  // Better quality placeholders
+      });
+      
       if (lowQualityUrl) {
         // Add low quality version to cache
         const optimizedUrl = optimizeCloudinaryUrl(url, { 
-          quality: options.quality || 80,
+          quality: options.quality || 85, // Improved default quality
           format: 'auto',
           width: options.width,
           height: options.height
@@ -76,8 +80,8 @@ export const preloadImagesByUrls = (
         // Also preload the low quality version
         const img = new Image();
         img.src = lowQualityUrl;
-        img.decoding = "sync"; // Fast decode for placeholders
-        img.fetchPriority = "high"; // High priority for tiny placeholders
+        img.decoding = "async"; // Allow async decode for better perf
+        img.fetchPriority = "high"; // High priority for placeholders
       }
     });
   }
@@ -143,10 +147,14 @@ export const preloadImages = (
         height: height || img.height
       });
       
-      // Generate low quality placeholder if needed
+      // Generate high quality placeholder if needed
       let lowQualityUrl;
       if (generateLowQuality && img.src.includes('cloudinary.com')) {
-        lowQualityUrl = getLowQualityPlaceholder(img.src);
+        // Usa a versão melhorada do placeholder com qualidade e tamanho aumentados
+        lowQualityUrl = getLowQualityPlaceholder(img.src, {
+          width: 40,
+          quality: 35
+        });
       }
       
       // Mark as loading
@@ -219,7 +227,7 @@ export const getLowQualityImage = (url: string): string => {
   if (!url) return '';
   
   // Check if we already have this in the cache
-  const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 95, format: 'auto' });
+  const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 90, format: 'auto' });
   
   // Here was the problematic code - fixed by retrieving the cache entry first
   const cacheEntry = imageCache.get(optimizedUrl);
@@ -232,8 +240,11 @@ export const getLowQualityImage = (url: string): string => {
   // Make sure we add it to the cache properly
   updateImageCache(optimizedUrl, { url });
   
-  // Generate a low quality version
-  return getLowQualityPlaceholder(url);
+  // Generate a better quality version of the placeholder to avoid blurry images
+  return getLowQualityPlaceholder(url, {
+    width: 40,   // Increased from default 20px
+    quality: 35  // Increased from default 10% 
+  });
 };
 
 /**
@@ -248,6 +259,13 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
   switch (page) {
     case 'intro':
       categoryFilter = 'branding';
+      // Aumenta a qualidade das imagens da introdução para evitar embaçamento
+      preloadImagesByCategory('branding', { 
+        quality: 90, 
+        batchSize: 2,
+        width: 800,
+        format: 'auto'
+      });
       break;
     case 'quiz':
       categoryFilter = undefined; // All high priority images
@@ -256,7 +274,7 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
       minPriority = 3;
       // Also preload transformation images with optimized settings
       preloadImagesByCategory('transformation', { 
-        quality: 75, 
+        quality: 85, 
         batchSize: 2,
         width: 800, // Limit width to improve loading
         format: 'webp' // Use modern format
@@ -279,10 +297,10 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
   
   // Preload these images with optimized settings
   preloadImages(highPriorityImages, {
-    quality: 80, // Lower quality is usually sufficient for preloading
+    quality: 90, // Increased quality for better visual appearance
     batchSize: 3,
     width: page === 'intro' ? 800 : 600, // Limit width based on context
-    format: 'webp', // Use modern format
+    format: 'auto', // Auto format for best browser compatibility
     onComplete: () => {
       console.log(`Preloaded ${highPriorityImages.length} critical images for ${page}`);
     }

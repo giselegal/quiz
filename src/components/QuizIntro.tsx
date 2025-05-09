@@ -50,14 +50,15 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       try {
         console.log("[QuizIntro] Iniciando carregamento de assets...");
         
-        // Assumindo que preloadCriticalImages pode ser uma Promise ou que não bloqueia criticamente o fluxo principal.
-        // Se for crítico, deve ser awaited.
+        // Pré-carrega imagens críticas para a introdução com maior qualidade
         preloadCriticalImages('intro'); 
         
-        // Pré-carrega a logo e a imagem de introdução
+        // Pré-carrega a logo e a imagem de introdução com alta qualidade
         await preloadImagesByIds(['main-logo', 'intro-image'], {
           batchSize: 2,
           quality: 95,
+          // Garante que os placeholders terão boa qualidade
+          generateLowQuality: true
         });
 
         console.log("[QuizIntro] Assets carregados com sucesso");
@@ -65,13 +66,13 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         if (isMounted) {
           setIsLoading(false); // Desliga o spinner principal
           setCriticalAssetsForQuizPreloaded(true); // Sinaliza que os assets da intro foram carregados
-          // Inicia a transição para mostrar o conteúdo
+          // Inicia a transição para mostrar o conteúdo com um delay menor
           setTimeout(() => {
             if (isMounted) {
               setShowContent(true);
               console.log("[QuizIntro] Conteúdo exibido");
             }
-          }, 50); // Pequeno delay para a transição de opacidade
+          }, 30); // Reduzido de 50ms para 30ms para transição mais rápida
         }
       } catch (error) {
         console.error("Falha ao pré-carregar imagens da introdução:", error);
@@ -90,7 +91,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         setIsLoading(false);
         setShowContent(true);
       }
-    }, 7000); // Aumentado para 7s para dar mais margem
+    }, 5000); // Reduzido para 5s para melhorar a experiência do usuário
 
     return () => {
       isMounted = false;
@@ -165,6 +166,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               priority={true} 
               objectFit="contain"
               quality={95}
+              placeholderColor="#ffffff"
             />
           </div>
           <div className="mt-2 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded"></div>
@@ -175,7 +177,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
         </h1>
 
-        {/* Imagem Principal */}
+        {/* Imagem Principal - Com configurações melhoradas para evitar imagens embaçadas */}
         <div className="w-full flex justify-center">
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <OptimizedImage 
@@ -184,10 +186,14 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               width={800}
               height={800}
               priority={true}
-              quality={75}
+              quality={90}
               objectFit="cover"
               containerClassName="rounded-lg overflow-hidden shadow-sm"
               placeholderColor="#f8f4ef"
+              onLoad={() => {
+                // Registra evento de carregamento para métricas
+                console.log("[QuizIntro] Imagem principal carregada");
+              }}
             />
           </div>
         </div>
