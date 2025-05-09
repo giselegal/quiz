@@ -17,8 +17,7 @@
     <meta name="twitter:description" content="Cansada do guarda-roupa lotado e nada combina? Faça o quiz da Gisele Galvão e descubra seu estilo com clareza e confiança. Resultado imediato!" />
     <meta name="twitter:image" content="https://giselegalvao.com.br/" />
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="./src/main.jsx" as="script" fetchpriority="high" />
+    <!-- Preload critical images -->
     <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.png" fetchpriority="high" />
     <link rel="preload" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" as="image" fetchpriority="high" />
     <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
@@ -106,26 +105,7 @@
         <div class="loading-spinner"></div>
       </div>
     </div>
-    <!-- Script principal - abordagem tradicional para evitar problemas de MIME type -->
-    <script>
-      // Detectar ambiente de produção vs desenvolvimento
-      if (window.location.hostname === 'giselegalvao.com.br' || 
-          window.location.hostname === 'www.giselegalvao.com.br') {
-        // Em produção, carregamos o script compilado
-        const script = document.createElement('script');
-        script.setAttribute('src', './assets/main.js');
-        script.setAttribute('type', 'text/javascript');
-        script.setAttribute('defer', 'true');
-        document.body.appendChild(script);
-        console.log('Ambiente de produção detectado - carregando script compilado');
-      } else {
-        // Em desenvolvimento, carregamos o script de desenvolvimento
-        const script = document.createElement('script');
-        script.setAttribute('src', './src/main.jsx');
-        script.setAttribute('defer', 'true');
-        document.body.appendChild(script);
-        console.log('Ambiente de desenvolvimento detectado');
-      }
-    </script>
+    <!-- Script principal -->
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
