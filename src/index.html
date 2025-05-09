@@ -10,9 +10,23 @@
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     
-    <!-- Preload critical transformation images -->
-    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/q_40,f_auto,w_400/v1745519979/antes_adriana_pmdn8y.webp" />
-    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/q_40,f_auto,w_400/v1745519979/depois_adriana_pmdn8y.webp" />
+    <!-- Preload critical transformation images with fetchpriority high -->
+    <link rel="preload" as="image" 
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_80,f_auto,w_400/v1745519979/antes_adriana_pmdn8y.webp" 
+          fetchpriority="high"
+          type="image/webp" />
+    <link rel="preload" as="image" 
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_80,f_auto,w_400/v1745519979/depois_adriana_pmdn8y.webp"
+          fetchpriority="high"
+          type="image/webp" />
+    <link rel="preload" as="image" 
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/antes_adriana_pmdn8y.webp"
+          fetchpriority="high"
+          type="image/webp" />
+    <link rel="preload" as="image" 
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/depois_adriana_pmdn8y.webp"
+          fetchpriority="high"
+          type="image/webp" />
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
     <meta name="description" content="Descubra seu estilo pessoal com nosso quiz interativo" />

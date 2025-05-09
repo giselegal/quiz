@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
-import { ShoppingCart, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { Slider } from '../ui/slider';
-import OptimizedImage from '../ui/OptimizedImage';
-import { preloadImagesByUrls, preloadCriticalImages } from '@/utils/imageManager';
+import ProgressiveImage from '../ui/ProgressiveImage';
+import { preloadImagesByUrls } from '@/utils/imageManager';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -44,56 +44,55 @@ const transformations: TransformationItem[] = [
   }
 ];
 
-// Preload all transformation images immediately when this module is loaded
-(() => {
-  // Collect all image URLs
-  const allUrls = transformations.flatMap(item => [
-    item.beforeImage, 
-    item.afterImage, 
-    item.lowQualityBefore || '', 
-    item.lowQualityAfter || ''
-  ]).filter(Boolean);
+// Preload all transformation images on component mount - but don't wait for them
+// This is more efficient than the IIFE approach that was here before
+const preloadTransformationImages = () => {
+  // Immediately preload low quality placeholders
+  const lowQualityUrls = transformations.flatMap(item => [
+    item.lowQualityBefore, 
+    item.lowQualityAfter
+  ]).filter(Boolean) as string[];
   
-  // Preload them with high priority
-  preloadImagesByUrls(allUrls, {
-    quality: 90,
-    batchSize: 4
+  if (lowQualityUrls.length > 0) {
+    preloadImagesByUrls(lowQualityUrls, {
+      quality: 10,
+      batchSize: 4
+    });
+  }
+  
+  // Then preload high quality images with lower priority
+  const highQualityUrls = transformations.flatMap(item => [
+    item.beforeImage,
+    item.afterImage
+  ]);
+  
+  preloadImagesByUrls(highQualityUrls, {
+    quality: 80, // Lower quality to improve load time
+    batchSize: 2
   });
-})();
+};
 
 const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ handleCTAClick }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [sliderPosition, setSliderPosition] = useState(50);
-  const [imagesLoaded, setImagesLoaded] = useState<{
-    before: boolean;
-    after: boolean;
-  }>({
+  const [imagesLoaded, setImagesLoaded] = useState({
     before: false,
     after: false
   });
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   
   const activeTransformation = transformations[activeIndex];
-  const beforeImageRef = useRef<HTMLImageElement>(null);
-  const afterImageRef = useRef<HTMLImageElement>(null);
   
   // Start preloading images as soon as component mounts
   useEffect(() => {
-    const highQualityUrls = [
-      activeTransformation.beforeImage,
-      activeTransformation.afterImage
-    ];
-    
-    // Preload high-quality versions
-    preloadImagesByUrls(highQualityUrls, {
-      quality: 90,
-      batchSize: 2,
-      onComplete: () => {
-        setImagesLoaded({
-          before: true,
-          after: true
-        });
-      }
+    preloadTransformationImages();
+  }, []);
+  
+  // When active index changes, reset loaded state and ensure next images are loading
+  useEffect(() => {
+    setImagesLoaded({
+      before: false,
+      after: false
     });
     
     // Also preload the next transformation if available
@@ -101,10 +100,18 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     if (nextIndex !== activeIndex) {
       const nextTransformation = transformations[nextIndex];
       preloadImagesByUrls([
+        nextTransformation.lowQualityBefore || '',
+        nextTransformation.lowQualityAfter || '',
+      ].filter(Boolean), {
+        quality: 10,
+        batchSize: 4
+      });
+      
+      preloadImagesByUrls([
         nextTransformation.beforeImage,
         nextTransformation.afterImage
       ], {
-        quality: 70, // Lower quality for next slide preloading
+        quality: 80,
         batchSize: 2
       });
     }
@@ -175,23 +182,16 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
           </div>
           <div className="md:w-1/2 w-full">
             <Card className="p-6 card-elegant overflow-hidden">
-              {/* Always show something - either low quality placeholders or high quality images */}
+              {/* Optimized image slider with both low quality placeholders and high quality images */}
               <div className="relative h-[400px] md:h-[500px] w-full mb-4">
-                {/* Before image - Show low quality first, then high quality when loaded */}
+                {/* Before image */}
                 <div className="absolute inset-0 overflow-hidden">
-                  {!imagesLoaded.before && activeTransformation.lowQualityBefore && (
-                    <img 
-                      src={activeTransformation.lowQualityBefore}
-                      alt={`Carregando - ${activeTransformation.name}`} 
-                      className="w-full h-full object-cover rounded-lg blur-sm"
-                      style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-                    />
-                  )}
-                  <img 
-                    ref={beforeImageRef}
+                  <ProgressiveImage 
                     src={activeTransformation.beforeImage}
-                    alt={`Antes - ${activeTransformation.name}`} 
-                    className={`w-full h-full object-cover rounded-lg transition-opacity duration-500 ${imagesLoaded.before ? 'opacity-100' : 'opacity-0'}`}
+                    lowQualitySrc={activeTransformation.lowQualityBefore}
+                    alt={`Antes - ${activeTransformation.name}`}
+                    className="w-full h-full"
+                    priority={activeIndex === 0}
                     style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
                   />
@@ -199,19 +199,12 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                 
                 {/* After image */}
                 <div className="absolute inset-0 overflow-hidden">
-                  {!imagesLoaded.after && activeTransformation.lowQualityAfter && (
-                    <img 
-                      src={activeTransformation.lowQualityAfter}
-                      alt={`Carregando - ${activeTransformation.name}`} 
-                      className="w-full h-full object-cover rounded-lg blur-sm"
-                      style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
-                    />
-                  )}
-                  <img
-                    ref={afterImageRef}
+                  <ProgressiveImage
                     src={activeTransformation.afterImage}
-                    alt={`Depois - ${activeTransformation.name}`} 
-                    className={`w-full h-full object-cover rounded-lg transition-opacity duration-500 ${imagesLoaded.after ? 'opacity-100' : 'opacity-0'}`}
+                    lowQualitySrc={activeTransformation.lowQualityAfter}
+                    alt={`Depois - ${activeTransformation.name}`}
+                    className="w-full h-full" 
+                    priority={activeIndex === 0}
                     style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
                   />

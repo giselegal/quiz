@@ -5,7 +5,7 @@ import { Header } from '@/components/result/Header';
 import { styleConfig } from '@/config/styleConfig';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
-import { ShoppingCart, CheckCircle, ArrowDown, Lock, Edit, LayoutTemplate } from 'lucide-react';
+import { ShoppingCart, CheckCircle, ArrowDown, Lock, Edit } from 'lucide-react';
 import { AnimatedWrapper } from '@/components/ui/animated-wrapper';
 import SecondaryStylesSection from '@/components/quiz-result/SecondaryStylesSection';
 import ErrorState from '@/components/result/ErrorState';
@@ -38,9 +38,8 @@ const ResultPage: React.FC = () => {
   } = useGlobalStyles();
   const {
     user
-  } = useAuth(); // Get user from auth context
+  } = useAuth();
   
-  // Usar o hook de teste A/B para a página de resultados
   const { currentVariation, registerConversion, isLoading: isLoadingABTest } = useABTest('result');
   
   const [imagesLoaded, setImagesLoaded] = useState({
@@ -56,17 +55,17 @@ const ResultPage: React.FC = () => {
     disableTransitions: isLowPerformance
   });
 
-  // Button hover state
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   
+  // Improved image preloading
   useEffect(() => {
     if (!primaryStyle) return;
     window.scrollTo(0, 0);
 
-    // Immediately preload critical images for the results page
+    // Start preloading critical images immediately
     preloadCriticalImages('results');
-
-    // Get the style-specific images
+    
+    // Get image information for the specific style
     const {
       category
     } = primaryStyle;
@@ -74,43 +73,50 @@ const ResultPage: React.FC = () => {
       image,
       guideImage
     } = styleConfig[category];
-    
-    // Create low quality placeholders
+
+    // Generate low quality placeholders
     const lowQualityStyle = getLowQualityPlaceholder(image);
     const lowQualityGuide = getLowQualityPlaceholder(guideImage);
     
-    // Preload high quality images
+    // Immediately load low quality placeholders
+    if (lowQualityStyle) {
+      const lowQualityStyleImg = new Image();
+      lowQualityStyleImg.src = lowQualityStyle;
+      lowQualityStyleImg.decoding = "sync";
+      lowQualityStyleImg.fetchPriority = "high";
+    }
+    
+    if (lowQualityGuide) {
+      const lowQualityGuideImg = new Image();
+      lowQualityGuideImg.src = lowQualityGuide;
+      lowQualityGuideImg.decoding = "sync";
+      lowQualityGuideImg.fetchPriority = "high";
+    }
+
+    // Load high quality versions with appropriate priority
     const styleImg = new Image();
-    styleImg.src = `${image}?q=auto:best&f=auto&w=340`;
+    styleImg.src = `${image}?q=80&f=auto&w=238`; // Reduced quality for faster load
+    styleImg.fetchPriority = "high";
     styleImg.onload = () => setImagesLoaded(prev => ({
       ...prev,
       style: true
     }));
     
     const guideImg = new Image();
-    guideImg.src = `${guideImage}?q=auto:best&f=auto&w=540`;
+    guideImg.src = `${guideImage}?q=80&f=auto&w=540`; // Reduced quality for faster load
+    guideImg.fetchPriority = "high";
     guideImg.onload = () => setImagesLoaded(prev => ({
       ...prev,
       guide: true
     }));
-    
-    // Also preload the low quality placeholders
-    if (lowQualityStyle) {
-      const lowQualityStyleImg = new Image();
-      lowQualityStyleImg.src = lowQualityStyle;
-    }
-    
-    if (lowQualityGuide) {
-      const lowQualityGuideImg = new Image();
-      lowQualityGuideImg.src = lowQualityGuide;
-    }
   }, [primaryStyle]);
   
   useEffect(() => {
-    if (imagesLoaded.style && imagesLoaded.guide) completeLoading();
+    if (imagesLoaded.style && imagesLoaded.guide) {
+      completeLoading();
+    }
   }, [imagesLoaded, completeLoading]);
   
-  // Check access to user.role (explicitly check for type)
   if (!primaryStyle) return <ErrorState />;
   if (isLoading || isLoadingABTest) return <ResultSkeleton />;
   
@@ -123,13 +129,13 @@ const ResultPage: React.FC = () => {
     description
   } = styleConfig[category];
   
-  // Determinar a URL de checkout com base na variação do teste A/B
+  // Determine checkout URL based on A/B test variation
   const getCheckoutUrl = () => {
-    // URL de checkout padrão
+    // Default checkout URL
     let checkoutUrl = 'https://pay.hotmart.com/W98977034C?checkoutMode=10&bid=1744967466912';
     
-    // Se houver uma variação ativa de teste A/B, usar sua configuração
-    if (currentVariation && currentVariation.content && currentVariation.content.checkoutUrl) {
+    // Use variation checkout URL if available
+    if (currentVariation?.content?.checkoutUrl) {
       checkoutUrl = currentVariation.content.checkoutUrl;
     }
     
@@ -140,16 +146,16 @@ const ResultPage: React.FC = () => {
     // Track checkout initiation
     trackButtonClick('checkout_button', 'Iniciar Checkout', 'results_page');
     
-    // Registrar conversão para o teste A/B (se houver)
+    // Register A/B test conversion if applicable
     if (currentVariation) {
       registerConversion();
     }
     
-    // Redirecionar para a URL de checkout
+    // Redirect to checkout URL
     window.location.href = getCheckoutUrl();
   };
   
-  // Aplicar configurações específicas da variação (se houver)
+  // Apply style overrides from A/B test if available
   const getStyleOverrides = () => {
     const baseStyles = {
       backgroundColor: globalStyles.backgroundColor || '#fffaf7',
@@ -157,8 +163,7 @@ const ResultPage: React.FC = () => {
       fontFamily: globalStyles.fontFamily || 'inherit'
     };
     
-    // Se houver uma variação ativa de teste A/B, mesclar suas configurações de estilo
-    if (currentVariation && currentVariation.content && currentVariation.content.styles) {
+    if (currentVariation?.content?.styles) {
       return {
         ...baseStyles,
         ...currentVariation.content.styles
@@ -168,17 +173,15 @@ const ResultPage: React.FC = () => {
     return baseStyles;
   };
   
-  // Verificar se a oferta deve ser modificada com base na variação A/B
+  // Get pricing information with A/B test overrides if available
   const getPriceInfo = () => {
-    // Valores padrão
     const priceInfo = {
       regularPrice: 'R$ 175,00',
       currentPrice: 'R$ 39,00',
       installments: '4X de R$ 10,86 sem juros'
     };
     
-    // Se houver uma variação ativa de teste A/B, usar suas configurações de preço
-    if (currentVariation && currentVariation.content && currentVariation.content.pricing) {
+    if (currentVariation?.content?.pricing) {
       return {
         ...priceInfo,
         ...currentVariation.content.pricing
@@ -190,7 +193,7 @@ const ResultPage: React.FC = () => {
   
   const priceInfo = getPriceInfo();
   
-  // Check if user has 'admin' role safely
+  // Check if user has 'admin' role
   const isAdmin = user && 
     typeof user === 'object' && 
     'role' in user && 
@@ -204,7 +207,7 @@ const ResultPage: React.FC = () => {
       
       <Header primaryStyle={primaryStyle} logoHeight={globalStyles.logoHeight} logo={globalStyles.logo} logoAlt={globalStyles.logoAlt} userName={user?.userName} />
 
-      {/* Admin Edit Button - Visible only for admin users */}
+      {/* Admin Edit Button - Only for admin users */}
       {isAdmin && (
         <div className="container mx-auto px-4 py-2 max-w-4xl">
           <Link to="/resultado/editor" className="inline-flex items-center gap-1.5 text-sm py-1.5 px-3 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
@@ -215,7 +218,7 @@ const ResultPage: React.FC = () => {
       )}
 
       <div className="container mx-auto px-4 py-6 max-w-4xl relative z-10">
-        {/* ATTENTION: Primary Style Card */}
+        {/* Primary Style Card */}
         <Card className="p-6 mb-10 bg-white shadow-md border border-[#B89B7A]/20 card-elegant">
           <AnimatedWrapper animation="fade" show={true} duration={600} delay={300}>
             <div className="text-center mb-8">
@@ -245,7 +248,7 @@ const ResultPage: React.FC = () => {
               <AnimatedWrapper animation={isLowPerformance ? 'none' : 'scale'} show={true} duration={500} delay={500}>
                 <div className="max-w-[238px] mx-auto relative">
                   <ProgressiveImage
-                    src={`${image}?q=auto:best&f=auto&w=238`}
+                    src={`${image}?q=80&f=auto&w=238`} 
                     lowQualitySrc={getLowQualityPlaceholder(image)}
                     alt={`Estilo ${category}`}
                     className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
@@ -254,7 +257,7 @@ const ResultPage: React.FC = () => {
                     height="auto"
                     onLoad={() => setImagesLoaded(prev => ({ ...prev, style: true }))}
                   />
-                  {/* Elegant decorative corner */}
+                  {/* Elegant decorative corners */}
                   <div className="absolute -top-2 -right-2 w-8 h-8 border-t-2 border-r-2 border-[#B89B7A]"></div>
                   <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-2 border-l-2 border-[#B89B7A]"></div>
                 </div>
@@ -263,12 +266,12 @@ const ResultPage: React.FC = () => {
             <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={800}>
               <div className="mt-8 max-w-[540px] mx-auto relative">
                 <ProgressiveImage
-                  src={`${guideImage}?q=auto:best&f=auto&w=540`}
+                  src={`${guideImage}?q=80&f=auto&w=540`}
                   lowQualitySrc={getLowQualityPlaceholder(guideImage)}
                   alt={`Guia de Estilo ${category}`}
                   className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
-                  priority={false}
-                  width="540"
+                  priority={true}
+                  width="540" 
                   height="auto"
                   onLoad={() => setImagesLoaded(prev => ({ ...prev, guide: true }))}
                 />
@@ -281,27 +284,27 @@ const ResultPage: React.FC = () => {
           </AnimatedWrapper>
         </Card>
 
-        {/* INTEREST: Before/After Transformation Section */}
+        {/* Before/After Transformation Section */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={700}>
           <BeforeAfterTransformation />
         </AnimatedWrapper>
 
-        {/* INTEREST: Motivation Section */}
+        {/* Motivation Section */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={800}>
           <MotivationSection />
         </AnimatedWrapper>
 
-        {/* INTEREST: Bonus Section */}
+        {/* Bonus Section */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={850}>
           <BonusSection />
         </AnimatedWrapper>
 
-        {/* DESIRE: Testimonials */}
+        {/* Testimonials */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={900}>
           <Testimonials />
         </AnimatedWrapper>
 
-        {/* DESIRE: Featured CTA (Green) */}
+        {/* Featured CTA */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={950}>
           <div className="text-center my-10">
             <div className="bg-[#f9f4ef] p-6 rounded-lg border border-[#B89B7A]/10 mb-6">
@@ -313,10 +316,16 @@ const ResultPage: React.FC = () => {
               </div>
             </div>
             
-            <Button onClick={handleCTAClick} className="text-white py-4 px-6 rounded-md btn-cta-green" onMouseEnter={() => setIsButtonHovered(true)} onMouseLeave={() => setIsButtonHovered(false)} style={{
-            background: "linear-gradient(to right, #4CAF50, #45a049)",
-            boxShadow: "0 4px 14px rgba(76, 175, 80, 0.4)"
-          }}>
+            <Button 
+              onClick={handleCTAClick} 
+              className="text-white py-4 px-6 rounded-md btn-cta-green" 
+              onMouseEnter={() => setIsButtonHovered(true)} 
+              onMouseLeave={() => setIsButtonHovered(false)} 
+              style={{
+                background: "linear-gradient(to right, #4CAF50, #45a049)",
+                boxShadow: "0 4px 14px rgba(76, 175, 80, 0.4)"
+              }}
+            >
               <span className="flex items-center justify-center gap-2">
                 <ShoppingCart className={`w-5 h-5 transition-transform duration-300 ${isButtonHovered ? 'scale-110' : ''}`} />
                 Quero meu Guia de Estilo Agora
@@ -333,18 +342,20 @@ const ResultPage: React.FC = () => {
           </div>
         </AnimatedWrapper>
 
-        {/* DESIRE: Guarantee Section */}
+        {/* Guarantee Section */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={1000}>
           <GuaranteeSection />
         </AnimatedWrapper>
 
-        {/* DESIRE: Mentor and Trust Elements */}
+        {/* Mentor Section */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={1050}>
           <MentorSection />
         </AnimatedWrapper>
 
-        {/* ACTION: Final Value Proposition and CTA */}
+        {/* Final Value Proposition and CTA */}
         <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={1100}>
+          {/* ... keep existing code (the final value proposition section) */}
+          
           <div className="text-center mt-10">
             <h2 className="text-2xl md:text-3xl font-playfair text-[#aa6b5d] mb-4">
               Vista-se de Você — na Prática
@@ -359,16 +370,18 @@ const ResultPage: React.FC = () => {
             <div className="bg-gradient-to-r from-[#fff7f3] to-[#f9f4ef] p-6 rounded-lg mb-6 border border-[#B89B7A]/10 glass-panel">
               <h3 className="text-xl font-medium text-[#aa6b5d] mb-4">O Guia de Estilo e Imagem + Bônus Exclusivos</h3>
               <ul className="space-y-3 text-left max-w-xl mx-auto text-[#432818]">
-                {["Looks com intenção e identidade", "Cores, modelagens e tecidos a seu favor", "Imagem alinhada aos seus objetivos", "Guarda-roupa funcional, sem compras por impulso"].map((item, index) => <li key={index} className="flex items-start">
+                {["Looks com intenção e identidade", "Cores, modelagens e tecidos a seu favor", "Imagem alinhada aos seus objetivos", "Guarda-roupa funcional, sem compras por impulso"].map((item, index) => (
+                  <li key={index} className="flex items-start">
                     <div className="flex-shrink-0 h-5 w-5 bg-gradient-to-r from-[#B89B7A] to-[#aa6b5d] rounded-full flex items-center justify-center text-white mr-2 mt-0.5">
                       <CheckCircle className="h-3 w-3" />
                     </div>
                     <span>{item}</span>
-                  </li>)}
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Updated Value Stack Section with new prices and installment option */}
+            {/* Value Stack Section */}
             <div className="bg-white p-6 rounded-lg shadow-md border border-[#B89B7A]/20 card-elegant mb-8 max-w-md mx-auto">
               <h3 className="text-xl font-medium text-center text-[#aa6b5d] mb-4">O Que Você Recebe Hoje</h3>
               
@@ -406,14 +419,17 @@ const ResultPage: React.FC = () => {
                   src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744920983/Espanhol_Portugu%C3%AAs_8_cgrhuw.webp"
                   alt="Métodos de pagamento"
                   className="w-full rounded-lg"
+                  loading="lazy"
+                  width="400"
+                  height="100"
                 />
               </div>
             </div>
 
             <Button onClick={handleCTAClick} className="text-white py-5 px-8 rounded-md shadow-md transition-colors btn-3d mb-2" style={{
-            background: "linear-gradient(to right, #4CAF50, #45a049)",
-            boxShadow: "0 4px 14px rgba(76, 175, 80, 0.4)",
-            fontSize: "1rem" /* Smaller font size for button */
+              background: "linear-gradient(to right, #4CAF50, #45a049)",
+              boxShadow: "0 4px 14px rgba(76, 175, 80, 0.4)",
+              fontSize: "1rem"
             }} onMouseEnter={() => setIsButtonHovered(true)} onMouseLeave={() => setIsButtonHovered(false)}>
               <span className="flex items-center justify-center gap-2">
                 <ShoppingCart className={`w-4 h-4 transition-transform duration-300 ${isButtonHovered ? 'scale-110' : ''}`} />
