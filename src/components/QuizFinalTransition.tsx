@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { preloadCriticalImages } from '@/utils/imageManager';
@@ -33,12 +32,12 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
         }
         return prev + 1;
       });
-    }, 30);
+    }, 20); // Alterado de 30 para 20
 
     // Update step based on progress
     const stepInterval = setInterval(() => {
       setStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 1500);
+    }, 1000); // Alterado de 1500 para 1000
 
     // Cleanup
     return () => {
@@ -50,14 +49,12 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
   useEffect(() => {
     // When progress reaches 100, navigate to result page
     if (progress === 100) {
-      const timer = setTimeout(() => {
-        if (onShowResult) {
-          onShowResult();
-        } else {
-          navigate('/resultado');
-        }
-      }, 500);
-      return () => clearTimeout(timer);
+      // Removido o setTimeout de 500ms
+      if (onShowResult) {
+        onShowResult();
+      } else {
+        navigate('/resultado');
+      }
     }
   }, [progress, onShowResult, navigate]);
 

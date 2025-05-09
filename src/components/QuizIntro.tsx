@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -7,6 +6,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import OptimizedImage from './ui/OptimizedImage';
 import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
+import { getImageById } from '@/data/imageBank';
 
 interface QuizIntroProps {
   onStart: (nome: string) => void;
@@ -58,6 +58,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   };
 
+  const introImageDetails = getImageById('intro-image');
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] py-[31px] mx-0 px-[5px]">
       <div className="">
@@ -86,12 +88,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         {/* Imagem - menor */}
         <div className="flex justify-center mb-6">
           <OptimizedImage 
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg" 
-            alt="Mulher elegante com roupas estilosas" 
+            src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
+            alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
             className="w-full max-w-[220px] h-auto rounded-lg shadow-sm" 
-            width={220} 
-            height={294} 
-            objectFit="cover" 
             priority={true} 
           />
         </div>
