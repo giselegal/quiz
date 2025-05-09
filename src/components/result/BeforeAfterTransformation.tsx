@@ -3,7 +3,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
 import { ShoppingCart, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
-import { Slider } from '../ui/slider';
 import ProgressiveImage from '../ui/ProgressiveImage';
 import { preloadImagesByUrls, getLowQualityPlaceholder } from '@/utils/imageManager';
 
@@ -12,107 +11,93 @@ interface BeforeAfterTransformationProps {
 }
 
 interface TransformationItem {
-  beforeImage: string;
-  afterImage: string;
+  image: string; 
   name: string;
-  beforeId: string;
-  afterId: string;
+  id: string; 
   width?: number;
   height?: number;
 }
 
 const transformations: TransformationItem[] = [
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
+    image: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
     name: "Adriana",
-    beforeId: "transformation-adriana-before",
-    afterId: "transformation-adriana-after",
+    id: "transformation-adriana",
     width: 800,
     height: 1000
   }, 
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
+    image: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
     name: "Mariangela",
-    beforeId: "transformation-mariangela-before",
-    afterId: "transformation-mariangela-after",
+    id: "transformation-mariangela",
     width: 800,
     height: 1000
   }
-  // Camila removida
 ];
 
-const preloadTransformationImages = () => {
+const preloadInitialTransformationImages = () => {
   const imageUrls: string[] = [];
-  transformations.slice(0, 2).forEach(item => { 
-    imageUrls.push(item.beforeImage, item.afterImage);
+  transformations.slice(0, 1).forEach(item => { // Apenas a primeira imagem inicialmente
+    imageUrls.push(item.image);
   });
   
-  preloadImagesByUrls(imageUrls, {
-    quality: 80,
-    batchSize: 2,
-  });
+  if (imageUrls.length > 0) {
+    preloadImagesByUrls(imageUrls, {
+      quality: 90, // Maior qualidade para a imagem visível
+      batchSize: 1,
+    });
+  }
 };
 
 const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ handleCTAClick }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [sliderPosition, setSliderPosition] = useState(50);
-  const [imagesLoaded, setImagesLoaded] = useState({
-    before: false,
-    after: false
-  });
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showAfterImage, setShowAfterImage] = useState(false); // Novo estado para controlar a transição automática
   
   const activeTransformation = transformations[activeIndex];
   
   useEffect(() => {
-    preloadTransformationImages();
-    const timer = setTimeout(() => {
+    preloadInitialTransformationImages(); // Pré-carrega a imagem inicial
+    // Define um temporizador para garantir que o estado de carregamento seja eventualmente desativado,
+    // mesmo que o pré-carregamento falhe ou demore muito.
+    const fallbackLoadingTimer = setTimeout(() => {
       setIsLoading(false);
-    }, 500); 
-    return () => clearTimeout(timer);
-  }, []);
+    }, 2500); // Tempo de fallback (ajuste conforme necessário)
+
+    return () => clearTimeout(fallbackLoadingTimer);
+  }, []); // Executa apenas uma vez na montagem
   
   useEffect(() => {
-    setImagesLoaded({ before: false, after: false });
-    setSliderPosition(50); // Reset slider position
-    setShowAfterImage(false); // Começa mostrando a imagem "antes"
-    
-    const nextIndex = (activeIndex + 1) % transformations.length;
-    if (nextIndex !== activeIndex && transformations[nextIndex]) {
-      const nextTransformation = transformations[nextIndex];
-      preloadImagesByUrls([
-        nextTransformation.beforeImage,
-        nextTransformation.afterImage
-      ], {
-        quality: 80,
-        batchSize: 2
-      });
+    setImageLoaded(false); // Reseta ao mudar de slide
+    setIsLoading(true);    // Ativa o loading para a nova imagem
+
+    const currentImage = activeTransformation?.image;
+    if (currentImage) {
+      // Tenta pré-carregar a imagem ativa com alta prioridade
+      // A função preloadImagesByUrls não retorna uma promise diretamente para encadear .then()
+      // A atualização de imageLoaded e isLoading será feita no onLoad do ProgressiveImage
+      preloadImagesByUrls([currentImage], { quality: 90, batchSize: 1 });
+
+      // Pré-carrega a imagem do *próximo* slide em segundo plano
+      const nextIndex = (activeIndex + 1) % transformations.length;
+      if (transformations[nextIndex] && nextIndex !== activeIndex) {
+        const nextTransformationImage = transformations[nextIndex].image;
+        preloadImagesByUrls([nextTransformationImage], { quality: 80, batchSize: 1 });
+      }
+    } else {
+      setIsLoading(false); // Se não houver imagem ativa, desativa o loading
     }
+  }, [activeIndex, activeTransformation]);
 
-    // Lógica para transição automática de imagem
-    const imageTransitionInterval = setInterval(() => {
-      setShowAfterImage(prevShowAfter => !prevShowAfter);
-    }, 4000); // Alterna a cada 4 segundos
-
-    return () => {
-      clearInterval(imageTransitionInterval); // Limpa o intervalo ao mudar de slide ou desmontar
-    };
-  }, [activeIndex]);
-  
   useEffect(() => {
-    if (imagesLoaded.before && imagesLoaded.after) {
+    // Lógica de isLoading agora é tratada no useEffect de activeIndex
+    // para refletir o carregamento da imagem atual.
+    // Se imageLoaded for true, isLoading deve ser false.
+    if (imageLoaded) {
       setIsLoading(false);
     }
-  }, [imagesLoaded]);
-  
-  // Remover handleSliderChange ou comentar, pois o slider manual não será mais o principal
-  // const handleSliderChange = (value: number[]) => {
-  //   setSliderPosition(value[0]);
-  // };
+  }, [imageLoaded]);
 
   const handleDotClick = (index: number) => {
     setActiveIndex(index);
@@ -160,7 +145,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
 
         <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-10 lg:gap-16">
           {/* Seção de Texto */}
-          <div className="text-left lg:w-2/5 order-2 lg:order-1">
+          <div className="text-left lg:w-2/5 order-2 lg:order-1"></div>
             <h3 className="text-2xl md:text-3xl font-semibold text-[#432818] dark:text-[#E0C9B1] mb-5 font-playfair">
               Transforme Sua Imagem, <span className="text-[#aa6b5d] dark:text-[#D4B79F]">Revele Sua Essência</span>
             </h3>
@@ -200,54 +185,24 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
           {/* Seção do Slider de Imagem */}
           <div className="lg:w-3/5 order-1 lg:order-2 w-full max-w-xl mx-auto">
             {isLoading ? (
-              <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+              <div className="aspect-[4/5] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center w-full mx-auto">
                 <p className="text-gray-500 dark:text-gray-400">Carregando transformação...</p>
               </div>
             ) : (
               <Card className="overflow-hidden shadow-2xl rounded-xl border border-[#B89B7A]/20 dark:border-[#E0C9B1]/20 bg-white dark:bg-[#332820]">
                 <div className="relative w-full aspect-[4/5] mx-auto">
-                  {/* Imagem "Antes" - sempre visível no fundo */}
                   <ProgressiveImage
-                    src={activeTransformation.beforeImage}
-                    lowQualitySrc={getTinyPlaceholder(activeTransformation.beforeImage)}
-                    alt={`${activeTransformation.name} - Antes`}
+                    src={activeTransformation.image}
+                    lowQualitySrc={getTinyPlaceholder(activeTransformation.image)}
+                    alt={`${activeTransformation.name} - Transformação`}
                     className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-500"
-                    style={{ opacity: imagesLoaded.before ? 1 : 0 }}
-                    onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
-                    priority
-                  />
-                  {/* Imagem "Depois" - transição de opacidade */}
-                  <ProgressiveImage
-                    src={activeTransformation.afterImage}
-                    lowQualitySrc={getTinyPlaceholder(activeTransformation.afterImage)}
-                    alt={`${activeTransformation.name} - Depois`}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl transition-opacity duration-1000 ease-in-out" // Duração da transição
-                    style={{ 
-                      opacity: showAfterImage && imagesLoaded.after ? 1 : 0 // Controla a visibilidade com base no estado
+                    style={{ opacity: imageLoaded ? 1 : 0 }}
+                    onLoad={() => {
+                      setImageLoaded(true);
+                      setIsLoading(false); 
                     }}
-                    onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
-                    priority
+                    priority 
                   />
-                  {/* Remover o slider visual e o controle manual do slider, se desejado, ou apenas ocultá-lo */}
-                  {/* 
-                  <div 
-                    className="absolute top-0 bottom-0 bg-[#B89B7A] dark:bg-[#D4B79F] w-1.5 cursor-ew-resize"
-                    style={{ left: `calc(${sliderPosition}% - 3px)` }}
-                  >
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-md flex items-center justify-center border-2 border-[#B89B7A] dark:border-[#D4B79F]">
-                      <ChevronLeft className="w-4 h-4 text-[#B89B7A] dark:text-[#D4B79F]" />
-                      <ChevronRight className="w-4 h-4 text-[#B89B7A] dark:text-[#D4B79F]" />
-                    </div>
-                  </div>
-                  <Slider
-                    value={[sliderPosition]}
-                    onValueChange={handleSliderChange} // Comentado ou removido
-                    min={0}
-                    max={100}
-                    step={0.1}
-                    className="absolute inset-0 opacity-0 cursor-ew-resize" // Pode manter invisível para navegação por teclado se necessário
-                  />
-                  */}
                 </div>
                 <div className="p-4 bg-white dark:bg-[#332820] rounded-b-xl">
                   <p className="text-center text-xl font-medium text-[#432818] dark:text-[#E0C9B1] mb-2">{activeTransformation.name}</p>
