@@ -88,7 +88,7 @@ export const preloadImages = (
     onComplete?: () => void
   } = {}
 ): void => {
-  const { batchSize = 3, quality = 95, onComplete } = options;
+  const { batchSize = 3, quality = 99, onComplete } = options;
   
   // Process each URL, standardizing the format
   const processedUrls = urls.map(item => {

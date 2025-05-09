@@ -118,7 +118,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     if (showContent && !isLoading) {
       // Pequeno atraso para garantir que as imagens foram renderizadas
       setTimeout(() => {
-        fixBlurryIntroQuizImages();
+        console.log('[QuizIntro] Aplicando correção para imagens borradas');
+        const count = fixBlurryIntroQuizImages();
+        console.log(`[QuizIntro] Correção aplicada com sucesso: ${count} imagens corrigidas`);
       }, 100);
     }
   }, [showContent, isLoading]);
@@ -138,18 +140,19 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
            style={{
              minHeight: '100vh',  
              background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)'
-           }}>
+           }}
+           data-section="intro">
         <div className="w-full max-w-md flex flex-col items-center justify-center text-center">
           <div className="w-28 sm:w-32 md:w-36 mb-6">
             <OptimizedImage
-              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_95,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
               alt="Logo Gisele Galvão"
               className="w-full h-auto"
               width={144}
               height={72}
               priority={true}
               objectFit="contain"
-              quality={95}
+              quality={99}
             />
           </div>
           <LoadingSpinner size="lg" color="#B89B7A" className="mb-4" />
@@ -163,12 +166,13 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   return (
     <AutoFixedImages>
       <div 
-        className={`flex flex-col items-center justify-start py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+        className={`quiz-intro flex flex-col items-center justify-start py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
         style={{
           background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
           minHeight: '100%',
           paddingBottom: '2rem'
         }}
+        data-section="intro"
       >
       <div className="w-full max-w-md flex flex-col items-center space-y-6 pb-8">
         
@@ -176,14 +180,14 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         <div className="w-full flex flex-col items-center mb-2"> 
           <div className="w-28 sm:w-32 md:w-36"> 
             <OptimizedImage 
-              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_95,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
+              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
               className="block h-auto w-full"
               width={144}
               height={72}
               priority={true} 
               objectFit="contain"
-              quality={95}
+              quality={99}
               placeholderColor="#ffffff"
             />
           </div>
