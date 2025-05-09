@@ -35,13 +35,18 @@ export const loadFacebookPixel = () => {
     
     // Função segura para inicializar e rastrear
     const safeInitPixel = () => {
-      if (window.fbq) {
-        window.fbq('init', pixelId);
-        window.fbq('track', 'PageView');
-        console.log('Facebook Pixel inicializado com ID:', pixelId);
-        return true;
+      try {
+        if (window.fbq) {
+          window.fbq('init', pixelId);
+          window.fbq('track', 'PageView');
+          console.log('Facebook Pixel inicializado com ID:', pixelId);
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error('Erro ao inicializar Facebook Pixel:', err);
+        return false;
       }
-      return false;
     };
     
     // Tenta inicializar imediatamente
@@ -63,9 +68,23 @@ export const loadFacebookPixel = () => {
  * Rastreia um evento personalizado
  */
 export const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
-  if (typeof window === 'undefined' || !window.fbq) return;
+  if (typeof window === 'undefined') return;
   
   try {
+    if (!window.fbq) {
+      console.warn('Facebook Pixel não está disponível para rastrear evento:', eventName);
+      // Tenta inicializar novamente antes de rastrear
+      loadFacebookPixel();
+      // Tenta rastrear após um pequeno delay
+      setTimeout(() => {
+        if (window.fbq) {
+          window.fbq('track', eventName, eventData);
+          console.log(`Evento rastreado (retry): ${eventName}`, eventData);
+        }
+      }, 300);
+      return;
+    }
+    
     window.fbq('track', eventName, eventData);
     console.log(`Evento rastreado: ${eventName}`, eventData);
   } catch (error) {

@@ -38,15 +38,27 @@ const AutoFixedImages: React.FC<AutoFixedImagesProps> = ({
       // Executar imediatamente
       window.ImageFixer.fixAllBlurryImages();
       
-      // Executar novamente após um curto intervalo para pegar imagens carregadas assincronamente
+      // Executar novamente em intervalos diferentes para capturar 
+      // imagens carregadas assincronamente
       setTimeout(() => {
         window.ImageFixer?.fixAllBlurryImages();
-      }, 300);
+      }, 200);
       
-      // E uma última verificação após um tempo maior
+      setTimeout(() => {
+        window.ImageFixer?.fixAllBlurryImages();
+      }, 500);
+      
       setTimeout(() => {
         window.ImageFixer?.fixAllBlurryImages();
       }, 1000);
+      
+      setTimeout(() => {
+        window.ImageFixer?.fixAllBlurryImages();
+      }, 2000);
+      
+      setTimeout(() => {
+        window.ImageFixer?.fixAllBlurryImages();
+      }, 3500);
     }
   }, [priority]);
   

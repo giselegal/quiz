@@ -53,13 +53,17 @@ const App = () => {
 
   // Inicializar analytics na montagem do componente
   useEffect(() => {
-    // Inicializar Facebook Pixel
-    loadFacebookPixel();
-    
-    // Capturar UTM parameters para analytics de marketing
-    captureUTMParameters();
-    
-    console.log(`App initialized with performance optimization${lowPerformance ? ' (low-performance mode)' : ''}`);
+    try {
+      // Inicializar Facebook Pixel
+      loadFacebookPixel();
+      
+      // Capturar UTM parameters para analytics de marketing
+      captureUTMParameters();
+      
+      console.log(`App initialized with performance optimization${lowPerformance ? ' (low-performance mode)' : ''}`);
+    } catch (error) {
+      console.error('Erro ao inicializar analytics:', error);
+    }
   }, [lowPerformance]);
 
   // Reinicializar Facebook Pixel em mudanças de rota

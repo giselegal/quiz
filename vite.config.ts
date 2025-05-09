@@ -6,13 +6,19 @@ import compression from "vite-plugin-compression";
 
 export default defineConfig(({ mode }) => ({
   root: '.',  // Definindo o diretório raiz onde está o index.html principal
+  base: './',  // Assegura que os caminhos relativos funcionem corretamente
   server: {
     host: "::",
     port: 8080,
     headers: {
       // Adiciona os headers MIME type corretos para desenvolvimento
       'X-Content-Type-Options': 'nosniff',
+      'Content-Type': 'application/javascript; charset=utf-8'
     },
+    fs: {
+      // Permite acesso a arquivos fora do diretório raiz se necessário
+      allow: ['../']
+    }
   },
   plugins: [
     react(),
@@ -47,9 +53,10 @@ export default defineConfig(({ mode }) => ({
             'tailwind-merge'
           ],
           'analytics': [
-            './src/services/pixelManager.ts',
-            './src/utils/analytics.ts'
+            './src/utils/analytics.ts',
+            './src/utils/facebookPixel.ts'
           ]
+        },
         },
         // Garante o MIME type correto para todos os assets
         entryFileNames: 'assets/[name]-[hash].js',

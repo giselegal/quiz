@@ -58,10 +58,10 @@ function getHighQualityUrl(url: string): string {
   // Aplicar apenas nossas transformações otimizadas
   const transforms = [
     'f_auto',         // Formato automático (webp/avif)
-    'q_99',          // Qualidade máxima (99%)
-    'dpr_auto',       // Densidade de pixel automática
-    'w_auto',         // Largura automática
-    'c_limit',        // Limitar redimensionamento
+    'q_99',           // Qualidade máxima (99%)
+    'dpr_auto',       // Densidade de pixel automática para telas de alta resolução
+    'w_auto',         // Largura automática baseada no contêiner
+    'c_limit',        // Limitar redimensionamento para manter qualidade
     'e_sharpen:80'    // Nitidez aumentada para compensar qualquer compressão
   ].join(',');
 
@@ -104,10 +104,11 @@ const FixedIntroImage: React.FC<FixedIntroImageProps> = ({
         alt={alt}
         width={width}
         height={height}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover quiz-intro-image"
         loading={priority ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : 'auto'}
         decoding={priority ? 'sync' : 'async'}
+        style={{imageRendering: 'crisp-edges'}}
       />
     </div>
   );
