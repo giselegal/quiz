@@ -1,8 +1,16 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
+import { StyleResult } from '@/types/quiz'; // Corrected import path
+import { styleConfig } from '@/config/styleConfig';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
-const ResultSkeleton: React.FC = () => {
+interface ResultSkeletonProps {
+  primaryStyle?: StyleResult;
+}
+
+const ResultSkeleton: React.FC<ResultSkeletonProps> = ({ primaryStyle }) => {
+  const mainImageSrc = primaryStyle && styleConfig[primaryStyle.category]?.image;
+
   return (
     <div className="min-h-screen bg-[#fffaf7] p-4">
       <div className="container mx-auto max-w-4xl">
@@ -37,7 +45,18 @@ const ResultSkeleton: React.FC = () => {
                 <div className="w-full h-24 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md" />
               </div>
               <div className="flex justify-center relative z-10">
-                <div className="w-64 h-80 bg-gradient-to-b from-[#aa6b5d]/10 to-[#B89B7A]/10 animate-pulse rounded-md shadow-sm" />
+                {mainImageSrc ? (
+                  <OptimizedImage
+                    src={mainImageSrc}
+                    alt={`Estilo ${primaryStyle?.category}`}
+                    width={238}
+                    height={Math.round(238 * 1.3)}
+                    className="w-64 h-80 object-cover rounded-md shadow-sm opacity-50" // Basic styling for preloaded image
+                    priority={true}
+                  />
+                ) : (
+                  <div className="w-64 h-80 bg-gradient-to-b from-[#aa6b5d]/10 to-[#B89B7A]/10 animate-pulse rounded-md shadow-sm" />
+                )}
               </div>
             </div>
           </div>

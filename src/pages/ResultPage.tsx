@@ -67,7 +67,7 @@ const ResultPage: React.FC = () => {
   }
   
   if (isLoading || isLoadingABTest) {
-    return <ResultSkeleton />;
+    return <ResultSkeleton primaryStyle={primaryStyle} />;
   }
   
   const {
@@ -134,7 +134,7 @@ const ResultPage: React.FC = () => {
   
   return (
     <div className="min-h-screen relative overflow-hidden" style={getStyleOverrides()}>
-      <CriticalCSSLoader css={resultPageCriticalCSS} />
+      <CriticalCSSLoader cssContent={resultPageCriticalCSS} />
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#B89B7A]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-[#aa6b5d]/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
       
@@ -182,7 +182,7 @@ const ResultPage: React.FC = () => {
                     src={image}
                     alt={`Estilo ${category}`}
                     width={238}
-                    height={238 * 1.3}
+                    height={Math.round(238 * 1.3)}
                     className="w-full h-auto rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
                     priority={true}
                   />
