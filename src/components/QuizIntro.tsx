@@ -104,9 +104,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   return (
     <div 
-      className={`min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+      className={`min-h-screen flex flex-col items-center justify-start bg-[#FEFEFE] py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
     >
-      <div className="w-full max-w-md flex flex-col items-center"> {/* Container principal do conteúdo visível */}
+      <div className="w-full max-w-md flex flex-col items-center gap-y-6"> {/* Container principal do conteúdo visível e gap-y-6 adicionado */}
         
         {/* Seção da Logo e Barra - Margem inferior reduzida */}
         <div className="w-full flex flex-col items-center mb-4 md:mb-6"> 
