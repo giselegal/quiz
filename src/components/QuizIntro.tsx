@@ -86,11 +86,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         </h1>
 
         {/* Imagem - menor */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-6 w-full px-4">
           <OptimizedImage 
             src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
             alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-            className="w-full max-w-[220px] h-auto rounded-lg shadow-sm" 
+            className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] h-auto rounded-lg shadow-sm object-contain" 
             priority={true} 
           />
         </div>
