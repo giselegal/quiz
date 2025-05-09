@@ -6,20 +6,19 @@ import compression from "vite-plugin-compression";
 
 export default defineConfig(({ mode }) => ({
   root: '.',  // Definindo o diretório raiz onde está o index.html principal
-  base: './',  // Assegura que os caminhos relativos funcionem corretamente
+  base: '/',  // Importante usar '/' para resolver problemas de caminhos
+  
   server: {
     host: "::",
     port: 8080,
     headers: {
-      // Adiciona os headers MIME type corretos para desenvolvimento
       'X-Content-Type-Options': 'nosniff',
-      'Content-Type': 'application/javascript; charset=utf-8'
     },
     fs: {
-      // Permite acesso a arquivos fora do diretório raiz se necessário
       allow: ['../']
     }
   },
+  
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
@@ -34,11 +33,14 @@ export default defineConfig(({ mode }) => ({
       ext: '.br',
     }),
   ].filter(Boolean),
+  
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    extensions: ['.js', '.jsx', '.ts', '.tsx'], // Adiciona suporte explícito para extensões
   },
+  
   build: {
     // Otimiza o tamanho do bundle e melhora carregamento
     rollupOptions: {
@@ -56,7 +58,6 @@ export default defineConfig(({ mode }) => ({
             './src/utils/analytics.ts',
             './src/utils/facebookPixel.ts'
           ]
-        },
         },
         // Garante o MIME type correto para todos os assets
         entryFileNames: 'assets/[name]-[hash].js',
@@ -76,11 +77,11 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  // Otimiza a importação de imagens
+  
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom']
   },
-  // Improve CSS handling for faster renders
+  
   css: {
     devSourcemap: mode === 'development',
     preprocessorOptions: {

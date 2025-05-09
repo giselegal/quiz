@@ -79,8 +79,11 @@
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     </noscript>
     
+    <!-- Meta tag para correção de MIME types -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    
     <!-- Análises e scripts externos (otimizados) -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" defer></script>
+    <script nomodule src="https://cdn.gpteng.co/gptengineer.js" defer></script>
     <script src="https://static.cloudflareinsights.com/beacon.min.js" defer></script>
     
     <!-- Facebook Pixel Code -->
@@ -103,6 +106,7 @@
         <div class="loading-spinner"></div>
       </div>
     </div>
+    <!-- Script não-modular para evitar erros de MIME type -->
     <script src="/src/main.jsx"></script>
   </body>
 </html>
