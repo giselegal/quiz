@@ -4,6 +4,7 @@
  */
 
 import { imageCache } from './images/caching';
+import { analyzeImageUrl as jsAnalyzeImageUrl } from '../ImageChecker';
 
 interface ImageDiagnosticReport {
   url: string;
@@ -14,7 +15,11 @@ interface ImageDiagnosticReport {
   dimensionsProvided: boolean;
   transformationsApplied: string[];
   loadTime?: number;
-  quality?: number;
+  quality?: number | string;
+  format?: string;
+  version?: string | null;
+  width?: string | number;
+  height?: string | number;
   suggestions: string[];
 }
 
@@ -23,73 +28,42 @@ interface ImageDiagnosticReport {
  * @param url URL da imagem para análise
  */
 export const analyzeImageUrl = (url: string): ImageDiagnosticReport => {
-  const isCloudinary = url.includes('cloudinary.com');
+  // Usar a função avançada de análise do ImageChecker
+  const jsAnalysis = jsAnalyzeImageUrl(url);
+  
+  const isCloudinary = url.includes('cloudinary.com') || url.includes('res.cloudinary.com');
   const cacheEntry = imageCache.get(url);
+  
+  // Combinar resultados de ambas as análises
   const report: ImageDiagnosticReport = {
     url,
     optimizedUrl: cacheEntry?.optimizedUrl,
     hasPlaceholder: !!cacheEntry?.lowQualityUrl,
     loadStatus: cacheEntry?.loadStatus,
     isCloudinary,
-    dimensionsProvided: false,
-    transformationsApplied: [],
-    suggestions: []
+    dimensionsProvided: jsAnalysis.width !== 'não especificado' || jsAnalysis.height !== 'não especificado',
+    transformationsApplied: jsAnalysis.transformations || [],
+    quality: jsAnalysis.quality,
+    format: jsAnalysis.format,
+    version: jsAnalysis.version,
+    width: jsAnalysis.width,
+    height: jsAnalysis.height,
+    suggestions: [...(jsAnalysis.suggestions || [])]
   };
   
-  // Analisa transformações existentes na URL
-  if (isCloudinary) {
-    // Verifica se tem parâmetros de qualidade
-    if (url.includes('q_auto') || url.match(/q_\d+/)) {
-      report.transformationsApplied.push('quality');
+  // Verificar informações adicionais específicas do cache
+  if (cacheEntry) {
+    if (cacheEntry.loadTime) {
+      report.loadTime = cacheEntry.loadTime;
       
-      // Extrai o valor da qualidade
-      const qualityMatch = url.match(/q_(\d+)/);
-      if (qualityMatch) {
-        report.quality = parseInt(qualityMatch[1], 10);
-      } else if (url.includes('q_auto')) {
-        report.quality = -1; // Auto quality
-      }
-    } else {
-      report.suggestions.push('Adicionar controle de qualidade (q_auto ou q_85)');
-    }
-    
-    // Verifica se tem parâmetros de formato
-    if (url.includes('f_auto')) {
-      report.transformationsApplied.push('format_auto');
-    } else {
-      report.suggestions.push('Usar formato automático (f_auto) para menor tamanho');
-    }
-    
-    // Verifica se tem especificação de largura
-    const widthMatch = url.match(/w_(\d+)/);
-    if (widthMatch) {
-      report.transformationsApplied.push('width');
-      report.dimensionsProvided = true;
-    } else {
-      report.suggestions.push('Especificar largura para evitar carregar imagens grandes desnecessariamente');
-    }
-    
-    // Verifica se tem nitidez
-    if (url.includes('e_sharpen')) {
-      report.transformationsApplied.push('sharpen');
-    } else {
-      report.suggestions.push('Adicionar nitidez (e_sharpen:60) para melhorar a qualidade percebida');
-    }
-    
-    // Verifica transformações de blur
-    if (url.includes('e_blur')) {
-      const blurMatch = url.match(/e_blur:(\d+)/);
-      if (blurMatch) {
-        const blurValue = parseInt(blurMatch[1], 10);
-        report.transformationsApplied.push(`blur:${blurValue}`);
-        
-        if (blurValue > 500 && url.includes('lowquality')) {
-          report.suggestions.push('Reduzir valor de blur para placeholders (recomendado: 300-500)');
-        }
+      if (cacheEntry.loadTime > 1000) {
+        report.suggestions.push('Imagem com tempo de carregamento alto (>1s), considerar otimização adicional');
       }
     }
-  } else {
-    report.suggestions.push('Considerar migrar para Cloudinary para otimização automática');
+    
+    if (cacheEntry.sizeFactor && cacheEntry.sizeFactor > 2) {
+      report.suggestions.push(`Imagem sendo servida em tamanho muito maior (${cacheEntry.sizeFactor}x) que o necessário`);
+    }
   }
   
   // Validação do cache
@@ -110,7 +84,10 @@ export const analyzeImageUrl = (url: string): ImageDiagnosticReport => {
  */
 export const checkRenderedImages = () => {
   const imgElements = document.querySelectorAll('img');
-  const results: {url: string, issues: string[]}[] = [];
+  const results: {url: string, issues: string[], element: HTMLImageElement}[] = [];
+  
+  console.group('📷 Diagnóstico de Imagens Renderizadas');
+  console.log(`Analisando ${imgElements.length} imagens na página atual...`);
   
   imgElements.forEach(img => {
     const src = img.src;
@@ -138,18 +115,106 @@ export const checkRenderedImages = () => {
       issues.push('Falta definição de object-fit');
     }
     
-    // Analisa URL para otimizações Cloudinary
-    if (src.includes('cloudinary.com')) {
-      const report = analyzeImageUrl(src);
+    // Analisa URL para otimizações avançadas
+    const report = analyzeImageUrl(src);
+    if (report.suggestions.length > 0) {
       issues.push(...report.suggestions);
     }
     
+    // Verifica visibilidade
+    const rect = img.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+    
+    if (isVisible && img.loading === 'lazy') {
+      issues.push('Imagem visível na abertura usando loading="lazy" - deve usar eager ou priority');
+    }
+    
+    // Verifica se o tamanho real é muito menor que o tamanho exibido (pixelado)
+    if (img.naturalWidth > 0 && img.width > 0 && img.naturalWidth / img.width < 0.5) {
+      issues.push(`Imagem sendo esticada (${img.naturalWidth}px para ${img.width}px) - possível pixelação`);
+    }
+    
     if (issues.length > 0) {
-      results.push({url: src, issues});
+      results.push({url: src, issues, element: img});
+      
+      // Adicionar borda vermelha em modo de desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        img.style.border = '2px solid red';
+        img.setAttribute('title', issues.join('\n'));
+      }
     }
   });
   
+  if (results.length > 0) {
+    console.warn(`⚠️ Encontrados ${results.length} problemas em imagens:`);
+    results.forEach((result, i) => {
+      console.group(`Imagem ${i+1}: ${result.url.substring(0, 50)}...`);
+      console.log('Elemento:', result.element);
+      console.log('Problemas:');
+      result.issues.forEach(issue => console.log(`- ${issue}`));
+      console.groupEnd();
+    });
+  } else {
+    console.log('✅ Nenhum problema encontrado nas imagens renderizadas!');
+  }
+  
+  console.groupEnd();
   return results;
+};
+
+/**
+ * Gera um relatório completo de diagnóstico de imagens
+ * para uma análise detalhada de desempenho de imagens no site
+ */
+export const generateImageReport = () => {
+  const renderedImages = checkRenderedImages();
+  const cachedImagesCount = Object.keys(imageCache.getAll()).length;
+  const totalDownloadedBytes = Object.values(imageCache.getAll())
+    .reduce((sum, entry: any) => sum + (entry.size || 0), 0);
+  
+  const report = {
+    timestamp: new Date().toISOString(),
+    summary: {
+      totalImagesRendered: document.querySelectorAll('img').length,
+      totalImagesWithIssues: renderedImages.length,
+      totalImagesCached: cachedImagesCount,
+      totalDownloadedBytes,
+      estimatedPerformanceImpact: renderedImages.length > 5 ? 'Alto' : renderedImages.length > 0 ? 'Médio' : 'Baixo',
+    },
+    issuesByCategory: {
+      optimization: 0,
+      sizing: 0,
+      format: 0,
+      loading: 0,
+      others: 0
+    },
+    detailedIssues: renderedImages
+  };
+  
+  // Classificar problemas por categoria
+  renderedImages.forEach(item => {
+    item.issues.forEach(issue => {
+      if (issue.includes('qualidade') || issue.includes('otimiz')) {
+        report.issuesByCategory.optimization++;
+      } else if (issue.includes('tamanho') || issue.includes('grande') || issue.includes('pequen')) {
+        report.issuesByCategory.sizing++;
+      } else if (issue.includes('formato') || issue.includes('webp') || issue.includes('avif')) {
+        report.issuesByCategory.format++;
+      } else if (issue.includes('carreg') || issue.includes('lazy') || issue.includes('eager')) {
+        report.issuesByCategory.loading++;
+      } else {
+        report.issuesByCategory.others++;
+      }
+    });
+  });
+  
+  console.group('📊 Relatório Completo de Diagnóstico de Imagens');
+  console.log('Sumário:', report.summary);
+  console.log('Problemas por categoria:', report.issuesByCategory);
+  console.log('Data e hora:', report.timestamp);
+  console.groupEnd();
+  
+  return report;
 };
 
 /**
@@ -157,5 +222,6 @@ export const checkRenderedImages = () => {
  */
 export default {
   analyzeImageUrl,
-  checkRenderedImages
+  checkRenderedImages,
+  generateImageReport
 };

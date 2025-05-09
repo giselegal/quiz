@@ -140,7 +140,135 @@ export const checkIntroImages = () => {
   };
 };
 
+/**
+ * Analisa uma URL de imagem do Cloudinary para extrair informações e diagnosticar problemas
+ * @param {string} url - URL da imagem para análise
+ * @returns {Object} Objeto com informações detalhadas sobre a URL da imagem
+ */
+export const analyzeImageUrl = (url) => {
+  if (!url) {
+    return {
+      isValid: false,
+      error: 'URL não fornecida'
+    };
+  }
+
+  console.group('🔍 Análise de URL de Imagem');
+  console.log(`URL Original: ${url}`);
+  
+  // Verificar se é uma URL do Cloudinary
+  const isCloudinary = url.includes('cloudinary.com') || url.includes('res.cloudinary.com');
+  if (!isCloudinary) {
+    console.warn('⚠️ Esta não é uma URL do Cloudinary. A análise pode ser limitada.');
+  }
+  
+  // Informações básicas
+  const info = {
+    isValid: true,
+    isCloudinary,
+    originalUrl: url,
+    hasOptimization: false,
+    format: 'desconhecido',
+    quality: 'desconhecido',
+    width: 'não especificado',
+    height: 'não especificado',
+    transformations: [],
+    version: null,
+    suggestions: []
+  };
+  
+  // Analisar partes da URL
+  try {
+    // Extrair formato
+    if (url.match(/\.(jpg|jpeg|png|webp|avif|gif|svg)/i)) {
+      info.format = url.match(/\.(jpg|jpeg|png|webp|avif|gif|svg)/i)[1].toLowerCase();
+    }
+    
+    // Verificar versões (v1234567890)
+    const versionMatch = url.match(/\/v\d+\//);
+    if (versionMatch) {
+      info.version = versionMatch[0].replace(/\//g, '');
+    }
+    
+    if (isCloudinary) {
+      // Extrair parâmetros de transformação
+      const uploadIndex = url.indexOf('/upload/');
+      if (uploadIndex > 0) {
+        const pathAfterUpload = url.substring(uploadIndex + 8);
+        const transformationPart = pathAfterUpload.substring(0, pathAfterUpload.indexOf('/'));
+        
+        if (transformationPart) {
+          const params = transformationPart.split(',');
+          info.transformations = params;
+          
+          // Analisar parâmetros específicos
+          params.forEach(param => {
+            if (param.startsWith('f_')) {
+              info.format = param.substring(2);
+              info.hasOptimization = true;
+            }
+            if (param.startsWith('q_')) {
+              info.quality = param.substring(2);
+              info.hasOptimization = true;
+            }
+            if (param.startsWith('w_')) {
+              info.width = param.substring(2);
+              info.hasOptimization = true;
+            }
+            if (param.startsWith('h_')) {
+              info.height = param.substring(2);
+              info.hasOptimization = true;
+            }
+            if (param.startsWith('e_')) {
+              // Efeitos como blur
+              info.transformations.push(param);
+            }
+          });
+        }
+      }
+    }
+    
+    // Gerar sugestões
+    if (isCloudinary) {
+      if (!info.hasOptimization) {
+        info.suggestions.push('Adicionar parâmetros de otimização (f_auto,q_auto)');
+      }
+      
+      if (!info.width && !info.height) {
+        info.suggestions.push('Especificar largura e/ou altura para evitar servir imagens muito grandes');
+      }
+      
+      if (info.format === 'png' && !url.includes('transparent')) {
+        info.suggestions.push('Considerar usar formato WEBP ou AVIF em vez de PNG para melhor compressão');
+      }
+      
+      if (info.quality && parseInt(info.quality) > 85 && info.quality !== 'auto') {
+        info.suggestions.push('Considerar reduzir a qualidade para 80-85 para melhorar o desempenho sem perda visual perceptível');
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao analisar URL:', error);
+    info.error = error.message;
+  }
+  
+  // Exibir resultados da análise
+  console.log(`📊 Análise Completa:`, info);
+  
+  if (info.suggestions.length > 0) {
+    console.log('💡 Sugestões de Otimização:');
+    info.suggestions.forEach((sugestão, i) => {
+      console.log(`  ${i+1}. ${sugestão}`);
+    });
+  } else if (info.hasOptimization) {
+    console.log('✅ URL parece estar bem otimizada!');
+  }
+  
+  console.groupEnd();
+  return info;
+};
+
 export default {
   checkImageStatus,
-  checkIntroImages
+  checkIntroImages,
+  analyzeImageUrl
 };
