@@ -136,23 +136,22 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 md:px-6" 
+      <div className="flex flex-col items-center justify-center py-12 px-6 sm:px-8" 
            style={{
              minHeight: '100vh',  
              background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)'
            }}
            data-section="intro">
         <div className="w-full max-w-md flex flex-col items-center justify-center text-center">
-          <div className="w-28 sm:w-32 md:w-36 mb-6">
-            <OptimizedImage
+          <div className="flex justify-center w-full mb-6">
+            <img
               src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
               alt="Logo Gisele Galvão"
-              className="w-full h-auto"
-              width={144}
-              height={72}
-              priority={true}
-              objectFit="contain"
-              quality={99}
+              className="h-auto w-32 sm:w-36 md:w-40 mx-auto"
+              width={160}
+              height={80}
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
           <LoadingSpinner size="lg" color="#B89B7A" className="mb-4" />
@@ -166,32 +165,32 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   return (
     <AutoFixedImages>
       <div 
-        className={`quiz-intro flex flex-col items-center justify-start py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+        className={`quiz-intro flex flex-col items-center justify-start py-10 px-6 sm:px-8 md:px-10 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
         style={{
           background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
-          minHeight: '100%',
-          paddingBottom: '2rem'
+          minHeight: '100vh',
+          paddingBottom: '3rem'
         }}
         data-section="intro"
       >
-      <div className="w-full max-w-md flex flex-col items-center space-y-6 pb-8">
+      <div className="w-full max-w-lg flex flex-col items-center space-y-8 pb-8">
         
         {/* Seção da Logo e Barra - Margem inferior ajustada */}
-        <div className="w-full flex flex-col items-center mb-2"> 
-          <div className="w-28 sm:w-32 md:w-36"> 
+        <div className="w-full flex flex-col items-center mb-4"> 
+          <div className="w-32 sm:w-36 md:w-40"> 
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
               className="block h-auto w-full"
-              width={144}
-              height={72}
+              width={160}
+              height={80}
               priority={true} 
               objectFit="contain"
               quality={99}
               placeholderColor="#ffffff"
             />
           </div>
-          <div className="mt-2 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded"></div>
+          <div className="mt-3 h-[3px] w-48 sm:w-52 md:w-60 bg-[#B89B7A] rounded"></div>
         </div>
 
         {/* Headline - Tamanho e peso da fonte aumentados, margem inferior ajustada */}
@@ -201,14 +200,14 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
         {/* Imagem Principal - Substituída por FixedIntroImage para eliminar embaçamento */}
         <div className="w-full flex justify-center">
-          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+          <div className="w-full max-w-sm sm:max-w-md md:max-w-lg">
             <FixedIntroImage 
               src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.webp'} 
               alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-              width={800}
-              height={800}
+              width={1000}
+              height={1000}
               priority={true}
-              className="rounded-lg overflow-hidden shadow-sm"
+              className="rounded-lg overflow-hidden shadow-md"
             />
           </div>
         </div>
@@ -239,7 +238,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           </div>
           <Button 
             type="submit" 
-            className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-3 sm:py-3.5 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:-translate-y-1 hover:scale-105"
+            className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-3 sm:py-4 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:-translate-y-1 hover:scale-102"
             disabled={!nome.trim()}
           >
             Quero Descobrir meu Estilo Agora!

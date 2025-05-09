@@ -11,12 +11,15 @@ const ResultSkeleton: React.FC = () => {
           <div className="flex flex-col items-center gap-5">
             <div className="w-48 h-20 relative flex justify-center items-center">
               <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md"></div>
-              <img 
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
-                alt="Gisele Galvão"
-                className="h-16 relative z-10 opacity-60"
-                loading="eager"
-              />
+              <div className="flex justify-center w-full">
+                <img 
+                  src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+                  alt="Gisele Galvão"
+                  className="h-16 relative z-10 opacity-70 mx-auto"
+                  loading="eager"
+                  fetchPriority="high"
+                />
+              </div>
             </div>
             <div className="w-full max-w-md h-8 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md" />
           </div>
@@ -42,18 +45,28 @@ const ResultSkeleton: React.FC = () => {
         
         {/* Before-after transformation skeleton */}
         <Card className="p-6 mb-10 bg-white relative overflow-hidden">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="md:w-1/2 space-y-4 relative z-10">
-              <div className="w-3/4 h-8 bg-gradient-to-r from-[#aa6b5d]/20 to-gray-100 animate-pulse rounded-md mb-4" />
-              <div className="w-full h-20 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md" />
-              <div className="w-full h-12 bg-gradient-to-r from-[#B89B7A]/20 to-gray-100 animate-pulse rounded-md" />
+          <div className="flex flex-col gap-6">
+            <div className="text-center">
+              <div className="w-3/4 h-8 bg-gradient-to-r from-[#aa6b5d]/20 to-gray-100 animate-pulse rounded-md mx-auto mb-4" />
+              <div className="w-2/3 h-4 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md mx-auto" />
             </div>
-            <div className="md:w-1/2">
-              <div className="h-[300px] w-full bg-gradient-to-br from-gray-100 to-[#aa6b5d]/5 animate-pulse rounded-md">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm text-gray-400 whitespace-nowrap">
-                  Carregando transformações...
-                </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div className="space-y-2">
+                <div className="h-4 w-16 bg-gradient-to-r from-[#aa6b5d]/20 to-gray-100 animate-pulse rounded-md mx-auto" />
+                <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-[#aa6b5d]/5 animate-pulse rounded-md" />
               </div>
+              
+              <div className="space-y-2">
+                <div className="h-4 w-16 bg-gradient-to-r from-[#aa6b5d]/20 to-gray-100 animate-pulse rounded-md mx-auto" />
+                <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-[#B89B7A]/10 animate-pulse rounded-md" />
+              </div>
+            </div>
+            
+            <div className="flex justify-center gap-2 mt-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className={`w-2 h-2 rounded-full ${i === 1 ? 'bg-[#aa6b5d]/50' : 'bg-gray-200'}`} />
+              ))}
             </div>
           </div>
         </Card>
