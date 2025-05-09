@@ -123,12 +123,14 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
            }}>
         <div className="w-full max-w-md flex flex-col items-center justify-center text-center">
           <div className="w-28 sm:w-32 md:w-36 mb-6">
-            <img
-              src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+            <OptimizedImage
+              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_95,w_144,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
               alt="Logo Gisele Galvão"
               className="w-full h-auto"
               width={144}
               height={72}
+              priority={true}
+              objectFit="contain"
             />
           </div>
           <LoadingSpinner size="lg" color="#B89B7A" className="mb-4" />
@@ -181,7 +183,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               height={800}
               priority={true}
               quality={75}
+              objectFit="cover"
               containerClassName="rounded-lg overflow-hidden shadow-sm"
+              placeholderColor="#f8f4ef"
             />
           </div>
         </div>

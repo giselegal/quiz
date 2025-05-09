@@ -1,12 +1,15 @@
 
 import React from 'react';
+import OptimizedImage from './OptimizedImage';
 
 interface LogoProps {
   src?: string;
   alt?: string;
   className?: string;
   style?: React.CSSProperties;
-  priority?: boolean; // Added priority prop but we'll ignore it since we're not using Next.js Image
+  priority?: boolean;
+  width?: number;
+  height?: number;
 }
 
 const Logo: React.FC<LogoProps> = ({ 
@@ -14,14 +17,20 @@ const Logo: React.FC<LogoProps> = ({
   alt = "Logo Gisele Galvão",
   className = "h-14", 
   style,
-  priority // This will be ignored but won't cause type errors
+  priority = true,
+  width = 200,
+  height = 100
 }) => {
   return (
-    <img
+    <OptimizedImage
       src={src}
       alt={alt}
       className={className}
       style={style}
+      priority={priority}
+      width={width}
+      height={height}
+      objectFit="contain"
     />
   );
 };
