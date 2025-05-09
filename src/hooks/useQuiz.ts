@@ -2,10 +2,13 @@
 import { StyleResult, QuizResult } from '@/types/quiz';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export const useQuiz = () => {
   const [primaryStyle, setPrimaryStyle] = useState<StyleResult | null>(null);
   const [secondaryStyles, setSecondaryStyles] = useState<StyleResult[]>([]);
+  const [isSubmittingResults, setIsSubmittingResults] = useState(false);
+  const navigate = useNavigate();
   
   useEffect(() => {
     try {
@@ -74,9 +77,12 @@ export const useQuiz = () => {
   
   const submitResults = async (results: QuizResult, clickOrder: string[]) => {
     try {
+      setIsSubmittingResults(true);
       console.log("Results submitted:", results);
+      
       // Save results to localStorage
       localStorage.setItem('quizResult', JSON.stringify(results));
+      
       // Update state
       setPrimaryStyle(results.primaryStyle);
       setSecondaryStyles(results.secondaryStyles || []);
@@ -91,23 +97,33 @@ export const useQuiz = () => {
         });
       }
       
-      return window.location.href = '/resultado';
+      // Start preloading results page images
+      // (we'll handle this in the transition component)
+      
+      return true; // Return success flag instead of redirecting
     } catch (error) {
       toast({
         title: "Erro ao salvar resultados",
         description: "Por favor, tente novamente.",
         variant: "destructive",
       });
+      setIsSubmittingResults(false);
       throw error;
     }
+  };
+  
+  const navigateToResults = () => {
+    navigate('/resultado');
   };
   
   return {
     primaryStyle,
     secondaryStyles,
+    isSubmittingResults,
     startQuiz,
     submitAnswers,
-    submitResults
+    submitResults,
+    navigateToResults
   };
 };
 

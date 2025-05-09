@@ -12,27 +12,64 @@
     
     <!-- Preload critical transformation images with fetchpriority high -->
     <link rel="preload" as="image" 
-          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_80,f_auto,w_400/v1745519979/antes_adriana_pmdn8y.webp" 
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/5702e50d-7785-426a-a0c6-3c47af176523_p9acfp.webp" 
           fetchpriority="high"
           type="image/webp" />
     <link rel="preload" as="image" 
-          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_80,f_auto,w_400/v1745519979/depois_adriana_pmdn8y.webp"
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/5702e50d-7785-426a-a0c6-3c47af176523_p9acfp.webp"
           fetchpriority="high"
           type="image/webp" />
     <link rel="preload" as="image" 
-          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/antes_adriana_pmdn8y.webp"
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/5702e50d-7785-426a-a0c6-3c47af176523_p9acfp.webp"
           fetchpriority="high"
           type="image/webp" />
     <link rel="preload" as="image" 
-          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/depois_adriana_pmdn8y.webp"
+          href="https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/5702e50d-7785-426a-a0c6-3c47af176523_p9acfp.webp"
           fetchpriority="high"
           type="image/webp" />
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
     <meta name="description" content="Descubra seu estilo pessoal com nosso quiz interativo" />
+    
+    <!-- Critical CSS for faster initial rendering -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .loading-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #fffaf7;
+      }
+      .loading-spinner {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        border: 2px solid #f3e8e6;
+        border-top-color: #aa6b5d;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .font-playfair {
+        font-family: 'Playfair Display', serif;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback loading during initial page load -->
+      <div class="loading-fallback">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   </body>

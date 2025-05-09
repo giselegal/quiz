@@ -6,7 +6,7 @@ import { ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { Slider } from '../ui/slider';
 import ProgressiveImage from '../ui/ProgressiveImage';
-import { preloadImagesByUrls } from '@/utils/imageManager';
+import { preloadImagesByUrls, getLowQualityPlaceholder } from '@/utils/imageManager';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -18,56 +18,44 @@ interface TransformationItem {
   name: string;
   beforeId: string;
   afterId: string;
-  lowQualityBefore?: string;
-  lowQualityAfter?: string;
 }
 
-// Correct image URLs for before/after transformations with low quality placeholders
+// Updated transformations array with named transformation URLs
 const transformations: TransformationItem[] = [
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/antes_adriana_pmdn8y.webp",
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745519979/depois_adriana_pmdn8y.webp",
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/5702e50d-7785-426a-a0c6-3c47af176523_p9acfp.webp",
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/5702e50d-7785-426a-a0c6-3c47af176523_p9acfp.webp",
     name: "Adriana",
     beforeId: "transformation-adriana-before",
-    afterId: "transformation-adriana-after",
-    lowQualityBefore: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/antes_adriana_pmdn8y.webp",
-    lowQualityAfter: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745519979/depois_adriana_pmdn8y.webp"
+    afterId: "transformation-adriana-after"
   }, 
   {
-    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/antes_mariangela_cpugfj.webp", 
-    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/v1745522326/depois_mariangela_cpugfj.webp",
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/6cceaaa9-9383-4890-95a4-da036f8421e3_u7tuaw.webp",
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193438/6cceaaa9-9383-4890-95a4-da036f8421e3_u7tuaw.webp",
     name: "Mariangela",
     beforeId: "transformation-mariangela-before",
-    afterId: "transformation-mariangela-after",
-    lowQualityBefore: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745522326/antes_mariangela_cpugfj.webp",
-    lowQualityAfter: "https://res.cloudinary.com/dqljyf76t/image/upload/q_10,f_auto,w_100/v1745522326/depois_mariangela_cpugfj.webp"
+    afterId: "transformation-mariangela-after"
+  },
+  {
+    beforeImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Antes%20e%20Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
+    afterImage: "https://res.cloudinary.com/dqljyf76t/image/upload/t_Depois%20-%20de%20Descobrir%20seu%20Estilo/v1745193439/2dd7e159-43a1-40b0-8075-ba6f591074c1_gpsauh.webp",
+    name: "Camila",
+    beforeId: "transformation-camila-before",
+    afterId: "transformation-camila-after"
   }
 ];
 
 // Preload all transformation images on component mount - but don't wait for them
-// This is more efficient than the IIFE approach that was here before
 const preloadTransformationImages = () => {
-  // Immediately preload low quality placeholders
-  const lowQualityUrls = transformations.flatMap(item => [
-    item.lowQualityBefore, 
-    item.lowQualityAfter
-  ]).filter(Boolean) as string[];
-  
-  if (lowQualityUrls.length > 0) {
-    preloadImagesByUrls(lowQualityUrls, {
-      quality: 10,
-      batchSize: 4
-    });
-  }
-  
-  // Then preload high quality images with lower priority
-  const highQualityUrls = transformations.flatMap(item => [
-    item.beforeImage,
+  // Extract all image URLs
+  const imageUrls = transformations.flatMap(item => [
+    item.beforeImage, 
     item.afterImage
   ]);
   
-  preloadImagesByUrls(highQualityUrls, {
-    quality: 80, // Lower quality to improve load time
+  // Preload high quality images in batches
+  preloadImagesByUrls(imageUrls, {
+    quality: 80,
     batchSize: 2
   });
 };
@@ -80,15 +68,23 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     after: false
   });
   const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const activeTransformation = transformations[activeIndex];
   
   // Start preloading images as soon as component mounts
   useEffect(() => {
     preloadTransformationImages();
+    
+    // After a short delay, set loading to false to ensure at least low quality images are shown
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
   
-  // When active index changes, reset loaded state and ensure next images are loading
+  // When active index changes, reset loaded state
   useEffect(() => {
     setImagesLoaded({
       before: false,
@@ -100,14 +96,6 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     if (nextIndex !== activeIndex) {
       const nextTransformation = transformations[nextIndex];
       preloadImagesByUrls([
-        nextTransformation.lowQualityBefore || '',
-        nextTransformation.lowQualityAfter || '',
-      ].filter(Boolean), {
-        quality: 10,
-        batchSize: 4
-      });
-      
-      preloadImagesByUrls([
         nextTransformation.beforeImage,
         nextTransformation.afterImage
       ], {
@@ -116,6 +104,13 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
       });
     }
   }, [activeIndex]);
+  
+  // Update loading state when both images are loaded
+  useEffect(() => {
+    if (imagesLoaded.before && imagesLoaded.after) {
+      setIsLoading(false);
+    }
+  }, [imagesLoaded]);
   
   const handleSliderChange = (value: number[]) => {
     setSliderPosition(value[0]);
@@ -182,85 +177,93 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
           </div>
           <div className="md:w-1/2 w-full">
             <Card className="p-6 card-elegant overflow-hidden">
-              {/* Optimized image slider with both low quality placeholders and high quality images */}
+              {/* Improved image slider with better loading states */}
               <div className="relative h-[400px] md:h-[500px] w-full mb-4">
-                {/* Before image */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <ProgressiveImage 
-                    src={activeTransformation.beforeImage}
-                    lowQualitySrc={activeTransformation.lowQualityBefore}
-                    alt={`Antes - ${activeTransformation.name}`}
-                    className="w-full h-full"
-                    priority={activeIndex === 0}
-                    style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-                    onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
-                  />
-                </div>
-                
-                {/* After image */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <ProgressiveImage
-                    src={activeTransformation.afterImage}
-                    lowQualitySrc={activeTransformation.lowQualityAfter}
-                    alt={`Depois - ${activeTransformation.name}`}
-                    className="w-full h-full" 
-                    priority={activeIndex === 0}
-                    style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
-                    onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
-                  />
-                </div>
-                
-                {/* Slider control */}
-                <div className="absolute left-0 right-0 bottom-16 px-8 z-10">
-                  <Slider
-                    value={[sliderPosition]}
-                    min={0}
-                    max={100}
-                    step={1}
-                    onValueChange={handleSliderChange}
-                    className="z-10"
-                  />
-                </div>
-                
-                {/* Slider divider line */}
-                <div 
-                  className="absolute top-0 bottom-0 w-1 bg-white shadow-md z-20"
-                  style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
-                >
-                  <div className="absolute top-1/2 left-1/2 w-6 h-6 bg-white rounded-full shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab">
-                    <div className="w-3 h-3 bg-[#aa6b5d] rounded-full"></div>
+                {isLoading ? (
+                  <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+                    <div className="text-sm text-gray-400">Carregando transformação...</div>
                   </div>
-                </div>
-                
-                {/* Labels */}
-                <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm z-10">
-                  Antes
-                </div>
-                <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm z-10">
-                  Depois
-                </div>
-                
-                <div className="absolute bottom-28 left-0 right-0 mx-auto bg-white/80 backdrop-blur-sm py-2 px-4 text-center rounded-lg max-w-xs z-10">
-                  <p className="font-medium">{activeTransformation.name}</p>
-                </div>
-                
-                {/* Navigation arrows */}
-                {transformations.length > 1 && (
+                ) : (
                   <>
-                    <button 
-                      onClick={handlePrevClick}
-                      className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md z-10 hover:bg-white transition-colors"
-                      aria-label="Transformação anterior"
+                    {/* Before image with low quality placeholder */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <ProgressiveImage 
+                        src={activeTransformation.beforeImage}
+                        lowQualitySrc={getLowQualityPlaceholder(activeTransformation.beforeImage)}
+                        alt={`Antes - ${activeTransformation.name}`}
+                        className="w-full h-full"
+                        priority={activeIndex === 0}
+                        style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                        onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
+                      />
+                    </div>
+                    
+                    {/* After image with low quality placeholder */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <ProgressiveImage
+                        src={activeTransformation.afterImage}
+                        lowQualitySrc={getLowQualityPlaceholder(activeTransformation.afterImage)}
+                        alt={`Depois - ${activeTransformation.name}`}
+                        className="w-full h-full" 
+                        priority={activeIndex === 0}
+                        style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+                        onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
+                      />
+                    </div>
+                    
+                    {/* Slider control */}
+                    <div className="absolute left-0 right-0 bottom-16 px-8 z-10">
+                      <Slider
+                        value={[sliderPosition]}
+                        min={0}
+                        max={100}
+                        step={1}
+                        onValueChange={handleSliderChange}
+                        className="z-10"
+                      />
+                    </div>
+                    
+                    {/* Slider divider line */}
+                    <div 
+                      className="absolute top-0 bottom-0 w-1 bg-white shadow-md z-20"
+                      style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
                     >
-                      <ChevronLeft className="w-6 h-6 text-[#aa6b5d]" />
-                    </button>
-                    <button 
-                      onClick={handleNextClick}
-                      className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md z-10 hover:bg-white transition-colors"
-                      aria-label="Próxima transformação"
-                    >
-                      <ChevronRight className="w-6 h-6 text-[#aa6b5d]" />
-                    </button>
+                      <div className="absolute top-1/2 left-1/2 w-6 h-6 bg-white rounded-full shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-grab">
+                        <div className="w-3 h-3 bg-[#aa6b5d] rounded-full"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Labels */}
+                    <div className="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm z-10">
+                      Antes
+                    </div>
+                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm py-1 px-3 rounded text-sm z-10">
+                      Depois
+                    </div>
+                    
+                    <div className="absolute bottom-28 left-0 right-0 mx-auto bg-white/80 backdrop-blur-sm py-2 px-4 text-center rounded-lg max-w-xs z-10">
+                      <p className="font-medium">{activeTransformation.name}</p>
+                    </div>
+                    
+                    {/* Navigation arrows */}
+                    {transformations.length > 1 && (
+                      <>
+                        <button 
+                          onClick={handlePrevClick}
+                          className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md z-10 hover:bg-white transition-colors"
+                          aria-label="Transformação anterior"
+                        >
+                          <ChevronLeft className="w-6 h-6 text-[#aa6b5d]" />
+                        </button>
+                        <button 
+                          onClick={handleNextClick}
+                          className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md z-10 hover:bg-white transition-colors"
+                          aria-label="Próxima transformação"
+                        >
+                          <ChevronRight className="w-6 h-6 text-[#aa6b5d]" />
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -271,7 +274,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                   {transformations.map((_, index) => (
                     <button 
                       key={index} 
-                      className={`w-3 h-3 rounded-full ${index === activeIndex ? 'bg-[#aa6b5d]' : 'bg-[#aa6b5d]/30'}`} 
+                      className={`w-3 h-3 rounded-full transition-colors duration-300 ${index === activeIndex ? 'bg-[#aa6b5d]' : 'bg-[#aa6b5d]/30'}`} 
                       onClick={() => handleDotClick(index)} 
                       aria-label={`Transformação ${index + 1}`}
                     />

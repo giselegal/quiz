@@ -28,6 +28,7 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
+  const [isLowQualityLoaded, setIsLowQualityLoaded] = useState(false);
 
   useEffect(() => {
     // Reset state when src changes
@@ -50,7 +51,7 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
       console.log(`Priority image loaded: ${src}`);
       
       // Report to performance observer if available
-      if ('performance' in window && 'measure' in performance) {
+      if ('performance' in window && 'mark' in performance) {
         try {
           performance.mark(`img-loaded-${src.substring(0, 20)}`);
         } catch (e) {
@@ -60,6 +61,10 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     }
   };
 
+  const handleLowQualityLoad = () => {
+    setIsLowQualityLoaded(true);
+  };
+
   const handleError = () => {
     setHasError(true);
     console.error(`Failed to load image: ${src}`);
@@ -67,25 +72,29 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
 
   return (
     <div className={cn("relative overflow-hidden", className)} style={style}>
-      {/* Low quality placeholder - only show when high quality isn't loaded */}
+      {/* Low quality placeholder - improved transition */}
       {lowQualitySrc && !isLoaded && (
         <img
           src={lowQualitySrc}
           alt={`Carregando ${alt}`}
-          className="w-full h-full object-cover absolute inset-0 blur-sm"
+          className={cn(
+            "w-full h-full object-cover absolute inset-0 blur-sm transition-opacity duration-300",
+            isLowQualityLoaded ? "opacity-100" : "opacity-0"
+          )}
           width={width}
           height={height}
+          onLoad={handleLowQualityLoad}
         />
       )}
       
-      {/* Actual image with loading state */}
+      {/* Actual image with improved loading state */}
       <img
         ref={imageRef}
         src={src}
         alt={alt}
         className={cn(
-          "w-full h-full object-cover transition-opacity duration-300",
-          isLoaded ? "opacity-100" : "opacity-0"
+          "w-full h-full object-cover transition-all duration-500",
+          isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-[1.02]"
         )}
         width={width}
         height={height}
@@ -101,6 +110,11 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
         <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
           <span className="text-gray-500">Imagem indisponível</span>
         </div>
+      )}
+      
+      {/* Loading skeleton when neither image is loaded */}
+      {!isLoaded && !isLowQualityLoaded && (
+        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
       )}
     </div>
   );
