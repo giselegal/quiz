@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useGlobalStyles } from '@/hooks/useGlobalStyles';
 import { preloadTransformationImages, getHighQualityImageUrl, fixBlurryImage } from '@/utils/transformationImageUtils';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 
 // Dados das transformações antes e depois
 const transformations = [
@@ -28,9 +29,12 @@ const transformations = [
 const BeforeAfterTransformation: React.FC = () => {
   const { globalStyles } = useGlobalStyles();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState({ before: false, after: false });
-  const [isLoading, setIsLoading] = useState(true);
+  const [previousIndex, setPreviousIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
+  const slideRef = useRef<HTMLDivElement>(null);
   const AUTOPLAY_INTERVAL = 5000; // 5 seconds for auto-play
+  const TRANSITION_DURATION = 500; // 500ms para a transição
 
   const currentTransformation = transformations[activeIndex];
 
@@ -38,48 +42,35 @@ const BeforeAfterTransformation: React.FC = () => {
   useEffect(() => {
     // Pré-carrega todas as imagens de transformação
     preloadTransformationImages(transformations);
-    
-    // Timeout de segurança para garantir que o loading não ficará preso
-    const safetyTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000);
-    
-    return () => clearTimeout(safetyTimer);
   }, []);
-
-  // Gerenciar carregamento de imagens ao mudar de transformação
-  useEffect(() => {
-    // Resetar estado de carregamento para a nova transformação
-    setImageLoaded({ before: false, after: false });
-    setIsLoading(true);
-
-    // Timeout de segurança para cada transição
-    const timer = setTimeout(() => {
-      if (!imageLoaded.before || !imageLoaded.after) {
-        console.warn("Image loading timed out, showing anyway");
-        setIsLoading(false);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [activeIndex]);
-
-  // Verificar se ambas as imagens carregaram para esconder o loading
-  useEffect(() => {
-    if (imageLoaded.before && imageLoaded.after) {
-      setIsLoading(false);
-    }
-  }, [imageLoaded]);
 
   // Próxima transformação
   const nextTransformation = useCallback(() => {
+    if (isTransitioning) return;
+    setPreviousIndex(activeIndex);
+    setDirection('right');
+    setIsTransitioning(true);
     setActiveIndex(prevIndex => (prevIndex + 1) % transformations.length);
-  }, [transformations.length]);
+  }, [activeIndex, isTransitioning, transformations.length]);
 
   // Transformação anterior
   const prevTransformation = useCallback(() => {
+    if (isTransitioning) return;
+    setPreviousIndex(activeIndex);
+    setDirection('left');
+    setIsTransitioning(true);
     setActiveIndex(prevIndex => (prevIndex - 1 + transformations.length) % transformations.length);
-  }, [transformations.length]);
+  }, [activeIndex, isTransitioning, transformations.length]);
+
+  // Gerenciar transição
+  useEffect(() => {
+    if (isTransitioning) {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+      }, TRANSITION_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [isTransitioning]);
 
   // Auto-play carousel
   useEffect(() => {
@@ -98,13 +89,6 @@ const BeforeAfterTransformation: React.FC = () => {
       : `${baseOptimized}?q=85&f=auto&w=400&e_sharpen:60`;
   };
 
-  // Corrigir imagem embaçada
-  const handleImageRef = (element) => {
-    if (element) {
-      fixBlurryImage(element);
-    }
-  };
-
   return (
     <div className="my-10 bg-white rounded-lg shadow-md border border-[#B89B7A]/20 p-6">
       <h2 className="text-2xl font-playfair text-center text-[#aa6b5d] mb-6">
@@ -119,65 +103,81 @@ const BeforeAfterTransformation: React.FC = () => {
         </div>
         
         {/* Imagens de Antes e Depois */}
-        <div className="relative">
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#f9f4ef]/50 z-10 backdrop-blur-sm">
-              <div className="w-10 h-10 border-2 border-[#B89B7A] border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
-          
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <p className="text-center text-sm font-medium text-[#aa6b5d]">ANTES</p>
-              <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
-                <img 
-                  ref={handleImageRef}
-                  src={getOptimizedImageUrl(currentTransformation.beforeImage)}
-                  alt={`Antes - ${currentTransformation.title}`}
-                  className="w-full h-full object-cover transition-opacity duration-300"
-                  loading="lazy"
-                  fetchPriority={activeIndex === 0 ? "high" : "auto"}
-                  width="400"
-                  height="533"
-                  onLoad={() => setImageLoaded(prev => ({ ...prev, before: true }))}
-                />
+        <div className="relative overflow-hidden" ref={slideRef}>
+          <div 
+            className={`transition-transform duration-500 ease-in-out ${isTransitioning ? (direction === 'right' ? '-translate-x-full' : 'translate-x-full') : 'translate-x-0'}`}
+          >
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <p className="text-center text-sm font-medium text-[#aa6b5d]">ANTES</p>
+                <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
+                  <OptimizedImage
+                    src={getOptimizedImageUrl(currentTransformation.beforeImage)}
+                    alt={`Antes - ${currentTransformation.title}`}
+                    width={400}
+                    height={533}
+                    className="w-full h-full object-cover"
+                    priority={activeIndex === 0}
+                    objectFit="cover"
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <p className="text-center text-sm font-medium text-[#aa6b5d]">DEPOIS</p>
-              <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
-                <img 
-                  ref={handleImageRef}
-                  src={getOptimizedImageUrl(currentTransformation.afterImage)}
-                  alt={`Depois - ${currentTransformation.title}`}
-                  className="w-full h-full object-cover transition-opacity duration-300"
-                  loading="lazy"
-                  fetchPriority={activeIndex === 0 ? "high" : "auto"}
-                  width="400"
-                  height="533"
-                  onLoad={() => setImageLoaded(prev => ({ ...prev, after: true }))}
-                />
+              
+              <div className="space-y-2">
+                <p className="text-center text-sm font-medium text-[#aa6b5d]">DEPOIS</p>
+                <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
+                  <OptimizedImage
+                    src={getOptimizedImageUrl(currentTransformation.afterImage)}
+                    alt={`Depois - ${currentTransformation.title}`}
+                    width={400}
+                    height={533}
+                    className="w-full h-full object-cover"
+                    priority={activeIndex === 0}
+                    objectFit="cover"
+                  />
+                </div>
               </div>
             </div>
           </div>
           
-          {/* Navigation */}
-          <div className="flex justify-between absolute top-1/2 -translate-y-1/2 left-0 right-0 px-2">
-            <button 
-              onClick={prevTransformation} 
-              className="w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md text-[#B89B7A] transition-colors"
-              aria-label="Transformação anterior"
-            >
-              <ArrowLeft size={16} />
-            </button>
-            <button 
-              onClick={nextTransformation} 
-              className="w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md text-[#B89B7A] transition-colors"
-              aria-label="Próxima transformação"
-            >
-              <ArrowRight size={16} />
-            </button>
+          {/* Absolute positioned container for previous slide (to create slide effect) */}
+          <div 
+            className={`absolute top-0 left-0 right-0 transition-transform duration-500 ease-in-out ${
+              isTransitioning 
+                ? (direction === 'right' ? 'translate-x-0' : '-translate-x-full') 
+                : (direction === 'right' ? 'translate-x-full' : '-translate-x-full')
+            }`}
+            style={{ opacity: isTransitioning ? 1 : 0 }}
+          >
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <p className="text-center text-sm font-medium text-[#aa6b5d]">ANTES</p>
+                <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
+                  <OptimizedImage
+                    src={getOptimizedImageUrl(transformations[previousIndex].beforeImage)}
+                    alt={`Antes - ${transformations[previousIndex].title}`}
+                    width={400}
+                    height={533}
+                    className="w-full h-full object-cover"
+                    objectFit="cover"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-center text-sm font-medium text-[#aa6b5d]">DEPOIS</p>
+                <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
+                  <OptimizedImage
+                    src={getOptimizedImageUrl(transformations[previousIndex].afterImage)}
+                    alt={`Depois - ${transformations[previousIndex].title}`}
+                    width={400}
+                    height={533}
+                    className="w-full h-full object-cover"
+                    objectFit="cover"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -186,7 +186,13 @@ const BeforeAfterTransformation: React.FC = () => {
           {transformations.map((_, index) => (
             <button
               key={index}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => {
+                if (isTransitioning) return;
+                setPreviousIndex(activeIndex);
+                setDirection(index > activeIndex ? 'right' : 'left');
+                setIsTransitioning(true);
+                setActiveIndex(index);
+              }}
               className={`w-2 h-2 rounded-full transition-colors ${
                 index === activeIndex ? 'bg-[#aa6b5d]' : 'bg-[#B89B7A]/30'
               }`}
@@ -208,7 +214,7 @@ const BeforeAfterTransformation: React.FC = () => {
         </ul>
         <button 
           className={`${globalStyles.primaryButton} py-3 px-8 text-lg w-full sm:w-auto rounded-lg`}
-          onClick={() => window.open('https://pay.hotmart.com/N74003734E?checkoutMode=10', '_blank')} // Example CTA action
+          onClick={() => window.open('https://pay.hotmart.com/N74003734E?checkoutMode=10', '_blank')}
         >
           Quero Minha Transformação!
         </button>
