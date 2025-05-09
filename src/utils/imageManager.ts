@@ -1,5 +1,5 @@
 import { BankImage, getAllImages, getImageBySrc, getImageById } from '@/data/imageBank';
-import { optimizeCloudinaryUrl } from './imageUtils';
+import { optimizeCloudinaryUrl, getLowQualityPlaceholder as getBaseLowQualityPlaceholder } from './imageUtils';
 
 /**
  * Interface for the image cache entry
@@ -95,12 +95,7 @@ export const isImagePreloaded = (url: string): boolean => {
 export const getLowQualityPlaceholder = (url: string): string => {
   if (!url || !url.includes('cloudinary.com')) return '';
   
-  // Extract base URL parts to create tiny placeholder
-  const baseUrlParts = url.split('/upload/');
-  if (baseUrlParts.length !== 2) return url;
-  
-  // Create a very low quality, small version for placeholders
-  return `${baseUrlParts[0]}/upload/f_auto,q_10,w_20/${baseUrlParts[1].split('/').slice(1).join('/')}`;
+  return getBaseLowQualityPlaceholder(url, { width: 20, quality: 10 });
 };
 
 /**
@@ -487,5 +482,7 @@ export default {
   preloadCriticalImages,
   getOptimizedImage,
   getLowQualityPlaceholder,
-  getLowQualityImage
+  getLowQualityImage,
+  getResponsiveImageSources,
+  getOptimizedImageUrl
 };

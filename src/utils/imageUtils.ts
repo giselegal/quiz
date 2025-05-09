@@ -220,17 +220,19 @@ export const getResponsiveImageUrl = (
  * @param url Original URL of the image
  * @returns Low quality placeholder image URL
  */
-export const getLowQualityPlaceholder = (url: string): string => {
+export const getLowQualityPlaceholder = (url: string, options: { width?: number, quality?: number } = {}): string => {
   if (!url || !url.includes('cloudinary.com')) {
     return url;
   }
   
-  // Create a very small, blurry placeholder
-  return optimizeCloudinaryUrl(url, {
-    width: 20,
-    quality: 40,
-    format: 'auto'
-  });
+  const { width = 20, quality = 10 } = options;
+  
+  // Extract base URL parts
+  const baseUrlParts = url.split('/upload/');
+  if (baseUrlParts.length !== 2) return url;
+  
+  // Create an optimized tiny placeholder
+  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
 };
 
 /**
@@ -280,27 +282,6 @@ export const extractDimensionsFromUrl = (url: string): { width?: number, height?
 };
 
 /**
- * Improved low quality placeholder generator with explicit dimensions
- * @param url Original URL of the image
- * @param options Width and quality options
- * @returns Low quality placeholder image URL
- */
-export const getLowQualityPlaceholder = (url: string, options: { width?: number, quality?: number } = {}): string => {
-  if (!url || !url.includes('cloudinary.com')) {
-    return url;
-  }
-  
-  const { width = 20, quality = 10 } = options;
-  
-  // Extract base URL parts
-  const baseUrlParts = url.split('/upload/');
-  if (baseUrlParts.length !== 2) return url;
-  
-  // Create an optimized tiny placeholder
-  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
-};
-
-/**
  * Check if a browser supports modern image formats
  * @returns Object with support flags
  */
@@ -332,6 +313,3 @@ export const getOptimalImageFormat = (): 'auto' | 'webp' | 'jpg' => {
   if (support.webp) return 'webp';
   return 'auto'; // Default to auto which will typically serve JPEG
 };
-
-// Export new utility functions
-export { extractDimensionsFromUrl, checkImageFormatSupport, getOptimalImageFormat };
