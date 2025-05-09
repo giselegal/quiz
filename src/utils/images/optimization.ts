@@ -20,15 +20,48 @@ export const optimizeCloudinaryUrl = (
     format = 'auto',
     width,
     height,
-    crop = 'limit'
+    crop = 'limit',
+    removeParams = [] // Parâmetros para remover
   } = settings;
   
   // Detecta se a URL já tem transformações
   const parts = url.split('/upload/');
   if (parts.length !== 2) return url;
   
-  const baseUrlParts = parts;
-  const secondPart = baseUrlParts[1];
+  let baseUrlParts = parts;
+  let secondPart = baseUrlParts[1];
+  
+  // Remove parâmetros problemáticos se especificados
+  if (removeParams.length > 0) {
+    // Verifica se a URL tem versão (v12345)
+    const versionMatch = secondPart.match(/^(v\d+)\//);
+    let version = '';
+    let finalPath = secondPart;
+
+    if (versionMatch) {
+      version = versionMatch[1] + '/';
+      finalPath = secondPart.substring(version.length);
+    }
+
+    // Remove parâmetros específicos de transformação
+    let transformParts = finalPath.split('/')[0].split(',');
+    transformParts = transformParts.filter(part => {
+      // Manter o parâmetro se não estiver na lista de remoção
+      return !removeParams.some(param => part.startsWith(param));
+    });
+
+    // Remonta a URL sem os parâmetros removidos
+    if (finalPath.includes('/')) {
+      const rest = finalPath.split('/').slice(1).join('/');
+      finalPath = transformParts.join(',') + '/' + rest;
+    } else {
+      finalPath = transformParts.join(',');
+    }
+
+    // Atualiza a segunda parte da URL com versão (se existir) e caminho processado
+    secondPart = version + finalPath;
+    baseUrlParts[1] = secondPart;
+  }
   const hasTransformations = secondPart.includes('/') && 
                             !/v\d+\//.test(secondPart.split('/')[0]); // Distingue transforms de version strings
   

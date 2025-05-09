@@ -24,6 +24,7 @@ export interface PreloadOptions {
   onComplete?: () => void;
   batchSize?: number;
   generateLowQuality?: boolean;
+  removeParams?: string[]; // Parâmetros para remover das URLs durante a otimização
 }
 
 /**
@@ -35,4 +36,8 @@ export interface OptimizationOptions {
   width?: number;
   height?: number;
   crop?: 'fill' | 'fit' | 'limit';
+  removeParams?: string[]; // Parâmetros para remover das URLs durante a otimização
 }
+
+// Alias para compatibilidade
+export type ImageSettings = OptimizationOptions;

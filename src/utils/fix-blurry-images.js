@@ -150,12 +150,97 @@ function fixAllBlurryImages() {
   let fixedCount = 0;
   
   images.forEach(img => {
-    if (fixBlurryImage(img)) {
+    // Verificar se a imagem está com erro
+    if (img.complete && (img.naturalWidth === 0 || img.naturalHeight === 0)) {
+      handleImageError(img);
+    } else if (fixBlurryImage(img)) {
       fixedCount++;
+    }
+    
+    // Adicionar handler de erro para imagens que falham posteriormente
+    if (!img.hasAttribute('data-error-handled')) {
+      img.setAttribute('data-error-handled', 'true');
+      img.addEventListener('error', function() {
+        handleImageError(this);
+      });
     }
   });
   
   return fixedCount;
+}
+
+/**
+ * Lida com erros de carregamento de imagem
+ */
+function handleImageError(img) {
+  // Não processar novamente imagens já tratadas para erro
+  if (img.hasAttribute('data-error-fixed')) return;
+  
+  // Marcar como tratada
+  img.setAttribute('data-error-fixed', 'true');
+  
+  const src = img.src;
+  if (DEBUG_MODE) {
+    console.error(`Erro ao carregar imagem: ${src}`);
+  }
+  
+  // Tentar corrigir a URL (remover parâmetros de transformação que podem estar causando o erro)
+  if (src && src.includes('cloudinary.com')) {
+    try {
+      // Versão simplificada da URL
+      const simplifiedUrl = getSimplifiedCloudinaryUrl(src);
+      if (simplifiedUrl !== src) {
+        img.src = simplifiedUrl;
+        return; // Tentativa de correção aplicada
+      }
+      
+      // Se não conseguimos simplificar, tentar versão de fallback
+      if (img.hasAttribute('data-fallback-src')) {
+        img.src = img.getAttribute('data-fallback-src');
+      }
+    } catch (error) {
+      if (DEBUG_MODE) {
+        console.error('Erro ao tentar corrigir imagem com erro:', error);
+      }
+    }
+  }
+}
+
+/**
+ * Simplifica a URL do Cloudinary removendo transformações que podem causar problemas
+ */
+function getSimplifiedCloudinaryUrl(url) {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  
+  try {
+    // Extrai as partes básicas da URL
+    const urlParts = url.split('/upload/');
+    if (urlParts.length !== 2) return url;
+    
+    const baseUrl = urlParts[0] + '/upload/';
+    let path = urlParts[1];
+    
+    // Extrai a versão, se existir
+    const versionMatch = path.match(/^(v\d+)\//);
+    let version = '';
+    let finalPath = path;
+    
+    if (versionMatch) {
+      version = versionMatch[1] + '/';
+      finalPath = path.substring(version.length);
+    }
+    
+    // Remove transformações problemáticas mas mantém formato e qualidade básicos
+    const basicTransforms = 'f_auto,q_auto/';
+    
+    // Constrói URL simplificada
+    return `${baseUrl}${version}${basicTransforms}${finalPath.split('/').pop()}`;
+  } catch (error) {
+    if (DEBUG_MODE) {
+      console.error('Erro ao simplificar URL do Cloudinary:', error);
+    }
+    return url;
+  }
 }
 
 /**
