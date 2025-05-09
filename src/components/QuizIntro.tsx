@@ -5,9 +5,12 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { OptimizedImage } from './ui/optimized-image';
+import FixedIntroImage from './ui/FixedIntroImage';
 import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
 import { getImageById } from '@/data/imageBank';
 import { LoadingSpinner } from './ui/loading-spinner';
+// Importar script de correção de imagens embaçadas diretamente
+import '../utils/fix-blurry-images.js';
 
 /**
  * QuizIntro - Componente completamente restruturado para a página inicial do quiz
@@ -177,28 +180,16 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
         </h1>
 
-        {/* Imagem Principal - Com configurações melhoradas para evitar imagens embaçadas */}
+        {/* Imagem Principal - Substituída por FixedIntroImage para eliminar embaçamento */}
         <div className="w-full flex justify-center">
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <OptimizedImage 
+            <FixedIntroImage 
               src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.webp'} 
               alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
               width={800}
               height={800}
               priority={true}
-              quality={95}  // Aumentado para 95
-              objectFit="cover"
-              containerClassName="rounded-lg overflow-hidden shadow-sm"
-              placeholderColor="#f8f4ef"
-              onLoad={() => {
-                // Registra evento de carregamento para métricas e performance
-                console.log("[QuizIntro] Imagem principal carregada e exibida");
-                
-                // Pre-carga dos assets do próximo passo
-                if (criticalAssetsForQuizPreloaded) {
-                  preloadCriticalImages('quiz');
-                }
-              }}
+              className="rounded-lg overflow-hidden shadow-sm"
             />
           </div>
         </div>

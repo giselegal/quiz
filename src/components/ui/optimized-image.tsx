@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { getLowQualityImage } from '@/utils/imageManager';
 import { AspectRatioContainer } from './aspect-ratio-container';
+// Importando o corretor de imagens embacadas direto
+import '../../utils/fix-blurry-images.js';
+
+// Declaração de tipo para o ImageFixer global
+declare global {
+  interface Window {
+    ImageFixer?: {
+      getHighQualityUrl: (url: string) => string;
+      fixBlurryImage: (img: HTMLImageElement) => boolean;
+      fixAllBlurryImages: () => number;
+    };
+  }
+}
 
 interface OptimizedImageProps {
   src: string;

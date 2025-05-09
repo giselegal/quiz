@@ -1,87 +1,47 @@
 /**
- * Componente que substitui automaticamente as imagens da introdução do quiz
- * por versões de alta qualidade, eliminando o problema de imagens embaçadas.
+ * Componente que substitui diretamente as imagens embaçadas usando solução JavaScript pura
+ * Esta versão não depende do ciclo de vida do React e funciona imediatamente
  */
-import React, { useEffect, useState } from 'react';
-import { getHighQualityImageUrl } from '../../utils/images/blurry-image-fixer';
+import React, { useEffect } from 'react';
+
+// Importar o script de correção de imagens
+import '../../utils/fix-blurry-images.js';
+
+// Declaração de tipos para window.ImageFixer
+declare global {
+  interface Window {
+    ImageFixer?: {
+      fixBlurryImage: (img: HTMLImageElement) => boolean;
+      fixAllBlurryImages: () => number;
+      getHighQualityUrl: (url: string) => string;
+    };
+  }
+}
 
 interface AutoFixedImagesProps {
-  selector?: string;
   children: React.ReactNode;
-  autoFix?: boolean;
+  priority?: boolean;
 }
 
 /**
- * Componente que envolve a seção de introdução e corrige automaticamente imagens embaçadas
+ * Componente que corrige imediatamente as imagens embaçadas
+ * Esta versão usa um script direto de JS que substitui todas as imagens embaçadas
+ * sem depender do ciclo de vida do React
  */
 const AutoFixedImages: React.FC<AutoFixedImagesProps> = ({ 
-  selector = '.quiz-intro img, [data-section="intro"] img',
   children,
-  autoFix = true
+  priority = true
 }) => {
-  const [isFixed, setIsFixed] = useState(false);
-  
   useEffect(() => {
-    if (autoFix) {
-      // Pequeno atraso para garantir que as imagens tenham sido renderizadas
-      const timer = setTimeout(() => {
-        fixImagesInContainer(selector);
-      }, 500);
-      
-      return () => clearTimeout(timer);
+    // Usando variáveis globais configuradas pelo script
+    if (window.ImageFixer && priority) {
+      // Executar novamente para garantir que imagens foram corrigidas
+      window.ImageFixer.fixAllBlurryImages();
     }
-  }, [selector, autoFix]);
-  
-  const fixImagesInContainer = (imgSelector: string) => {
-    const images = document.querySelectorAll(imgSelector);
-    console.log(`🔍 Localizadas ${images.length} imagens para correção automática`);
-    
-    if (images.length === 0) return;
-    
-    let fixedCount = 0;
-    
-    images.forEach((img: HTMLImageElement) => {
-      const originalSrc = img.src;
-      const highQualitySrc = getHighQualityImageUrl(originalSrc);
-      
-      if (highQualitySrc !== originalSrc) {
-        // Criar nova imagem para pré-carregar
-        const newImg = new Image();
-        newImg.onload = () => {
-          // Substituir a fonte da imagem original
-          img.src = highQualitySrc;
-          
-          // Remover qualquer filtro de embaçamento
-          img.style.filter = 'none';
-          img.classList.remove('blur', 'placeholder');
-          
-          if (img.parentElement?.classList.contains('blur-wrapper')) {
-            img.parentElement.classList.remove('blur-wrapper');
-          }
-          
-          fixedCount++;
-          console.log(`✅ Imagem corrigida (${fixedCount}/${images.length}): ${originalSrc}`);
-          
-          if (fixedCount === images.length) {
-            console.log('🎉 Todas as imagens foram corrigidas com sucesso!');
-            setIsFixed(true);
-          }
-        };
-        
-        newImg.onerror = () => {
-          console.error(`❌ Erro ao carregar nova imagem: ${highQualitySrc}`);
-        };
-        
-        // Iniciar carregamento
-        newImg.src = highQualitySrc;
-      } else {
-        console.log(`⚠️ Imagem já parece otimizada: ${originalSrc}`);
-      }
-    });
-  };
+  }, [priority]);
   
   return (
-    <div className={`auto-fixed-images ${isFixed ? 'all-fixed' : 'fixing'}`}>
+    <div className="auto-fixed-images">
       {children}
     </div>
   );
