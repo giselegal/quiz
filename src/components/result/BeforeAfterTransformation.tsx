@@ -37,13 +37,13 @@ const transformations: TransformationItem[] = [
 
 const preloadInitialTransformationImages = () => {
   const imageUrls: string[] = [];
-  transformations.slice(0, 1).forEach(item => { // Apenas a primeira imagem inicialmente
+  transformations.slice(0, 1).forEach(item => { 
     imageUrls.push(item.image);
   });
   
   if (imageUrls.length > 0) {
     preloadImagesByUrls(imageUrls, {
-      quality: 90, // Maior qualidade para a imagem visível
+      quality: 90, 
       batchSize: 1,
     });
   }
@@ -56,44 +56,50 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
   const [isLoading, setIsLoading] = useState(true);
   
   const activeTransformation = transformations[activeIndex];
-  
+  const autoSlideInterval = 5000; // Intervalo em milissegundos (5 segundos)
+
   useEffect(() => {
-    preloadInitialTransformationImages(); // Pré-carrega a imagem inicial
-    // Define um temporizador para garantir que o estado de carregamento seja eventualmente desativado,
-    // mesmo que o pré-carregamento falhe ou demore muito.
+    preloadInitialTransformationImages(); 
     const fallbackLoadingTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2500); // Tempo de fallback (ajuste conforme necessário)
+      if (isLoading) { // Só desativa se ainda estiver carregando
+        setIsLoading(false);
+      }
+    }, 2500); 
 
     return () => clearTimeout(fallbackLoadingTimer);
   }, []); // Executa apenas uma vez na montagem
   
   useEffect(() => {
-    setImageLoaded(false); // Reseta ao mudar de slide
-    setIsLoading(true);    // Ativa o loading para a nova imagem
+    setImageLoaded(false); 
+    setIsLoading(true);    
 
     const currentImage = activeTransformation?.image;
     if (currentImage) {
-      // Tenta pré-carregar a imagem ativa com alta prioridade
-      // A função preloadImagesByUrls não retorna uma promise diretamente para encadear .then()
-      // A atualização de imageLoaded e isLoading será feita no onLoad do ProgressiveImage
       preloadImagesByUrls([currentImage], { quality: 90, batchSize: 1 });
 
-      // Pré-carrega a imagem do *próximo* slide em segundo plano
       const nextIndex = (activeIndex + 1) % transformations.length;
-      if (transformations[nextIndex] && nextIndex !== activeIndex) {
+      if (transformations.length > 1 && transformations[nextIndex] && nextIndex !== activeIndex) {
         const nextTransformationImage = transformations[nextIndex].image;
         preloadImagesByUrls([nextTransformationImage], { quality: 80, batchSize: 1 });
       }
     } else {
-      setIsLoading(false); // Se não houver imagem ativa, desativa o loading
+      setIsLoading(false); 
     }
-  }, [activeIndex, activeTransformation]);
+  // Adicionado transformations.length como dependência para garantir que o efeito seja reavaliado se o número de imagens mudar.
+  }, [activeIndex, activeTransformation, transformations.length]);
+
+  // Efeito para a transição automática de slides
+  useEffect(() => {
+    if (transformations.length <= 1 || !imageLoaded) return; // Não inicia se não houver imagens suficientes ou a imagem atual não carregou
+
+    const intervalId = setInterval(() => {
+      setActiveIndex(prev => (prev === transformations.length - 1 ? 0 : prev + 1));
+    }, autoSlideInterval);
+
+    return () => clearInterval(intervalId); 
+  }, [transformations.length, autoSlideInterval, imageLoaded, activeIndex]); // Adicionado activeIndex para reiniciar o timer ao navegar manualmente
 
   useEffect(() => {
-    // Lógica de isLoading agora é tratada no useEffect de activeIndex
-    // para refletir o carregamento da imagem atual.
-    // Se imageLoaded for true, isLoading deve ser false.
     if (imageLoaded) {
       setIsLoading(false);
     }
@@ -136,16 +142,16 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-3">
-            A Transformação de Mulheres que Colocaram em Prática Seu Estilo de Ser
+            Transformações de Mulheres que Colocaram em Prática Seu Estilo de Ser
           </h2>
           <p className="text-lg text-[#432818] dark:text-[#d1c7b8] max-w-3xl mx-auto mt-4">
-            Mulheres reais que redescobriram sua confiança e alinharam sua imagem aos seus sonhos através do poder do estilo pessoal.
+            Mulheres reais que reencontraram a própria essência e passaram a refletir quem são — com leveza, intenção e autenticidade — através do estilo pessoal.
           </p>
         </div>
 
         <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-10 lg:gap-16">
           {/* Seção de Texto */}
-          <div className="text-left lg:w-2/5 order-2 lg:order-1"></div>
+          <div className="text-left lg:w-2/5 order-2 lg:order-1">
             <h3 className="text-2xl md:text-3xl font-semibold text-[#432818] dark:text-[#E0C9B1] mb-5 font-playfair">
               Transforme Sua Imagem, <span className="text-[#aa6b5d] dark:text-[#D4B79F]">Revele Sua Essência</span>
             </h3>
@@ -184,7 +190,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
 
           {/* Seção do Slider de Imagem */}
           <div className="lg:w-3/5 order-1 lg:order-2 w-full max-w-xl mx-auto">
-            {isLoading ? (
+            {isLoading && !imageLoaded ? (
               <div className="aspect-[4/5] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center w-full mx-auto">
                 <p className="text-gray-500 dark:text-gray-400">Carregando transformação...</p>
               </div>
@@ -199,7 +205,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                     style={{ opacity: imageLoaded ? 1 : 0 }}
                     onLoad={() => {
                       setImageLoaded(true);
-                      setIsLoading(false); 
+                      // setIsLoading(false); // Movido para o useEffect de imageLoaded
                     }}
                     priority 
                   />
@@ -211,7 +217,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                       <button
                         key={index}
                         onClick={() => handleDotClick(index)}
-                        className={`w-3 h-3 rounded-full transition-colors ${
+                        className={`w-3 h-3 rounded-full transition-colors ${ 
                           activeIndex === index ? 'bg-[#B89B7A] dark:bg-[#D4B79F]' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
                         }`}
                         aria-label={`Ver transformação ${index + 1}`}
