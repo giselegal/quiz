@@ -38,6 +38,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lowQualitySrc, setLowQualitySrc] = useState<string>('');
+  const [hasError, setHasError] = useState(false);
   
   // Otimizar URL da imagem para Cloudinary
   const optimizeCloudinaryUrl = (url: string): string => {
@@ -49,7 +50,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     
     if (!match) return url;
     
-    const [, baseUrl, pathAndOptions] = match;
+    const [, baseUrl, pathAndQuery] = match;
+    
+    // Verificar se a URL já contém parâmetros de otimização
+    const hasExistingParams = /f_auto|q_auto|w_\d+|dpr_auto/.test(pathAndQuery);
+    
+    // Se já tiver parâmetros, apenas devolver a URL original
+    if (hasExistingParams) return url;
     
     // Transformações avançadas para melhorar a performance
     const transforms = [
@@ -61,8 +68,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       'e_sharpen:60'         // leve nitidez para melhorar a qualidade percebida
     ].join(',');
     
-    // Adicionar ou substituir parâmetros de otimização
-    return `${baseUrl}${transforms}/${pathAndOptions.replace(/\.[^.]+$/, '.webp')}`;
+    // Extrair o nome do arquivo e extensão
+    const filePathParts = pathAndQuery.split('/');
+    const fileName = filePathParts[filePathParts.length - 1];
+    
+    // Adicionar transformações
+    return `${baseUrl}${transforms}/${fileName}`;
   };
   
   const optimizedSrc = optimizeCloudinaryUrl(src);

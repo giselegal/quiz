@@ -72,14 +72,18 @@ export const getLowQualityPlaceholder = (url: string, options: { width?: number,
     return url;
   }
   
-  const { width = 20, quality = 10 } = options;
+  const { width = 40, quality = 30 } = options;
   
   // Extract base URL parts
   const baseUrlParts = url.split('/upload/');
   if (baseUrlParts.length !== 2) return url;
   
-  // Create an optimized tiny placeholder
-  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
+  // Split the path to extract the version and file name
+  const pathParts = baseUrlParts[1].split('/');
+  const fileName = pathParts[pathParts.length - 1];
+  
+  // Create an optimized placeholder with better parameters
+  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width},e_blur:1000/${fileName}`;
 };
 
 /**
