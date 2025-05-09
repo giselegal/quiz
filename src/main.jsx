@@ -5,6 +5,8 @@ import App from './App';
 import './index.css';
 import { displayVersion } from './utils/version';
 import { injectCriticalCSS, initialCriticalCSS, removeCriticalCSS } from './utils/critical-css';
+import { checkSiteHealth } from './utils/siteHealthCheck';
+import { monitorFunnelRoutes } from './utils/funnelMonitor';
 
 // Injetar CSS crítico para renderização inicial mais rápida
 injectCriticalCSS(initialCriticalCSS);
@@ -29,6 +31,21 @@ try {
     console.log('Aplicativo renderizado com sucesso!');
   } else {
     console.error('Elemento root não encontrado!');
+    // Fallback para quando o elemento root não é encontrado
+    const bodyElement = document.body;
+    if (bodyElement) {
+      const fallbackRoot = document.createElement('div');
+      fallbackRoot.id = 'root';
+      bodyElement.appendChild(fallbackRoot);
+      
+      // Tentar renderizar novamente
+      ReactDOM.createRoot(fallbackRoot).render(
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      );
+      console.log('Aplicativo renderizado no elemento fallback!');
+    }
   }
 } catch (error) {
   console.error('Erro ao renderizar o aplicativo:', error);

@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:hostinger": "vite build && cp public/.htaccess dist/.htaccess",
+    "build:funnel": "vite build && cp public/.htaccess dist/.htaccess && cp public/_redirects dist/_redirects",
     "lint": "eslint .",
     "preview": "vite preview",
     "lovable:prepare": "lovable-tagger"

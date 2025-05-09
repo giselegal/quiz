@@ -7,7 +7,7 @@ import compression from "vite-plugin-compression";
 // https://vitejs.dev/config/
 export default defineConfig({
   root: '.',
-  base: '/',
+  base: './',
   
   server: {
     host: "::",
@@ -66,6 +66,7 @@ export default defineConfig({
             './src/utils/facebookPixel.ts'
           ]
         },
+        // Garantir que os assets sejam carregados corretamente para as rotas específicas
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'
