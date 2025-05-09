@@ -187,7 +187,9 @@ const imageBank: ImageCategory[] = [
         src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.png',
         alt: 'Mulher elegante com roupas estilosas',
         category: 'branding',
-        preloadPriority: 5
+        preloadPriority: 5,
+        width: 1024, // Assuming original image is 1024x1024
+        height: 1024 // Assuming original image is 1024x1024
       }
     ]
   },

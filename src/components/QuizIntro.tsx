@@ -88,7 +88,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             <OptimizedImage 
               src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
               alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-              width={360}
+              width={896}
+              height={896}
               className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto rounded-lg shadow-sm object-contain mx-auto"
               priority={true} 
             />
