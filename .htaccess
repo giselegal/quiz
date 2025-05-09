@@ -1,0 +1,41 @@
+# Configurações de MIME type
+<IfModule mod_mime.c>
+    AddType application/javascript .js .jsx
+    AddType application/javascript .mjs
+    AddType text/javascript .js .jsx
+    AddType text/javascript .mjs
+    AddType application/json .json
+</IfModule>
+
+# Desabilitar sniffing de MIME types
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# Roteamento SPA
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Se o arquivo ou diretório não existir fisicamente, redirecionar para index.html
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.html [L]
+</IfModule>
+
+# Compressão gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript application/json
+</IfModule>
+
+# Cache para recursos estáticos
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/json "access plus 1 day"
+</IfModule>

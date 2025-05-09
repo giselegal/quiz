@@ -19,8 +19,8 @@
     
     <!-- Preload critical resources -->
     <link rel="preload" href="/src/main.jsx" as="script" fetchpriority="high" />
-    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.png" fetchpriority="high" type="image/webp" />
-    <link rel="preload" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" as="image" fetchpriority="high" type="image/webp" />
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.png" fetchpriority="high" />
+    <link rel="preload" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" as="image" fetchpriority="high" />
     <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     <link rel="dns-prefetch" href="https://connect.facebook.net" />
@@ -83,7 +83,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     
     <!-- Análises e scripts externos (otimizados) -->
-    <script nomodule src="https://cdn.gpteng.co/gptengineer.js" defer></script>
+    <script src="https://cdn.gpteng.co/gptengineer.js" defer></script>
     <script src="https://static.cloudflareinsights.com/beacon.min.js" defer></script>
     
     <!-- Facebook Pixel Code -->
@@ -106,7 +106,7 @@
         <div class="loading-spinner"></div>
       </div>
     </div>
-    <!-- Script não-modular para evitar erros de MIME type -->
-    <script src="/src/main.jsx"></script>
+    <!-- Script principal - abordagem tradicional para evitar problemas de MIME type -->
+    <script src="/src/main.jsx" defer></script>
   </body>
 </html>
