@@ -27,6 +27,7 @@ interface OptimizedImageProps {
   placeholderColor?: string;
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   onLoad?: () => void;
+  style?: React.CSSProperties; // Adicionada a prop style
 }
 
 /**
@@ -49,7 +50,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   quality = 80,
   placeholderColor = '#f5f5f5',
   objectFit = 'cover',
-  onLoad
+  onLoad,
+  style // Destruturar a prop style
 }) => {
   console.log('[OptimizedImage] Props:', { src, alt, width, height, priority, quality, objectFit });
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -178,6 +180,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           width={widthNum}
           height={heightNum}
           className={`w-full h-full object-${objectFit} absolute inset-0 transition-all duration-500 ease-in-out ${className} ${placeholderFading ? 'opacity-50' : 'opacity-100'}`}
+          style={style} // Aplicar style
           loading="eager"
           decoding="async"
         />
@@ -191,6 +194,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           width={widthNum}
           height={heightNum}
           className={`w-full h-full object-${objectFit} absolute inset-0 transition-all duration-700 ease-in-out ${className} ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.02]'}`}
+          style={style} // Aplicar style
           onLoad={handleImageLoad}
           onError={handleImageError}
           loading={priority ? 'eager' : 'lazy'}

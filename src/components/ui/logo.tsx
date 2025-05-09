@@ -1,6 +1,5 @@
-
 import React from 'react';
-import OptimizedImage from './OptimizedImage';
+import { OptimizedImage } from './optimized-image'; // Corrigido: importação nomeada e nome do arquivo em minúsculas com hífen
 
 interface LogoProps {
   src?: string;
@@ -28,17 +27,14 @@ const Logo: React.FC<LogoProps> = ({
         alt={alt}
         className={`${className} mx-auto`}
         style={style}
-        priority={priority}
+        priority={priority} // Controla fetchPriority="high" internamente em OptimizedImage
         width={width}
         height={height}
         objectFit="contain"
-        quality={99}
-        fetchPriority="high"
+        quality={99} // quality é uma prop válida de OptimizedImageProps
       />
     </div>
   );
 };
-
-export default Logo;
 
 export default Logo;
