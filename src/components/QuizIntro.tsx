@@ -173,10 +173,10 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         }}
         data-section="intro"
       >
-      <div className="w-full max-w-lg flex flex-col items-center space-y-8 pb-8">
+      <div className="w-full max-w-lg flex flex-col items-center space-y-6 pb-8"> {/* Alterado de space-y-8 para space-y-6 */}
         
         {/* Seção da Logo e Barra - Margem inferior ajustada */}
-        <div className="w-full flex flex-col items-center mb-4"> 
+        <div className="w-full flex flex-col items-center"> {/* Removido mb-4 */}
           <div className="w-32 sm:w-36 md:w-40"> 
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
@@ -190,11 +190,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               placeholderColor="#ffffff"
             />
           </div>
-          <div className="mt-3 h-[3px] w-48 sm:w-52 md:w-60 bg-[#B89B7A] rounded"></div>
+          <div className="mt-2 h-[3px] w-48 sm:w-52 md:w-60 bg-[#B89B7A] rounded"></div> {/* Alterado de mt-3 para mt-2 */}
         </div>
 
         {/* Headline - Tamanho e peso da fonte aumentados, margem inferior ajustada */}
-        <h1 className="font-playfair text-2xl sm:text-3xl md:text-3xl font-bold text-center mb-4 leading-tight text-[#432818]">
+        <h1 className="font-playfair text-2xl sm:text-3xl md:text-3xl font-bold text-center leading-tight text-[#432818]"> {/* Removido mb-4 */}
           Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
         </h1>
 
