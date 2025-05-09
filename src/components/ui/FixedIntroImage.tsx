@@ -58,11 +58,11 @@ function getHighQualityUrl(url: string): string {
   // Aplicar apenas nossas transformações otimizadas
   const transforms = [
     'f_auto',         // Formato automático (webp/avif)
-    'q_95',          // Alta qualidade (95%)
+    'q_99',          // Qualidade máxima (99%)
     'dpr_auto',       // Densidade de pixel automática
     'w_auto',         // Largura automática
     'c_limit',        // Limitar redimensionamento
-    'e_sharpen:60'    // Nitidez moderada
+    'e_sharpen:80'    // Nitidez aumentada para compensar qualquer compressão
   ].join(',');
 
   // Construir URL final: baseUrl + transformações + versão (se existir) + publicId

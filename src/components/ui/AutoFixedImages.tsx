@@ -35,8 +35,18 @@ const AutoFixedImages: React.FC<AutoFixedImagesProps> = ({
   useEffect(() => {
     // Usando variáveis globais configuradas pelo script
     if (window.ImageFixer && priority) {
-      // Executar novamente para garantir que imagens foram corrigidas
+      // Executar imediatamente
       window.ImageFixer.fixAllBlurryImages();
+      
+      // Executar novamente após um curto intervalo para pegar imagens carregadas assincronamente
+      setTimeout(() => {
+        window.ImageFixer?.fixAllBlurryImages();
+      }, 300);
+      
+      // E uma última verificação após um tempo maior
+      setTimeout(() => {
+        window.ImageFixer?.fixAllBlurryImages();
+      }, 1000);
     }
   }, [priority]);
   

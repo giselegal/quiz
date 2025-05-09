@@ -3,7 +3,7 @@ export function fixBlurryIntroQuizImages() {
   console.log('Iniciando correção de imagens borradas na seção de introdução do quiz...');
   
   // 1. Identificar todas as imagens na seção de introdução do quiz
-  const quizIntroImages = document.querySelectorAll('.quiz-intro img, [data-section="intro"] img');
+  const quizIntroImages = document.querySelectorAll('.quiz-intro img, [data-section="intro"] img, img');
   let count = 0;
   
   quizIntroImages.forEach(img => {
