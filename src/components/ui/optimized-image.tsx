@@ -62,45 +62,55 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
    * Detecta se a URL já tem transformações para não aplicar duplicadamente.
    */
   const optimizeCloudinaryUrl = (url: string): string => {
-    if (!url.includes('cloudinary.com')) return url;
-    
-    // Extrair partes da URL do Cloudinary
-    const baseUrlPattern = /(https:\/\/res\.cloudinary\.com\/[^\/]+\/image\/upload\/)(.*)/;
-    const match = url.match(baseUrlPattern);
-    
-    if (!match) return url;
-    
-    const [, baseUrl, pathAndQuery] = match;
-    
-    // Verificar se a URL já contém parâmetros de otimização
-    const hasExistingParams = /f_auto|q_auto|w_\d+|dpr_auto/.test(pathAndQuery);
-    
-    // Se já tiver parâmetros, apenas devolver a URL original
-    if (hasExistingParams) return url;
-    
-    // Transformações avançadas para melhorar a performance e qualidade
-    const transforms = [
-      'f_auto',              // formato automático (webp/avif para navegadores compatíveis)
-      `q_auto:${quality}`,   // qualidade adaptativa com base no parâmetro quality
-      `w_${width}`,          // largura exata
-      'dpr_auto',            // densidade de pixel adaptativa (para retina displays)
-      'c_limit',             // modo de corte limitado para preservar proporção
-      'e_sharpen:60'         // leve nitidez para melhorar a qualidade percebida
-    ].join(',');
-    
-    // Verifica se a URL tem formato de versão (v12345)
-    const versionMatch = pathAndQuery.match(/^(v\d+)\//);
-    if (versionMatch) {
-      const version = versionMatch[1];
-      const rest = pathAndQuery.substring(version.length + 1);
-      // Preserva a versão na URL
-      return `${baseUrl}${version}/${transforms}/${rest}`;
+    if (!url.includes('cloudinary.com')) {
+        // Adicionado log para URLs não Cloudinary
+        console.log('[OptimizedImage] URL is not Cloudinary, returning as is:', url);
+        return url;
     }
-    
-    // URL normal sem versão
-    return `${baseUrl}${transforms}/${pathAndQuery}`;
+
+    // Regex para capturar a base da URL, transformações existentes (opcional e não capturado para uso),
+    // versão (opcional) e o public_id (caminho do arquivo)
+    const cloudinaryPattern = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(?:[^/]+?\/)?(?:(v\d+)\/)?(.+)$/;
+    const match = url.match(cloudinaryPattern);
+
+    if (!match) {
+        console.warn('[OptimizedImage] URL looks like Cloudinary but does not match expected pattern:', url);
+        return url; // Retorna a URL original se não corresponder ao padrão
+    }
+
+    const [, cloudUrlBase, existingVersionPath, publicIdFilePath] = match;
+    // existingTransformationsPath (o segundo grupo de captura (?:[^/]+?\/)?) é ignorado intencionalmente.
+
+    // Logs para depuração da análise da URL
+    // console.log('[OptimizedImage] Parsing URL for optimization:', url);
+    // console.log('[OptimizedImage] Parsed components:', { cloudUrlBase, existingVersionPath, publicIdFilePath });
+
+    const newTransforms = [
+      'f_auto',        // Formato automático
+      `q_${quality}`,  // Qualidade baseada na prop (ex: q_80)
+      `w_${width}`,    // Largura baseada na prop
+      'dpr_auto',      // Densidade de pixel automática
+      'c_limit',       // Modo de corte: redimensiona a imagem para caber nas dimensões sem cortar.
+      'e_sharpen:60'   // Aplica um leve efeito de nitidez
+    ].join(',');
+
+    let finalOptimizedUrl = cloudUrlBase;
+    finalOptimizedUrl += newTransforms + '/';
+
+    if (existingVersionPath) {
+      finalOptimizedUrl += existingVersionPath + '/'; // Adiciona a versão se existir
+    }
+
+    finalOptimizedUrl += publicIdFilePath; // Adiciona o caminho público do arquivo
+
+    // Logs para depuração da URL gerada
+    // console.log('[OptimizedImage] Original src for optimization:', url);
+    // console.log('[OptimizedImage] Applied new transforms:', newTransforms);
+    // console.log('[OptimizedImage] Resulting optimizedSrc:', finalOptimizedUrl);
+
+    return finalOptimizedUrl;
   };
-  
+
   const optimizedSrc = optimizeCloudinaryUrl(src);
   console.log('[OptimizedImage] Input src:', src);
   console.log('[OptimizedImage] Generated optimizedSrc:', optimizedSrc);

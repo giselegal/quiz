@@ -20,43 +20,61 @@ interface FixedIntroImageProps {
  * Transforma qualquer URL do Cloudinary em uma versão de alta qualidade
  */
 function getHighQualityUrl(url: string): string {
-  if (!url) return url;
-  
-  // Se não for Cloudinary, retornar sem alterações
-  if (!url.includes('cloudinary.com') && !url.includes('res.cloudinary.com')) {
+  console.log('[FixedIntroImage] getHighQualityUrl input:', url);
+  if (!url || (!url.includes('cloudinary.com') && !url.includes('res.cloudinary.com'))) {
+    console.log('[FixedIntroImage] URL is not Cloudinary or empty, returning as is:', url);
     return url;
   }
-  
-  // Dividir a URL para trabalhar com ela
-  const parts = url.split('/upload/');
-  if (parts.length !== 2) return url;
-  
-  const baseUrl = parts[0] + '/upload/';
-  let pathAndQuery = parts[1];
-  
-  // Remover qualquer parâmetro de blur existente
-  pathAndQuery = pathAndQuery.replace(/[,/]e_blur:[0-9]+/g, '');
-  
-  // Detectar versão na URL (v12345678)
-  const versionMatch = pathAndQuery.match(/^(v\d+)\//);
+
+  const uploadMarker = '/image/upload/';
+  const parts = url.split(uploadMarker);
+  if (parts.length !== 2) {
+    console.warn('[FixedIntroImage] URL structure unexpected (no /image/upload/):', url);
+    return url;
+  }
+
+  const baseUrl = parts[0] + uploadMarker;
+  const pathAfterUpload = parts[1];
+
   let version = '';
-  let finalPath = pathAndQuery;
-  
-  if (versionMatch) {
-    version = versionMatch[1] + '/';
-    finalPath = pathAndQuery.substring(version.length);
+  let publicId = '';
+
+  // Regex para extrair transformações existentes (e ignorá-las), versão (opcional) e public_id
+  // Padrão: (zero ou mais transformações "pasta/") -> (versão "v123/" opcional) -> (public_id "pasta/imagem.jpg")
+  const pathPattern = /^(?:[^/]+\/)*(v\d+\/)?(.+)$/;
+  const pathMatch = pathAfterUpload.match(pathPattern);
+
+  if (pathMatch) {
+    // pathMatch[1] é o grupo da versão (ex: "v123/") ou undefined
+    // pathMatch[2] é o grupo do public_id (ex: "imagem.jpg" ou "pasta/imagem.jpg")
+    if (pathMatch[1]) {
+      version = pathMatch[1]; // Captura a versão com a barra
+    }
+    publicId = pathMatch[2];
+  } else {
+    // Fallback: se a regex não casar, assume que pathAfterUpload é o public_id
+    publicId = pathAfterUpload;
+    console.warn('[FixedIntroImage] getHighQualityUrl regex did not match path:', pathAfterUpload);
   }
   
-  // Parâmetros de alta qualidade
-  const transforms = [
+  console.log('[FixedIntroImage] Parsed URL parts - Version:', version, 'PublicID:', publicId, 'from path:', pathAfterUpload);
+
+  const newTransforms = [
     'f_auto',         // Formato automático (webp/avif)
     'q_95',           // Qualidade muito alta (95%)
     'dpr_auto',       // Densidade de pixel automática
     'e_sharpen:60'    // Nitidez para melhorar qualidade visual
   ].join(',');
-  
-  // Montar URL final com alta qualidade
-  return `${baseUrl}${version}${transforms}/${finalPath}`;
+
+  // Construção correta: baseUrl + newTransforms + / + version (se houver) + publicId
+  let finalUrl = `${baseUrl}${newTransforms}/`;
+  if (version) {
+    finalUrl += version; // version já tem a barra no final
+  }
+  finalUrl += publicId;
+
+  console.log('[FixedIntroImage] getHighQualityUrl output:', finalUrl);
+  return finalUrl;
 }
 
 /**
