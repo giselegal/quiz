@@ -86,22 +86,7 @@
         <div class="loading-spinner"></div>
       </div>
     </div>
-    <!-- Script principal: carrega o bundle em produção/preview e o fonte em desenvolvimento -->
-    <script>
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      if (isLocalhost) {
-        const script = document.createElement('script');
-        script.setAttribute('src', '/src/main.jsx');
-        script.setAttribute('type', 'module');
-        script.setAttribute('defer', 'true');
-        document.body.appendChild(script);
-      } else {
-        const script = document.createElement('script');
-        script.setAttribute('src', '/assets/index-B5Qt9EMX.js');
-        script.setAttribute('type', 'text/javascript');
-        script.setAttribute('defer', 'true');
-        document.body.appendChild(script);
-      }
-    </script>
+    <!-- Script principal: apenas o bundle gerado pelo Vite em produção/preview -->
+    <script type="module" crossorigin src="/assets/index-B5Qt9EMX.js"></script>
   </body>
 </html>
