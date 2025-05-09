@@ -1,13 +1,13 @@
 /**
- * FixedTransformationImage - Componente otimizado para imagens de transformação
+ * FixedResultImage - Componente otimizado para imagens de resultados
  * 
  * Este componente foi criado para resolver o problema de imagens embaçadas
- * nas transformações de antes e depois. Usa a mesma tecnologia do FixedIntroImage
- * mas com configurações específicas para imagens de transformação.
+ * na página de resultados. Similar ao FixedIntroImage, mas com configurações
+ * específicas para as imagens de resultado.
  */
 import React, { useState } from 'react';
 
-interface FixedTransformationImageProps {
+interface FixedResultImageProps {
   src: string;
   alt: string;
   width: number;
@@ -15,6 +15,7 @@ interface FixedTransformationImageProps {
   className?: string;
   containerClassName?: string;
   priority?: boolean;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   onLoad?: () => void;
 }
 
@@ -49,12 +50,12 @@ function getHighQualityUrl(url: string): string {
     finalPath = pathAndQuery.substring(version.length);
   }
   
-  // Parâmetros de alta qualidade específicos para transformações
+  // Parâmetros de alta qualidade para imagens de resultado
   const transforms = [
     'f_auto',         // Formato automático (webp/avif)
-    'q_90',           // Qualidade alta (90%)
+    'q_85',           // Qualidade boa (85%) - equilíbrio entre qualidade e performance
     'dpr_auto',       // Densidade de pixel automática
-    'e_sharpen:50'    // Nitidez para melhorar qualidade visual
+    'e_sharpen:40'    // Nitidez leve para melhorar qualidade visual
   ].join(',');
   
   // Montar URL final com alta qualidade
@@ -62,16 +63,17 @@ function getHighQualityUrl(url: string): string {
 }
 
 /**
- * Componente de imagem de alta qualidade para transformações
+ * Componente de imagem de alta qualidade para página de resultados
  */
-const FixedTransformationImage: React.FC<FixedTransformationImageProps> = ({
+const FixedResultImage: React.FC<FixedResultImageProps> = ({
   src,
   alt,
   width,
   height,
   className = '',
   containerClassName = '',
-  priority = true,
+  priority = false,
+  objectFit = 'cover',
   onLoad
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -100,7 +102,7 @@ const FixedTransformationImage: React.FC<FixedTransformationImageProps> = ({
         alt={alt}
         width={width}
         height={height}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
+        className={`absolute inset-0 w-full h-full object-${objectFit} transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
         loading={priority ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : 'auto'}
         decoding={priority ? 'sync' : 'async'}
@@ -110,4 +112,4 @@ const FixedTransformationImage: React.FC<FixedTransformationImageProps> = ({
   );
 };
 
-export default FixedTransformationImage;
+export default FixedResultImage;
