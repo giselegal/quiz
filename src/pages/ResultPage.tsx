@@ -51,7 +51,7 @@ const ResultPage: React.FC = () => {
     isLoading,
     completeLoading
   } = useLoadingState({
-    minDuration: isLowPerformance ? 400 : 800,
+    minDuration: 50, // Reduzido drasticamente de 800/400ms para 50ms
     disableTransitions: isLowPerformance
   });
 

@@ -32,12 +32,12 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
         }
         return prev + 1;
       });
-    }, 20); // Alterado de 30 para 20
+    }, 10); // Reduzido de 20ms para 10ms (total 1 segundo)
 
     // Update step based on progress
     const stepInterval = setInterval(() => {
       setStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 1000); // Alterado de 1500 para 1000
+    }, 250); // Reduzido de 1000ms para 250ms para mostrar mais etapas
 
     // Cleanup
     return () => {
