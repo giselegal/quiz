@@ -2,7 +2,7 @@
 import { BankImage, getImageById } from '@/data/imageBank';
 import { PreloadOptions } from './types';
 import { optimizeCloudinaryUrl, getLowQualityPlaceholder } from './optimization';
-import { updateImageCache, hasImageWithStatus } from './caching';
+import { updateImageCache, hasImageWithStatus, imageCache } from './caching';
 import { getAllImages } from '@/data/imageBank';
 
 /**
@@ -219,11 +219,17 @@ export const getLowQualityImage = (url: string): string => {
   
   // Check if we already have this in the cache
   const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 95, format: 'auto' });
-  const cachedImage = updateImageCache(optimizedUrl, { url });
   
-  if (cachedImage && 'lowQualityUrl' in cachedImage) {
-    return cachedImage.lowQualityUrl || '';
+  // Here was the problematic code - fixed by retrieving the cache entry first
+  const cacheEntry = imageCache.get(optimizedUrl);
+  
+  // Then check if the cache entry has a lowQualityUrl
+  if (cacheEntry && cacheEntry.lowQualityUrl) {
+    return cacheEntry.lowQualityUrl;
   }
+  
+  // Make sure we add it to the cache properly
+  updateImageCache(optimizedUrl, { url });
   
   // Generate a low quality version
   return getLowQualityPlaceholder(url);
