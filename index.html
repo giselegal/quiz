@@ -105,7 +105,24 @@
         <div class="loading-spinner"></div>
       </div>
     </div>
-    <!-- Script principal -->
-    <script type="module" src="/src/main.jsx"></script>
+    <!-- Script principal: alterna entre desenvolvimento e produção -->
+    <script>
+      const isProd = window.location.hostname === 'giselegalvao.com.br' || window.location.hostname === 'www.giselegalvao.com.br';
+      if (isProd) {
+        // Em produção, carregue o bundle gerado
+        const script = document.createElement('script');
+        script.setAttribute('src', '/assets/main.js');
+        script.setAttribute('type', 'text/javascript');
+        script.setAttribute('defer', 'true');
+        document.body.appendChild(script);
+      } else {
+        // Em desenvolvimento, carregue o fonte como módulo
+        const script = document.createElement('script');
+        script.setAttribute('src', '/src/main.jsx');
+        script.setAttribute('type', 'module');
+        script.setAttribute('defer', 'true');
+        document.body.appendChild(script);
+      }
+    </script>
   </body>
 </html>
