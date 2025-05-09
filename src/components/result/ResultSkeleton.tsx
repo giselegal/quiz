@@ -51,11 +51,21 @@ const ResultSkeleton: React.FC<ResultSkeletonProps> = ({ primaryStyle }) => {
                     alt={`Estilo ${primaryStyle?.category}`}
                     width={238}
                     height={Math.round(238 * 1.3)}
-                    className="w-64 h-80 object-cover rounded-md shadow-sm opacity-50" // Basic styling for preloaded image
+                    className="w-64 h-80 object-cover rounded-md shadow-sm opacity-50"
                     priority={true}
                   />
                 ) : (
-                  <div className="w-64 h-80 bg-gradient-to-b from-[#aa6b5d]/10 to-[#B89B7A]/10 animate-pulse rounded-md shadow-sm" />
+                  <div className="w-64 h-80 flex items-center justify-center bg-gray-100/50 rounded-md shadow-sm">
+                    <OptimizedImage
+                      src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+                      alt="Carregando..."
+                      width={160}
+                      height={80}
+                      className="animate-pulse opacity-75"
+                      objectFit="contain"
+                      priority={true}
+                    />
+                  </div>
                 )}
               </div>
             </div>
