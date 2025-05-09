@@ -106,11 +106,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     <div 
       className={`min-h-screen flex flex-col items-center justify-center bg-[#FEFEFE] py-8 px-4 md:px-6 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
     >
-      <div className="w-full max-w-md flex flex-col items-center">
-        {/* Seção da Logo e Barra */}
-        <div className="w-full flex flex-col items-center mb-6 md:mb-8"> {/* Aplicado flex e items-center aqui */}
-          {/* Container da Logo: largura definida, centralizado pelo items-center do pai */}
-          <div className="w-28 sm:w-32 md:w-36">  {/* Removido mx-auto */}
+      <div className="w-full max-w-md flex flex-col items-center"> {/* Container principal do conteúdo visível */}
+        
+        {/* Seção da Logo e Barra - Margem inferior reduzida */}
+        <div className="w-full flex flex-col items-center mb-4 md:mb-6"> 
+          <div className="w-28 sm:w-32 md:w-36"> 
             <OptimizedImage 
               src="https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
               alt="Logo Gisele Galvão" 
@@ -121,15 +121,16 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               objectFit="contain"
             />
           </div>
-          {/* Barra Dourada: largura definida, centralizada pelo items-center do pai */}
-          <div className="mt-3 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded"></div> {/* Removido mx-auto */}
+          <div className="mt-2 h-[2px] w-24 sm:w-28 md:w-32 bg-[#B89B7A] rounded"></div>
         </div>
 
-        <h1 className="font-playfair text-xl md:text-2xl font-bold text-center mb-4 leading-normal text-[#432818]">
+        {/* Headline - Tamanho e peso da fonte aumentados, margem inferior ajustada */}
+        <h1 className="font-playfair text-2xl sm:text-3xl md:text-3xl font-bold text-center mb-5 leading-tight text-[#432818]">
           Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
         </h1>
 
-        <div className="flex justify-center mb-6 w-full">
+        {/* Imagem Principal */}
+        <div className="flex justify-center mb-3 w-full"> {/* Margem inferior reduzida */}
           <OptimizedImage 
             src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg'} 
             alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
@@ -139,35 +140,39 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             priority={true} 
           />
         </div>
-
-        <p className="text-sm text-[#433830] text-center mb-7 max-w-md mx-auto px-[18px]">
+        
+        {/* Texto descritivo - Movido para logo abaixo da imagem, margem inferior ajustada */}
+        <p className="text-sm text-[#433830] text-center mb-6 max-w-md mx-auto px-4"> {/* px ajustado e mb ajustado */}
           Em poucos minutos, descubra seu{' '}
           <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
           looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com
           praticidade e <span className="font-semibold text-[#432818]">confiança</span>.
         </p>
 
-        <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto flex flex-col gap-3" aria-live="polite">
-          <label htmlFor="name" className="text-xs font-semibold text-[#432818]">
-            NOME
-          </label>
-          <Input 
-            id="name" 
-            placeholder="Digite seu nome" 
-            value={nome} 
-            onChange={e => setNome(e.target.value)} 
-            className="w-full p-3 border-[#b29670] focus:border-[#a1835d] focus:ring-[#a1835d] bg-[#FEFEFE]" 
-            autoFocus 
-            aria-required="true" 
-          />
+        {/* Formulário */}
+        <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto flex flex-col gap-4" aria-live="polite"> {/* gap aumentado ligeiramente */}
+          <div>
+            <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1">
+              NOME
+            </label>
+            <Input 
+              id="name" 
+              placeholder="Digite seu nome" 
+              value={nome} 
+              onChange={e => setNome(e.target.value)} 
+              className="w-full p-3 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md" // Cor da borda e foco ajustadas, rounded-md
+              autoFocus 
+              aria-required="true" 
+            />
+          </div>
           <Button 
             type="submit" 
-            className="w-full mx-auto bg-[#b29670] hover:bg-[#a1835d] text-white py-3 px-4 text-base rounded-md shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#b29670] focus:ring-offset-2 mt-3" 
+            className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-3.5 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 mt-2 transform hover:scale-105" // Cores, padding, fonte, sombra e transição/hover ajustados
             disabled={!nome.trim()}
           >
             Quero Descobrir meu Estilo Agora!
           </Button>
-          <p className="text-xs text-center text-gray-500 mt-2">
+          <p className="text-xs text-center text-gray-500 mt-1"> {/* mt reduzido */}
             Ao clicar, você concorda com nossa política de privacidade
           </p>
         </form>
