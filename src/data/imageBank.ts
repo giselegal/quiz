@@ -1,4 +1,3 @@
-
 import { StyleCategory } from '@/types/quiz';
 
 /**
@@ -185,7 +184,7 @@ const imageBank: ImageCategory[] = [
       },
       {
         id: 'intro-image',
-        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/q_95,f_auto/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.jpg',
+        src: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.png',
         alt: 'Mulher elegante com roupas estilosas',
         category: 'branding',
         preloadPriority: 5
