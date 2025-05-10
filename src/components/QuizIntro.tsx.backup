@@ -39,18 +39,18 @@ const STATIC_LOGO_IMAGE_URLS = {
 const STATIC_INTRO_IMAGE_URLS = {
   avif: {
     tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 200),
-    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 300, 60),
-    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 350, 65),
-    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 400, 70)
+    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 345, 80),
+    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 400, 85),
+    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 450, 90)
   },
   webp: {
     tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 200),
-    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 300, 55),
-    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 350, 60),
-    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 400, 65)
+    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 345, 75),
+    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 400, 80),
+    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 450, 85)
   },
   placeholder: `${INTRO_IMAGE_BASE_URL}f_webp,q_1,w_20,c_limit,e_blur:200/${INTRO_IMAGE_ID}.webp`,
-  png: `${INTRO_IMAGE_BASE_URL}f_png,q_60,w_300,c_limit,fl_progressive/${INTRO_IMAGE_ID}.png`
+  png: `${INTRO_IMAGE_BASE_URL}f_png,q_70,w_345,c_limit,fl_progressive/${INTRO_IMAGE_ID}.png`
 };
 
 // --- Fim das otimizações de escopo do módulo ---
@@ -255,7 +255,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           {/* Remoção do minHeight inline para permitir que aspectRatio e max-width controlem melhor as dimensões */}
           <div 
             ref={mainImageRef}
-            className="w-full max-w-[250px] sm:max-w-[300px] md:max-w-xs mx-auto relative overflow-hidden rounded-lg shadow-md" 
+            className="w-full max-w-[300px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md" 
             style={{
               // minHeight: 320, // Removido para melhor responsividade com aspectRatio
               height: 'auto',
@@ -288,7 +288,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 src={STATIC_INTRO_IMAGE_URLS.png} // Alterado para usar a URL PNG otimizada do introImageId correto
                 alt="Descubra seu estilo predominante"
                 className="w-full h-auto object-contain quiz-intro-image"
-                width={300}
+                width={345}
                 height={360}
                 loading="eager"
                 fetchPriority="high"
