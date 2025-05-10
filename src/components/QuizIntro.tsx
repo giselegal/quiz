@@ -134,6 +134,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     );
   }
 
+  if (!showContent) {
+    // Garante que nada é renderizado até o fade-in
+    return null;
+  }
+
   return (
     <AutoFixedImages>
       <div 
