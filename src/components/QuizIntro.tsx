@@ -192,9 +192,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             for (const entry of entries) {
               if (entry.target === mainImageRef.current) {
                 const width = entry.contentRect.width;
-                // Armazenar o último valor em uma ref em vez de comparar com o state
-                // para evitar ciclos de renderização causados por comparações com mainImageWidth
-                if (width > 0) {
+                if (width > 0 && Math.abs(width - mainImageWidth) > 1) {
                   setMainImageWidth(width);
                 }
               }
