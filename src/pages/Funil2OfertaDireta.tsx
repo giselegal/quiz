@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { trackEvent } from '@/utils/facebookPixel';
+import { trackPixelEvent } from '@/utils/facebookPixel';
 
 const IMAGES = {
   logo: 'https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp',
@@ -18,12 +18,12 @@ export default function Funil2OfertaDireta() {
 
   // Dispara ViewContent ao carregar a página
   useEffect(() => {
-    trackEvent('ViewContent');
+    trackPixelEvent('ViewContent');
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    trackEvent('Lead', { nome });
+    trackPixelEvent('Lead', { nome });
     setEnviado(true);
   };
 
