@@ -40,27 +40,22 @@ const ResultSkeleton: React.FC<ResultSkeletonProps> = ({ primaryStyle }) => {
         
         {/* Main content skeleton */}
         <Card className="p-4 sm:p-6 mb-6 sm:mb-10 bg-white relative overflow-hidden">
-          <div className="flex flex-col gap-4 sm:gap-6 relative">
+          <div className="flex flex-col gap-4 sm:gap-6 relative items-center">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/40 animate-pulse z-0"></div>
-            
             <div className="w-full h-6 sm:h-8 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md relative z-10" />
-            <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-              <div className="space-y-4 relative z-10">
-                <div className="w-full h-24 sm:h-32 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md" />
-                <div className="w-full h-20 sm:h-24 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md" />
-              </div>
-              <div className="flex justify-center relative z-10">
+            <div className="flex flex-col items-center w-full">
+              <div className="flex justify-center w-full">
                 {mainImageSrc ? (
                   <OptimizedImage
                     src={mainImageSrc}
                     alt={`Estilo ${primaryStyle?.category}`}
                     width={BASE_WIDTH}
                     height={BASE_HEIGHT}
-                    className="w-56 sm:w-64 h-auto aspect-[4/5] object-cover rounded-md shadow-sm opacity-50"
+                    className="w-full max-w-xs sm:max-w-sm md:max-w-md aspect-[4/5] object-cover rounded-md shadow-sm opacity-50 mx-auto"
                     priority={true}
                   />
                 ) : (
-                  <div className="w-56 sm:w-64 aspect-[4/5] flex items-center justify-center bg-gray-100/50 rounded-md shadow-sm">
+                  <div className="w-full max-w-xs sm:max-w-sm md:max-w-md aspect-[4/5] flex items-center justify-center bg-gray-100/50 rounded-md shadow-sm mx-auto">
                     <OptimizedImage
                       src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
                       alt="Carregando..."
