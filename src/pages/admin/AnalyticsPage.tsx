@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { DashboardHeader } from '@/components/analytics/DashboardHeader';
 import { AnalyticsLoadingState } from '@/components/analytics/LoadingState';
@@ -6,8 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useIsLowPerformanceDevice } from '@/hooks/use-mobile';
-import { getCachedMetrics, resetMetricsCache, filterEventsByTimeRange } from '@/utils/analyticsHelpers';
-import { getAnalyticsEvents, clearAnalyticsData, testFacebookPixel } from '@/utils/analytics';
+import { getCachedMetrics, resetMetricsCache, filterEventsByTimeRange } from '../../utils/analyticsHelpers'; // Alterado para caminho relativo
+import { getAnalyticsEvents, clearAnalyticsData, testFacebookPixel } from '../../utils/analytics'; // Alterado para caminho relativo
 import { toast } from '@/components/ui/use-toast';
 
 // Lazy loaded tab components for better performance

@@ -371,3 +371,5 @@ export const testFacebookPixel = () => {
     return false;
   }
 };
+
+// Interface para os dados de eventos (exemplo)
