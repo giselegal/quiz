@@ -4,14 +4,18 @@ import { LoadingSpinner } from './loading-spinner';
 interface LoadingStateProps {
   message?: string;
   showLogo?: boolean;
+  role?: string;
+  'aria-busy'?: boolean;
 }
 
 export const LoadingState: React.FC<LoadingStateProps> = ({ 
   message = 'Carregando...', 
-  showLogo = true 
+  showLogo = true,
+  role = 'status',
+  'aria-busy': ariaBusy = 'true'
 }) => {
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FEFEFE]">
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FEFEFE]" role={role} aria-busy={ariaBusy}>
       {showLogo && (
         <div className="w-28 h-auto mb-8">
           <img 

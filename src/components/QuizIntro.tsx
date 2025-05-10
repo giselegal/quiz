@@ -41,6 +41,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   useEffect(() => {
     let isMounted = true;
 
+    // Iniciar carregamento avançado da imagem principal, antes de qualquer coisa
+    const preloadMainImage = new Image();
+    preloadMainImage.src = introImageUrls.webp.small; // Formato webp para prioridade mais alta
+    preloadMainImage.sizes = "(max-width: 640px) 320px, (max-width: 768px) 384px, 420px";
+    
     const loadInitialAssets = async () => {
       try {
         console.log("[QuizIntro] Iniciando carregamento de assets...");
@@ -115,24 +120,63 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   }, [showContent, isLoading]);
 
   const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_112,h_56,c_limit,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
-  const introImageUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_480/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png";
+  // Otimização: Adicionando múltiplos tamanhos com formatos modernos e parâmetros de qualidade
+  const introImageBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
+  const introImageId = "v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up";
+  
+  // Função para criar URLs otimizadas com diferentes tamanhos e formatos
+  const getOptimizedImageUrl = (baseUrl: string, imageId: string, format: string, width: number, quality: number) => {
+    return `${baseUrl}f_${format},q_${quality},w_${width},c_limit,dpr_auto${width > 300 ? ',e_sharpen:30' : ''}/${imageId}.${format}`;
+  };
+  
+  // URLs otimizadas para diferentes tamanhos e formatos
+  const introImageUrls = {
+    avif: {
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 320, 85),
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 384, 85),
+      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 420, 85)
+    },
+    webp: {
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 320, 85),
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 384, 85),
+      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 420, 85)
+    },
+    // Inclui versão de baixa qualidade para carregamento progressivo
+    placeholder: `${introImageBaseUrl}f_webp,q_10,w_30,c_limit,e_blur:200/${introImageId}.webp`,
+    png: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'png', 480, 80)
+  };
 
   // Pré-carregamento explícito do LCP (imagem principal do quiz)
   React.useEffect(() => {
     // Remove qualquer preload duplicado
-    const existing = document.querySelectorAll('link[rel="preload"][as="image"][href="' + introImageUrl + '"]');
+    const preloadSelector = `link[rel="preload"][as="image"][href*="${introImageId}"]`;
+    const existing = document.querySelectorAll(preloadSelector);
     existing.forEach(el => el.parentNode?.removeChild(el));
-    // Adiciona o preload otimizado
-    const lcpLink = document.createElement('link');
-    lcpLink.rel = 'preload';
-    lcpLink.as = 'image';
-    lcpLink.href = introImageUrl;
-    lcpLink.crossOrigin = '';
-    document.head.appendChild(lcpLink);
+    
+    // Adiciona preloads para formatos modernos e fallback
+    const preloadFormats = [
+      { href: introImageUrls.avif.small, type: 'image/avif' },
+      { href: introImageUrls.webp.small, type: 'image/webp' },
+      { href: introImageUrls.png, type: 'image/png' }
+    ];
+    
+    const preloadLinks = preloadFormats.map(format => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = format.href;
+      link.type = format.type;
+      link.crossOrigin = '';
+      document.head.appendChild(link);
+      return link;
+    });
+    
     return () => {
-      if (lcpLink.parentNode) lcpLink.parentNode.removeChild(lcpLink);
+      preloadLinks.forEach(link => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+      });
     };
-  }, [introImageUrl]);
+  }, [introImageId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,9 +191,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       <LoadingState 
         message="Preparando sua experiência personalizada..." 
         showLogo={true} 
-        // Melhoria: role e aria-busy para acessibilidade
-        role="status"
-        aria-busy="true"
       />
     );
   }
@@ -198,17 +239,45 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
           {/* Container de imagem com proporções fixas para evitar layout shift */}
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md flex items-center justify-center" style={{minHeight: 320, background: '#f8f6f2'}}>
-            <img
-              src={introImageUrl}
-              alt="Intro Quiz"
-              className="w-full h-auto max-h-[340px] object-contain quiz-intro-image"
-              width={320}
-              height={340}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              style={{background: '#f8f6f2', display: 'block', margin: '0 auto'}}
-            />
+            <picture>
+              {/* Formatos modernos para browsers que suportam */}
+              <source 
+                srcSet={`${introImageUrls.avif.small} 320w, ${introImageUrls.avif.medium} 384w, ${introImageUrls.avif.large} 420w`} 
+                type="image/avif" 
+                sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, 420px"
+              />
+              <source 
+                srcSet={`${introImageUrls.webp.small} 320w, ${introImageUrls.webp.medium} 384w, ${introImageUrls.webp.large} 420w`} 
+                type="image/webp" 
+                sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, 420px"
+              />
+              {/* Fallback para navegadores sem suporte a formatos modernos */}
+              <img
+                src={introImageUrls.png}
+                alt="Descubra seu estilo predominante"
+                className="w-full h-auto max-h-[340px] object-contain quiz-intro-image transition-opacity duration-300"
+                width={320}
+                height={340}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                style={{
+                  background: '#f8f6f2', 
+                  display: 'block', 
+                  margin: '0 auto',
+                  backgroundImage: `url('${introImageUrls.placeholder}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+                sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, 420px"
+                onLoad={() => {
+                  // Marca a imagem como carregada para métricas de LCP
+                  if (window.performance && window.performance.mark) {
+                    window.performance.mark('quiz-intro-image-loaded');
+                  }
+                }}
+              />
+            </picture>
           </div>
 
           {/* Texto descritivo com espaçamento consistente */}
