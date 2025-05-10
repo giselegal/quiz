@@ -203,10 +203,10 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           <div className="w-full flex justify-center">
             <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
               <FixedIntroImage 
-                src={introImageDetails?.src || 'https://res.cloudinary.com/dqljyf76t/image/upload/v1745193439/9a20446f-e01f-48f4-96d0-f4b37cc06625_ebd68o.webp'} 
-                alt={introImageDetails?.alt || "Mulher elegante com roupas estilosas"} 
-                width={600}
-                height={800}
+                src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto,w_700/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png"
+                alt="Intro Quiz"
+                width={700}
+                height={900}
                 priority={true}
                 className="rounded-lg overflow-hidden shadow-md"
               />
