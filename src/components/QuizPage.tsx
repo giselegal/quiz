@@ -130,14 +130,28 @@ const QuizPage: React.FC = () => {
         if (nextIndex < strategicQuestions.length) {
           const nextQuestion = strategicQuestions[nextIndex];
           if (nextQuestion.imageUrl) {
-            preloadImages([{ src: nextQuestion.imageUrl, priority: 3 }], { quality: 95 });
+            preloadImages([{ 
+              src: nextQuestion.imageUrl, 
+              id: `strategic-${nextIndex}`,
+              category: 'strategic',
+              tags: [],
+              alt: `Question ${nextIndex}`,
+              preloadPriority: 3
+            }], { quality: 95 });
           }
           
           // Also preload the next-next question with lower priority if available
           if (nextIndex + 1 < strategicQuestions.length) {
             const nextNextQuestion = strategicQuestions[nextIndex + 1];
             if (nextNextQuestion.imageUrl) {
-              preloadImages([{ src: nextNextQuestion.imageUrl, priority: 2 }], { quality: 95 });
+              preloadImages([{ 
+                src: nextNextQuestion.imageUrl,
+                id: `strategic-${nextIndex+1}`,
+                category: 'strategic',
+                tags: [],
+                alt: `Question ${nextIndex+1}`,
+                preloadPriority: 2
+              }], { quality: 95 });
             }
           }
         }

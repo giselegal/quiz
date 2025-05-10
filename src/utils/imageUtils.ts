@@ -1,4 +1,3 @@
-
 /**
  * Funções utilitárias para otimização, gerenciamento e manipulação de imagens
  */
@@ -186,4 +185,3 @@ export const getOptimalImageFormat = (): 'auto' | 'webp' | 'jpg' => {
   if (support.webp) return 'webp';
   return 'auto'; // Padrão para auto que normalmente servirá JPEG
 };
-

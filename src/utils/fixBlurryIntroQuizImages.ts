@@ -1,3 +1,4 @@
+
 /**
  * Utilitário otimizado para corrigir imagens borradas na seção de introdução do quiz
  */

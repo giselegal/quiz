@@ -1,3 +1,4 @@
+
 import { BankImage, getImageById } from '@/data/imageBank';
 import { PreloadOptions } from './types';
 import { optimizeCloudinaryUrl, getLowQualityPlaceholder } from './optimization';
@@ -49,6 +50,7 @@ export const preloadImagesByUrls = (
     src: url,
     category: 'external',
     tags: [],
+    alt: 'Preloaded image' // Add required alt property
   }));
   
   const { generateLowQuality = true, ...restOptions } = options;

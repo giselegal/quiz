@@ -85,7 +85,7 @@ export interface ImageCacheEntry {
   lowQualityUrl?: string;
 }
 
-// Update BankImage to include priority
+// Update BankImage to include priority and make alt optional
 export interface BankImage {
   id: string;
   src: string;

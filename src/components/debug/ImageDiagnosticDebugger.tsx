@@ -1,548 +1,384 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  ImageAnalysis,
-  ImageDiagnosticResult,
-  PreloadImageDefinition
-} from '@/utils/images/types';
-import {
-  getOptimizedImage,
-  getLowQualityPlaceholder,
-  getResponsiveImageSources,
-  getImageMetadata
-} from '@/utils/imageManager';
-import { optimizeCloudinaryUrl } from '@/utils/imageUtils';
+import React, { useState, useEffect } from 'react';
+import { getAllImages } from '@/data/imageBank';
+import { optimizeCloudinaryUrl, getResponsiveImageSources } from '@/utils/imageUtils';
+import { ImageAnalysis, ImageDiagnosticResult } from '@/utils/images/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
-import { Copy, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Copy, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { toast } from '@/components/ui/use-toast';
-import { getLowQualityImage } from '@/utils/imageManager';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 
 interface ImageDiagnosticDebuggerProps {
-  imageUrl: string;
+  isVisible: boolean;
 }
 
-const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ imageUrl }) => {
-  const [analysis, setAnalysis] = useState<ImageAnalysis | null>(null);
-  const [optimizedUrl, setOptimizedUrl] = useState<string>(imageUrl);
-  const [lqipUrl, setLqipUrl] = useState<string>('');
-  const [responsiveSrcSet, setResponsiveSrcSet] = useState<string>('');
-  const [responsiveSizes, setResponsiveSizes] = useState<string>('');
-  const [metadata, setMetadata] = useState<any>(null);
-  const [quality, setQuality] = useState<number>(80);
-  const [width, setWidth] = useState<number | undefined>(undefined);
-  const [height, setHeight] = useState<number | undefined>(undefined);
-  const [format, setFormat] = useState<'auto' | 'webp' | 'avif'>('auto');
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [isPreloading, setIsPreloading] = useState<boolean>(false);
-  const [isLqipGenerating, setIsLqipGenerating] = useState<boolean>(false);
-  const [isResponsiveGenerating, setIsResponsiveGenerating] = useState<boolean>(false);
-  const [isMetadataLoading, setIsMetadataLoading] = useState<boolean>(false);
-  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
-  const [isLowQualityGenerating, setIsLowQualityGenerating] = useState<boolean>(false);
-  const [lowQualityImage, setLowQualityImage] = useState<string>('');
-  const [isCopyingOptimized, setIsCopyingOptimized] = useState<boolean>(false);
-  const [isCopyingLqip, setIsCopyingLqip] = useState<boolean>(false);
-  const [isCopyingResponsive, setIsCopyingResponsive] = useState<boolean>(false);
-  const [isCopyingLowQuality, setIsCopyingLowQuality] = useState<boolean>(false);
-  const [isCopiedOptimized, setIsCopiedOptimized] = useState<boolean>(false);
-  const [isCopiedLqip, setIsCopiedLqip] = useState<boolean>(false);
-  const [isCopiedResponsive, setIsCopiedResponsive] = useState<boolean>(false);
-  const [isCopiedLowQuality, setIsCopiedLowQuality] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [totalImages, setTotalImages] = useState<number>(0);
-  const [totalIssues, setTotalIssues] = useState<number>(0);
-  const [totalSize, setTotalSize] = useState<number>(0);
+const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVisible }) => {
+  const [images, setImages] = useState<HTMLImageElement[]>([]);
+  const [analysisResults, setAnalysisResults] = useState<ImageAnalysis[]>([]);
+  const [diagnosticResult, setDiagnosticResult] = useState<ImageDiagnosticResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [optimizationSettings, setOptimizationSettings] = useState({
+    quality: 80,
+    format: 'auto',
+    responsive: true,
+  });
+  const [customUrl, setCustomUrl] = useState('');
   const { toast } = useToast();
 
-  // Reset copied state after a delay
   useEffect(() => {
-    if (isCopiedOptimized) {
-      const timer = setTimeout(() => setIsCopiedOptimized(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isCopiedOptimized]);
+    if (!isVisible) return;
 
-  useEffect(() => {
-    if (isCopiedLqip) {
-      const timer = setTimeout(() => setIsCopiedLqip(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isCopiedLqip]);
-
-  useEffect(() => {
-    if (isCopiedResponsive) {
-      const timer = setTimeout(() => setIsCopiedResponsive(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isCopiedResponsive]);
-
-  useEffect(() => {
-    if (isCopiedLowQuality) {
-      const timer = setTimeout(() => setIsCopiedLowQuality(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isCopiedLowQuality]);
-
-  // Analyze image function
-  const analyzeImage = useCallback(async () => {
-    setIsAnalyzing(true);
-    setIsError(false);
-    setErrorMessage('');
-
-    try {
-      // Simulate analysis with dummy data
-      const dummyAnalysis: ImageAnalysis = {
-        url: imageUrl,
-        format: 'auto',
-        quality: '80',
-        width: 'auto',
-        height: 'auto',
-        isOptimized: false,
-        isResponsive: false,
-        suggestedImprovements: ['Optimize image', 'Use responsive images'],
-        estimatedSizeReduction: 0.5
-      };
-
-      setAnalysis(dummyAnalysis);
-    } catch (error: any) {
-      console.error('Error analyzing image:', error);
-      setIsError(true);
-      setErrorMessage(error.message || 'Failed to analyze image');
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, [imageUrl]);
-
-  // Optimize image function
-  const optimizeImage = useCallback(() => {
-    setIsOptimizing(true);
-    setIsError(false);
-    setErrorMessage('');
-
-    try {
-      const optimized = optimizeCloudinaryUrl(imageUrl, { quality, format, width, height });
-      setOptimizedUrl(optimized);
-    } catch (error: any) {
-      console.error('Error optimizing image:', error);
-      setIsError(true);
-      setErrorMessage(error.message || 'Failed to optimize image');
-    } finally {
-      setIsOptimizing(false);
-    }
-  }, [imageUrl, quality, format, width, height]);
-
-  // Generate LQIP function
-  const generateLQIP = useCallback(async () => {
-    setIsLqipGenerating(true);
-    setIsError(false);
-    setErrorMessage('');
-
-    try {
-      const lqip = getLowQualityPlaceholder(imageUrl, { quality: 20, width: 30 });
-      setLqipUrl(lqip);
-    } catch (error: any) {
-      console.error('Error generating LQIP:', error);
-      setIsError(true);
-      setErrorMessage(error.message || 'Failed to generate LQIP');
-    } finally {
-      setIsLqipGenerating(false);
-    }
-  }, [imageUrl]);
-
-  // Generate responsive images function
-  const generateResponsiveImages = useCallback(() => {
-    setIsResponsiveGenerating(true);
-    setIsError(false);
-    setErrorMessage('');
-
-    try {
-      const response = getResponsiveImageSources(imageUrl);
-      if (typeof response === 'object' && response !== null) {
-        setResponsiveSrcSet(response.srcSet || '');
-        setResponsiveSizes(response.sizes || '');
+    setIsLoading(true);
+    // Wait for the DOM to be fully loaded
+    const waitForImages = () => {
+      const imgs = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
+      if (imgs.length > 0) {
+        setImages(imgs);
+        setIsLoading(false);
+      } else {
+        setTimeout(waitForImages, 500); // Check again after 500ms
       }
-    } catch (error: any) {
-      console.error('Error generating responsive images:', error);
-      setIsError(true);
-      setErrorMessage(error.message || 'Failed to generate responsive images');
-    } finally {
-      setIsResponsiveGenerating(false);
-    }
-  }, [imageUrl]);
-
-  // Load image metadata function
-  const loadImageMetadata = useCallback(async () => {
-    setIsMetadataLoading(true);
-    setIsError(false);
-    setErrorMessage('');
-
-    try {
-      const meta = await getImageMetadata(imageUrl);
-      setMetadata(meta);
-    } catch (error: any) {
-      console.error('Error loading image metadata:', error);
-      setIsError(true);
-      setErrorMessage(error.message || 'Failed to load image metadata');
-    } finally {
-      setIsMetadataLoading(false);
-    }
-  }, [imageUrl]);
-
-  // Generate low quality image function
-  const generateLowQualityImage = useCallback(async () => {
-    setIsLowQualityGenerating(true);
-    setIsError(false);
-    setErrorMessage('');
-
-    try {
-      const lowQuality = await getLowQualityImage(imageUrl);
-      setLowQualityImage(lowQuality);
-    } catch (error: any) {
-      console.error('Error generating low quality image:', error);
-      setIsError(true);
-      setErrorMessage(error.message || 'Failed to generate low quality image');
-    } finally {
-      setIsLowQualityGenerating(false);
-    }
-  }, [imageUrl]);
-
-  // Copy to clipboard functions
-  const copyToClipboard = (text: string, setState: (value: boolean) => void, setCopiedState: (value: boolean) => void) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        setState(true);
-        setCopiedState(true);
-        toast({
-          title: "Copiado para a área de transferência!",
-          description: "Cole o código onde precisar.",
-        })
-      })
-      .catch(err => {
-        console.error('Failed to copy text: ', err);
-        setState(false);
-        setCopiedState(false);
-        toast({
-          title: "Erro ao copiar",
-          description: "Não foi possível copiar o código. Tente novamente.",
-          variant: "destructive",
-        })
-      });
-  };
-
-  // Image diagnostic function (dummy implementation)
-  const runImageDiagnostics = useCallback(async () => {
-    // Dummy data for demonstration
-    const dummyResult: ImageDiagnosticResult = {
-      summary: {
-        totalImagesRendered: 10,
-        totalImagesWithIssues: 3,
-        totalDownloadedBytes: 500000,
-        estimatedPerformanceImpact: 'Medium'
-      },
-      detailedIssues: [
-        {
-          url: imageUrl,
-          element: document.createElement('img'),
-          issues: ['Large image size', 'Missing alt text'],
-          dimensions: {
-            natural: { width: 1920, height: 1080 },
-            display: { width: 640, height: 360 }
-          }
-        }
-      ]
     };
 
-    // Extract relevant data for display
-    const { summary } = dummyResult;
-    const { totalImagesRendered, totalImagesWithIssues, totalDownloadedBytes } = summary;
+    waitForImages();
+  }, [isVisible]);
 
-    setTotalImages(totalImagesRendered);
-    setTotalIssues(totalImagesWithIssues);
-    setTotalSize(totalDownloadedBytes);
-  }, [imageUrl]);
+  const analyzeImage = async (url: string): Promise<ImageAnalysis> => {
+    const isCloudinary = url.includes('cloudinary.com');
+    const optimizedUrl = isCloudinary ? optimizeCloudinaryUrl(url, optimizationSettings) : url;
+    const originalSize = await getImageSize(url);
+    const optimizedSize = await getImageSize(optimizedUrl);
+
+    let suggestedImprovements: string[] = [];
+    if (isCloudinary && optimizationSettings.quality < 80) {
+      suggestedImprovements.push('Aumentar a qualidade da imagem para pelo menos 80.');
+    }
+    if (isCloudinary && optimizationSettings.format === 'jpg') {
+      suggestedImprovements.push('Usar formato automático ou WebP para melhor compressão.');
+    }
+    if (!url.includes('w_auto') && !url.includes('dpr_auto')) {
+      suggestedImprovements.push('Considerar URLs responsivas para diferentes tamanhos de tela.');
+    }
+
+    const analysis: ImageAnalysis = {
+      url,
+      format: 'desconhecido',
+      quality: 'desconhecida',
+      width: 'desconhecida',
+      height: 'desconhecida',
+      isOptimized: optimizedSize < originalSize,
+      isResponsive: url.includes('w_auto') || url.includes('dpr_auto'),
+      suggestedImprovements,
+      estimatedSizeReduction: originalSize - optimizedSize,
+    };
+
+    return analysis;
+  };
+
+  const getImageSize = (url: string): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.responseType = 'blob';
+        request.onload = () => {
+          const blob = request.response;
+          resolve(blob.size);
+        };
+        request.onerror = () => reject(new Error(`Erro ao obter o tamanho da imagem: ${url}`));
+        request.send();
+      };
+      img.onerror = () => reject(new Error(`Erro ao carregar a imagem: ${url}`));
+      img.src = url;
+    });
+  };
+
+  const runDiagnostics = async () => {
+    setIsLoading(true);
+    const results: ImageAnalysis[] = [];
+
+    for (const imageEl of images) {
+      try {
+        const url = imageEl.src;
+        const analysis = await analyzeImage(url);
+        results.push(analysis);
+      } catch (error: any) {
+        console.error(`Erro ao analisar imagem: ${imageEl.src}`, error);
+        results.push({
+          url: imageEl.src,
+          format: 'desconhecido',
+          quality: 'desconhecida',
+          width: 'desconhecida',
+          height: 'desconhecida',
+          isOptimized: false,
+          isResponsive: false,
+          suggestedImprovements: ['Erro ao analisar a imagem.'],
+        });
+      }
+    }
+
+    setAnalysisResults(results);
+
+    const totalImagesRendered = images.length;
+    let totalImagesWithIssues = 0;
+    let totalDownloadedBytes = 0;
+    let detailedIssues: ImageDiagnosticResult['detailedIssues'] = [];
+
+    for (const imageEl of images) {
+      const url = imageEl.src;
+      const issues: string[] = [];
+
+      if (!url) {
+        totalImagesWithIssues++;
+        issues.push('URL da imagem não encontrada.');
+      } else {
+        const isCloudinary = url.includes('cloudinary.com');
+        if (isCloudinary) {
+          const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettings);
+          const originalSize = await getImageSize(url);
+          const optimizedSize = await getImageSize(optimizedUrl);
+          totalDownloadedBytes += optimizedSize;
+
+          if (optimizationSettings.quality < 80) {
+            totalImagesWithIssues++;
+            issues.push('Qualidade da imagem abaixo do recomendado (80).');
+          }
+          if (optimizationSettings.format === 'jpg') {
+            totalImagesWithIssues++;
+            issues.push('Formato da imagem não é otimizado (usar auto ou webp).');
+          }
+          if (!url.includes('w_auto') && !url.includes('dpr_auto')) {
+            totalImagesWithIssues++;
+            issues.push('URLs não são responsivas para diferentes tamanhos de tela.');
+          }
+          if (optimizedSize > originalSize) {
+            issues.push('Tamanho da imagem otimizada é maior que a original.');
+          }
+        } else {
+          totalImagesWithIssues++;
+          issues.push('Imagem não está hospedada no Cloudinary.');
+        }
+      }
+
+      if (issues.length > 0) {
+        detailedIssues.push({
+          url,
+          element: imageEl,
+          issues,
+          dimensions: {
+            natural: { width: imageEl.naturalWidth, height: imageEl.naturalHeight },
+            display: { width: imageEl.width, height: imageEl.height }
+          }
+        });
+      }
+    }
+
+    const estimatedPerformanceImpact = totalImagesWithIssues > 0 ? 'Alto' : 'Baixo';
+
+    setDiagnosticResult({
+      summary: {
+        totalImagesRendered,
+        totalImagesWithIssues,
+        totalDownloadedBytes,
+        estimatedPerformanceImpact,
+      },
+      detailedIssues,
+    });
+
+    setIsLoading(false);
+  };
+
+  const optimizeImageUrl = async (url: string) => {
+    if (!url) return;
+
+    const isCloudinary = url.includes('cloudinary.com');
+    if (!isCloudinary) {
+      toast({
+        title: "Erro",
+        description: "A URL não é do Cloudinary.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettings);
+      const responsiveSources = getResponsiveImageSources(url, [320, 640, 960, 1280]);
+      
+      // Create a temporary image element to apply the optimized URL
+      const imageEl = new Image();
+      imageEl.src = optimizedUrl;
+      imageEl.srcset = responsiveSources.srcSet;
+      imageEl.sizes = responsiveSources.sizes;
+
+      // Copy the optimized URL to the clipboard
+      await navigator.clipboard.writeText(imageEl.src);
+      toast({
+        title: "Sucesso",
+        description: "URL otimizada copiada para a área de transferência.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível otimizar e copiar a URL.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <div className="p-4 space-y-6">
-      <h2 className="text-xl font-semibold">Image Diagnostic Debugger</h2>
+    isVisible && (
+      <div className="fixed top-0 left-0 w-full h-full bg-gray-100 bg-opacity-75 z-50 overflow-auto">
+        <div className="container mx-auto p-4">
+          <h2 className="text-2xl font-bold mb-4">Image Diagnostic Debugger</h2>
 
-      {/* Image Display and Controls */}
-      <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-        <div className="w-full md:w-1/2">
-          <img src={imageUrl} alt="Original" className="max-w-full h-auto rounded-lg shadow-md" />
-          <p className="text-sm text-gray-500 mt-2">Original Image</p>
-        </div>
-
-        <div className="w-full md:w-1/2">
-          <img src={optimizedUrl} alt="Optimized" className="max-w-full h-auto rounded-lg shadow-md" />
-          <p className="text-sm text-gray-500 mt-2">Optimized Image</p>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="quality">Quality:</Label>
-            <Slider
-              id="quality"
-              defaultValue={[quality]}
-              max={100}
-              step={5}
-              onValueChange={(value) => setQuality(value[0])}
-              className="max-w-md"
-            />
-            <span>{quality}</span>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="format">Format:</Label>
-            <select
-              id="format"
-              className="border rounded-md p-1"
-              value={format}
-              onChange={(e) => setFormat(e.target.value as 'auto' | 'webp' | 'avif')}
-            >
-              <option value="auto">Auto</option>
-              <option value="webp">WebP</option>
-              <option value="avif">AVIF</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="width">Width:</Label>
-            <Input
-              type="number"
-              id="width"
-              className="border rounded-md p-1 w-20"
-              value={width === undefined ? '' : width.toString()}
-              onChange={(e) => setWidth(e.target.value === '' ? undefined : parseInt(e.target.value))}
-              placeholder="Auto"
-            />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="height">Height:</Label>
-            <Input
-              type="number"
-              id="height"
-              className="border rounded-md p-1 w-20"
-              value={height === undefined ? '' : height.toString()}
-              onChange={(e) => setHeight(e.target.value === '' ? undefined : parseInt(e.target.value))}
-              placeholder="Auto"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={optimizeImage} disabled={isOptimizing}>
-            {isOptimizing ? 'Optimizing...' : 'Optimize Image'}
-          </Button>
-          <Button onClick={generateLQIP} disabled={isLqipGenerating}>
-            {isLqipGenerating ? 'Generating LQIP...' : 'Generate LQIP'}
-          </Button>
-          <Button onClick={generateResponsiveImages} disabled={isResponsiveGenerating}>
-            {isResponsiveGenerating ? 'Generating Responsive Images...' : 'Generate Responsive Images'}
-          </Button>
-          <Button onClick={generateLowQualityImage} disabled={isLowQualityGenerating}>
-            {isLowQualityGenerating ? 'Generating Low Quality Image...' : 'Generate Low Quality Image'}
-          </Button>
-          <Button onClick={loadImageMetadata} disabled={isMetadataLoading}>
-            {isMetadataLoading ? 'Loading Metadata...' : 'Load Image Metadata'}
-          </Button>
-          <Button onClick={analyzeImage} disabled={isAnalyzing}>
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Image'}
-          </Button>
-          <Button onClick={runImageDiagnostics}>
-            Run Image Diagnostics
-          </Button>
-        </div>
-      </div>
-
-      {/* Results */}
-      {analysis && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Analysis Results</h3>
-          <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto">
-            {JSON.stringify(analysis, null, 2)}
-          </pre>
-        </div>
-      )}
-
-      {metadata && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Image Metadata</h3>
-          <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto">
-            {JSON.stringify(metadata, null, 2)}
-          </pre>
-        </div>
-      )}
-
-      {optimizedUrl !== imageUrl && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Optimized URL</h3>
-          <div className="flex items-center space-x-4">
-            <Input
-              type="text"
-              readOnly
-              value={optimizedUrl}
-              className="flex-grow"
-            />
-            <Button
-              variant="outline"
-              disabled={isCopyingOptimized}
-              onClick={() => copyToClipboard(optimizedUrl, setIsCopyingOptimized, setIsCopiedOptimized)}
-            >
-              {isCopiedOptimized ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-              {isCopyingOptimized ? 'Copying...' : 'Copy'}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {lqipUrl && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">LQIP URL</h3>
-          <div className="flex items-center space-x-4">
-            <Input
-              type="text"
-              readOnly
-              value={lqipUrl}
-              className="flex-grow"
-            />
-            <Button
-              variant="outline"
-              disabled={isCopyingLqip}
-              onClick={() => copyToClipboard(lqipUrl, setIsCopyingLqip, setIsCopiedLqip)}
-            >
-              {isCopiedLqip ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-              {isCopyingLqip ? 'Copying...' : 'Copy'}
-            </Button>
-          </div>
-          <img src={lqipUrl} alt="LQIP" className="max-w-full h-auto rounded-lg shadow-md" />
-        </div>
-      )}
-
-      {responsiveSrcSet && responsiveSizes && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Responsive Images</h3>
-          <div className="space-y-2">
-            <div>
-              <Label>SrcSet:</Label>
-              <div className="flex items-center space-x-4">
-                <Input
-                  type="text"
-                  readOnly
-                  value={responsiveSrcSet}
-                  className="flex-grow"
+          {/* Optimization Settings */}
+          <div className="mb-4 p-4 bg-white rounded shadow-md">
+            <h3 className="text-lg font-semibold mb-2">Optimization Settings</h3>
+            <div className="space-y-2">
+              <div>
+                <Label htmlFor="quality">Quality ({optimizationSettings.quality})</Label>
+                <Slider
+                  id="quality"
+                  defaultValue={[optimizationSettings.quality]}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => setOptimizationSettings({ ...optimizationSettings, quality: value[0] })}
                 />
-                <Button
-                  variant="outline"
-                  disabled={isCopyingResponsive}
-                  onClick={() => copyToClipboard(responsiveSrcSet, setIsCopyingResponsive, setIsCopiedResponsive)}
-                >
-                  {isCopiedResponsive ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                  {isCopyingResponsive ? 'Copying...' : 'Copy'}
-                </Button>
               </div>
-            </div>
-            <div>
-              <Label>Sizes:</Label>
-              <div className="flex items-center space-x-4">
-                <Input
-                  type="text"
-                  readOnly
-                  value={responsiveSizes}
-                  className="flex-grow"
-                />
-                <Button
-                  variant="outline"
-                  disabled={isCopyingResponsive}
-                  onClick={() => copyToClipboard(responsiveSizes, setIsCopyingResponsive, setIsCopiedResponsive)}
+              <div>
+                <Label htmlFor="format">Format</Label>
+                <select
+                  id="format"
+                  className="w-full p-2 border rounded"
+                  value={optimizationSettings.format}
+                  onChange={(e) => setOptimizationSettings({ ...optimizationSettings, format: e.target.value })}
                 >
-                  {isCopiedResponsive ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                  {isCopyingResponsive ? 'Copying...' : 'Copy'}
-                </Button>
+                  <option value="auto">Auto</option>
+                  <option value="webp">WebP</option>
+                  <option value="jpg">JPG</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="responsive"
+                  checked={optimizationSettings.responsive}
+                  onCheckedChange={(checked) => setOptimizationSettings({ ...optimizationSettings, responsive: checked })}
+                />
+                <Label htmlFor="responsive">Generate Responsive Images</Label>
               </div>
             </div>
           </div>
-        </div>
-      )}
 
-      {lowQualityImage && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Low Quality Image</h3>
-          <div className="flex items-center space-x-4">
-            <Input
-              type="text"
-              readOnly
-              value={lowQualityImage}
-              className="flex-grow"
-            />
-            <Button
-              variant="outline"
-              disabled={isCopyingLowQuality}
-              onClick={() => copyToClipboard(lowQualityImage, setIsCopyingLowQuality, setIsCopiedLowQuality)}
-            >
-              {isCopiedLowQuality ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-              {isCopyingLowQuality ? 'Copying...' : 'Copy'}
-            </Button>
+          {/* Custom URL Input */}
+          <div className="mb-4 p-4 bg-white rounded shadow-md">
+            <h3 className="text-lg font-semibold mb-2">Optimize Custom URL</h3>
+            <div className="flex space-x-2">
+              <Input
+                type="url"
+                placeholder="Enter image URL"
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+              />
+              <Button onClick={() => optimizeImageUrl(customUrl)} disabled={!customUrl}>
+                Optimize & Copy
+              </Button>
+            </div>
           </div>
-          <img src={lowQualityImage} alt="Low Quality" className="max-w-full h-auto rounded-lg shadow-md" />
-        </div>
-      )}
 
-      {/* Error Message */}
-      {isError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Error!</strong>
-          <span className="block sm:inline">{errorMessage}</span>
-        </div>
-      )}
+          {/* Run Diagnostics Button */}
+          <Button onClick={runDiagnostics} disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analisando...
+              </>
+            ) : (
+              "Executar Diagnóstico"
+            )}
+          </Button>
 
-      {/* Image Diagnostics Summary */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Image Diagnostics Summary</h3>
-        <Table>
-          <TableCaption>Summary of image diagnostics results.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px]">Metric</TableHead>
-              <TableHead>Value</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">Total Images Rendered</TableCell>
-              <TableCell>{totalImages ? String(totalImages) : '0'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Total Images with Issues</TableCell>
-              <TableCell>{totalIssues ? String(totalIssues) : '0'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Total Downloaded Bytes</TableCell>
-              <TableCell>{totalSize ? String(totalSize) : '0'}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+          {/* Diagnostic Summary */}
+          {diagnosticResult && (
+            <div className="mt-4 p-4 bg-white rounded shadow-md">
+              <h3 className="text-lg font-semibold mb-2">Diagnostic Summary</h3>
+              <p>Total Images Rendered: {diagnosticResult.summary.totalImagesRendered}</p>
+              <p>Total Images with Issues: {diagnosticResult.summary.totalImagesWithIssues}</p>
+              <p>Total Downloaded Bytes: {diagnosticResult.summary.totalDownloadedBytes}</p>
+              <p>Estimated Performance Impact: {diagnosticResult.summary.estimatedPerformanceImpact}</p>
+            </div>
+          )}
+
+          {/* Detailed Issues */}
+          {diagnosticResult && diagnosticResult.detailedIssues.length > 0 && (
+            <div className="mt-4 p-4 bg-white rounded shadow-md">
+              <h3 className="text-lg font-semibold mb-2">Detailed Issues</h3>
+              {diagnosticResult.detailedIssues.map((issue, index) => (
+                <div key={index} className="mb-4 p-4 border rounded">
+                  <p>
+                    <strong>URL:</strong> {issue.url}
+                  </p>
+                  <p>
+                    <strong>Natural Dimensions:</strong> {issue.dimensions?.natural.width}x{issue.dimensions?.natural.height}
+                  </p>
+                  <p>
+                    <strong>Display Dimensions:</strong> {issue.dimensions?.display.width}x{issue.dimensions?.display.height}
+                  </p>
+                  {issue.issues.map((error, i) => (
+                    <p key={i} className="text-red-500">
+                      <AlertTriangle className="inline-block h-4 w-4 mr-1" />
+                      {error}
+                    </p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Image List and Analysis */}
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold mb-2">Image Analysis</h3>
+            {isLoading ? (
+              <p>Loading images...</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {images.map((img, index) => (
+                  <div key={index} className="bg-white rounded shadow-md p-4">
+                    <img src={img.src} alt={`Image ${index}`} className="mb-2 rounded" style={{ maxWidth: '100%', height: 'auto' }} />
+                    <p className="text-sm">
+                      <strong>URL:</strong> {img.src}
+                    </p>
+                    {analysisResults[index] && (
+                      <>
+                        <p className="text-sm">
+                          <strong>Optimized:</strong> {analysisResults[index].isOptimized ? <CheckCircle className="inline-block h-4 w-4 text-green-500" /> : <AlertTriangle className="inline-block h-4 w-4 text-red-500" />}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Responsive:</strong> {analysisResults[index].isResponsive ? <CheckCircle className="inline-block h-4 w-4 text-green-500" /> : <AlertTriangle className="inline-block h-4 w-4 text-red-500" />}
+                        </p>
+                        {analysisResults[index].suggestedImprovements.length > 0 && (
+                          <>
+                            <p className="text-sm font-medium">Suggested Improvements:</p>
+                            <ul className="list-disc list-inside text-sm text-red-500">
+                              {analysisResults[index].suggestedImprovements.map((improvement, i) => (
+                                <li key={i}>{improvement}</li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    )
   );
 };
 
