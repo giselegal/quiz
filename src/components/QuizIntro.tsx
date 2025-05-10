@@ -344,7 +344,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               />
               {/* Fallback para navegadores sem suporte a formatos modernos */}
               <img
-                src={introImageUrls.png}
+                src="https://res.cloudinary.com/dqljyf76t/image/upload/f_avif,q_auto,w_450,c_limit/v1709737559/quiz-sell-genius/quiz-intro-image.png"
                 alt="Descubra seu estilo predominante"
                 className="w-full h-auto object-contain quiz-intro-image"
                 width={345}
