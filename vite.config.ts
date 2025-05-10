@@ -19,7 +19,10 @@ export default defineConfig(({ mode }) => ({
     },
     fs: {
       allow: ['../']
-    }
+    },
+    allowedHosts: [
+      "a10d1b34-b5d4-426b-8c97-45f125d03ec1.lovableproject.com"
+    ]
   },
   
   plugins: [
