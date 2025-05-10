@@ -83,13 +83,20 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
   // Configuração otimizada do logo com fundo transparente
   const logoBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
+  // Certifique-se de que este é o ID público correto da sua imagem de logo no Cloudinary.
+  // O parâmetro `b_transparent` tentará tornar o fundo da imagem transparente.
+  // Para melhores resultados, a imagem original carregada no Cloudinary:
+  // 1. Deve ser um formato que suporte transparência (ex: PNG).
+  // 2. Idealmente, já deve ter um fundo transparente.
+  // 3. Se tiver um fundo sólido, `b_transparent` funciona melhor com fundos simples (ex: branco).
   const logoImageId = "v1744911572/LOGO_DA_MARCA_GISELE_r14oz2";
   
-  // URLs otimizadas para o logo em diferentes formatos com fundo transparente
+  // URLs otimizadas para o logo em diferentes formatos, incluindo o parâmetro b_transparent
+  // e usando q_auto e dpr_auto para melhor otimização pelo Cloudinary.
   const logoImageUrls = {
-    webp: `${logoBaseUrl}f_webp,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100,b_transparent/${logoImageId}.webp`,
-    png: `${logoBaseUrl}f_png,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100,b_transparent/${logoImageId}.png`,
-    avif: `${logoBaseUrl}f_avif,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100,b_transparent/${logoImageId}.avif`
+    webp: `${logoBaseUrl}f_webp,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${logoImageId}.webp`,
+    png: `${logoBaseUrl}f_png,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${logoImageId}.png`,
+    avif: `${logoBaseUrl}f_avif,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${logoImageId}.avif`
   };
   
   // Otimização: Adicionando múltiplos tamanhos com formatos modernos e parâmetros de qualidade
