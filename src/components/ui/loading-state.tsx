@@ -53,7 +53,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
         className="mb-4"
       />
       
-      <p className="text-[#432818] font-medium">{message}</p>
+      <p className="text-[#432818] font-medium font-inter">{message}</p>
     </div>
   );
 };

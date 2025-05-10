@@ -30,7 +30,7 @@ export const QuizIntroLoading: React.FC = () => {
         />
       </div>
       
-      <p className="text-[#432818] font-medium">Preparando sua experiência...</p>
+      <p className="text-[#432818] font-medium font-inter">Preparando sua experiência...</p>
     </div>
   );
 };

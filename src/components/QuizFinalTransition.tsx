@@ -87,7 +87,7 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
           <h2 className="text-2xl font-playfair text-[#aa6b5d] mb-2">
             Finalizando Seu Quiz
           </h2>
-          <p className="text-[#3a3a3a]">
+          <p className="text-[#3a3a3a] font-inter">
             Estamos preparando seu resultado personalizado
           </p>
         </motion.div>
@@ -113,7 +113,7 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="text-center text-[#3a3a3a] font-medium"
+          className="text-center text-[#3a3a3a] font-medium font-inter"
         >
           {steps[step]}
         </motion.div>

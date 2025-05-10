@@ -70,6 +70,7 @@
       }
       .loading-fallback {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         min-height: 100vh;
@@ -85,6 +86,12 @@
       }
       @keyframes spin {
         to { transform: rotate(360deg); }
+      }
+      .loading-message {
+        margin-top: 1rem;
+        color: #432818;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
       }
       .font-playfair {
         font-family: 'Playfair Display', serif;
@@ -122,6 +129,7 @@
     <div id="root">
       <div class="loading-fallback">
         <div class="loading-spinner"></div>
+        <div class="loading-message">Carregando...</div>
       </div>
     </div>
     <!-- Script principal: entrada padrão do Vite, será substituído no build -->

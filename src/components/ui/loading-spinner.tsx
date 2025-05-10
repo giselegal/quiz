@@ -48,7 +48,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           animationDuration: '0.8s'
         }}
       />
-      {showText && <p className="mt-2 text-sm text-gray-600">{text}</p>}
+      {showText && <p className="mt-2 text-sm text-gray-600 font-inter">{text}</p>}
     </div>
   );
 };
