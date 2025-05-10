@@ -363,40 +363,38 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             <picture>
               {/* Formatos modernos para browsers que suportam, com preload da versão tiny primeiro */}
               <source 
-                srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`} 
+                srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`} 
                 type="image/avif" 
-                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
+                sizes="450px"
+                fetchpriority="high"
               />
               <source 
-                srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`} 
+                srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`} 
                 type="image/webp" 
-                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
+                sizes="450px"
+                fetchpriority="high"
               />
               {/* Fallback para navegadores sem suporte a formatos modernos */}
               {/* O src agora usa uma URL otimizada do mesmo introImageId */}
               <img
-                src={STATIC_INTRO_IMAGE_URLS.png} // Alterado para usar a URL PNG otimizada do introImageId correto
+                src={STATIC_INTRO_IMAGE_URLS.avif.large} // Direto para AVIF para browsers modernos
                 alt="Descubra seu estilo predominante"
                 className="w-full h-auto object-contain quiz-intro-image"
-                width={345}
-                height={360}
+                width={450}
+                height={470}
                 loading="eager"
-                fetchPriority="high"
-                decoding="async"
+                fetchpriority="high"
+                decoding="sync"
                 onLoad={() => { imageLoaded.current = true; }}
                 style={{
-                  background: '#f8f6f2', 
+                  background: 'none', 
                   display: 'block', 
                   margin: '0 auto',
                   objectFit: 'contain',
-                  aspectRatio: '345/360',
-                  backgroundImage: `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  imageRendering: 'auto',
-                  contain: 'paint'
+                  aspectRatio: '450/470',
+                  imageRendering: 'high-quality'
                 }}
-                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
+                sizes="450px"
               />
             </picture>
           </div>

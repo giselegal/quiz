@@ -8,7 +8,7 @@ import { captureUTMParameters } from './utils/analytics';
 import { loadFacebookPixel } from './utils/facebookPixel';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import CriticalCSSLoader from './components/CriticalCSSLoader';
-import { initialCriticalCSS, heroCriticalCSS } from './utils/critical-css';
+import { initialCriticalCSS } from './utils/critical-css';
 
 // Componente de loading para Suspense
 const LoadingFallback = () => (

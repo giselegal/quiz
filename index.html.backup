@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Descubra Seu Estilo com Gisele Galvão | Vista-se de Você!</title>
+    <meta name="description" content="Cansada do guarda-roupa lotado e nada combina? Faça o quiz da Gisele Galvão e descubra seu estilo com clareza e confiança. Resultado imediato!" />
+    <meta name="author" content="Gisele Galvão" />
+    <meta property="og:title" content="Descubra Seu Estilo com Gisele Galvão | Vista-se de Você!" />
+    <meta property="og:description" content="Cansada do guarda-roupa lotado e nada combina? Faça o quiz da Gisele Galvão e descubra seu estilo com clareza e confiança. Resultado imediato!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://giselegalvao.com.br/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Descubra Seu Estilo com Gisele Galvão | Vista-se de Você!" />
+    <meta name="twitter:description" content="Cansada do guarda-roupa lotado e nada combina? Faça o quiz da Gisele Galvão e descubra seu estilo com clareza e confiança. Resultado imediato!" />
+    <meta name="twitter:image" content="https://giselegalvao.com.br/" />
+    <!-- Favicon embutido base64 -->
+    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJaWlgCWlpYWlpaWPJaWljyWlpY8lpaWPJaWljyWlpY8lpaWPJaWljyWlpY8lpaWPJaWljyWlpYWlpaWAAAAAADU1NQA1NTUM9vb27nl5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/29vbucPDwzPS0tIAAAAAANjY2APe3t7V5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/e3t7V1tbWAwAAAADc3NwA3d3dj+Xl5f/l5eX/5eXl/9ra2v+9vb3/s7Oz/7S0tP/BwcH/29vb/+Xl5f/l5eX/3d3dj9zc3AAAAAAAlpaWAJaWlkzl5eX/5eXl/7+/v/91dXX/VlZW/0hISP9JSUn/WVlZ/3t7e//Hx8f/5eXl/5aWlkyWlpYAAAAAAJaWlgCWlpYIl5eXg87Ozv+GhYb/jYyN/4yLjP9zcnP/dHN0/42MjP+NjIz/i4qL/87Ozv+Xl5eDlpaWCJaWlgAAAAAAlpaWAJaWlgCWlpYVlpaWiI2MjP+1tLX/srGy/4OCg/+Eg4P/srKy/7W0tf+MjIz/lpaWiJaWlhWWlpYAlpaWAAAAAACWlpYAlpaWAJaWlgCWlpYeioqK/8/Pz//Ozc7/n56f/6CfoP/Ozs7/z8/P/4qKiv+WlpYelpaWAJaWlgCWlpYAAAAAAAAAAAAAAAAAAAAAAAAAAPLy8v/y8vL/8vLy//Ly8v/y8vL/8vLy//Ly8v/y8vL/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJaWlgCWlpYO5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f+WlpYOlpaWAAAAAAAAAAAAAAAAAAAAAAAAAAAAlpaWCOXl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/lpaWCJaWlgAAAAAAAAAAAAAAAAAAAAAAAAAAANjY2APe3t7e5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/3t7e3tjY2AMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADd3d0A3d3di+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/93d3Yvd3d0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1dXVANXV1TDe3t7g5eXl/+Xl5f/l5eX/5eXl/97e3uDV1dUw1dXVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADR0dEA0dHRDtXV1YfZ2dnQ2dnZ0NXV1YfR0dEO0dHRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP9/AAD+PwAA8B8AAMAHAADgAwAA8AcAAPgPAAD8HwAA+A8AAOAHAADwDwAA/j8AAP9/AAD//wAA" type="image/x-icon">
+    <!-- Removido preload de imagens para evitar avisos de preload não utilizado -->
+    <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="dns-prefetch" href="https://connect.facebook.net" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <meta http-equiv="Cache-Control" content="max-age=86400, must-revalidate" />
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Preload critical images -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_webp,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" type="image/webp" fetchpriority="high">
+    <!-- Preload do LCP principal (imagem principal) com máxima prioridade -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_avif,q_80,w_450,c_limit,dpr_auto,e_sharpen:30/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.avif" type="image/avif" fetchpriority="high" importance="high">
+    <!-- Fallback para browsers que não suportam AVIF -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_webp,q_90,w_450,c_limit,dpr_auto,e_sharpen:30/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.webp" type="image/webp" fetchpriority="high">
+    
+    <!-- Injetor de favicon como fallback -->
+    <script>
+      // Injeta um favicon inline caso não esteja funcionando
+      (function() {
+        // Usar requestAnimationFrame para evitar bloqueio de renderização
+        requestAnimationFrame(function() {
+          try {
+            var link = document.querySelector('link[rel="icon"]');
+            if (!link || !link.href) {
+              var newLink = document.createElement('link');
+              newLink.rel = 'icon';
+              newLink.type = 'image/x-icon';
+              newLink.href = 'data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJaWlgCWlpYWlpaWPJaWljyWlpY8lpaWPJaWljyWlpY8lpaWPJaWljyWlpY8lpaWPJaWljyWlpYWlpaWAAAAAADU1NQA1NTUM9vb27nl5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/29vbucPDwzPS0tIAAAAAANjY2APe3t7V5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/e3t7V1tbWAwAAAADc3NwA3d3dj+Xl5f/l5eX/5eXl/9ra2v+9vb3/s7Oz/7S0tP/BwcH/29vb/+Xl5f/l5eX/3d3dj9zc3AAAAAAAlpaWAJaWlkzl5eX/5eXl/7+/v/91dXX/VlZW/0hISP9JSUn/WVlZ/3t7e//Hx8f/5eXl/5aWlkyWlpYAAAAAAJaWlgCWlpYIl5eXg87Ozv+GhYb/jYyN/4yLjP9zcnP/dHN0/42MjP+NjIz/i4qL/87Ozv+Xl5eDlpaWCJaWlgAAAAAAlpaWAJaWlgCWlpYVlpaWiI2MjP+1tLX/srGy/4OCg/+Eg4P/srKy/7W0tf+MjIz/lpaWiJaWlhWWlpYAlpaWAAAAAACWlpYAlpaWAJaWlgCWlpYeioqK/8/Pz//Ozc7/n56f/6CfoP/Ozs7/z8/P/4qKiv+WlpYelpaWAJaWlgCWlpYAAAAAAAAAAAAAAAAAAAAAAAAAAPLy8v/y8vL/8vLy//Ly8v/y8vL/8vLy//Ly8v/y8vL/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJaWlgCWlpYO5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f+WlpYOlpaWAAAAAAAAAAAAAAAAAAAAAAAAAAAAlpaWCOXl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/lpaWCJaWlgAAAAAAAAAAAAAAAAAAAAAAAAAAANjY2APe3t7e5eXl/+Xl5f/l5eX/5eXl/+Xl5f/l5eX/3t7e3tjY2AMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADd3d0A3d3di+Xl5f/l5eX/5eXl/+Xl5f/l5eX/5eXl/93d3Yvd3d0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1dXVANXV1TDe3t7g5eXl/+Xl5f/l5eX/5eXl/97e3uDV1dUw1dXVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADR0dEA0dHRDtXV1YfZ2dnQ2dnZ0NXV1YfR0dEO0dHRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP9/AAD+PwAA8B8AAMAHAADgAwAA8AcAAPgPAAD8HwAA+A8AAOAHAADwDwAA/j8AAP9/AAD//wAA';
+              document.head.appendChild(newLink);
+            }
+          } catch(e) { /* Ignora erros silenciosamente */ }
+        });
+      })();
+    </script>
+    
+    <!-- Carregar fontes secundárias de forma não-bloqueante -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    
+    <!-- Critical CSS inline para renderização mais rápida -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+      #root {
+        min-height: 100vh;
+        width: 100%;
+      }
+      .loading-fallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #f9fafb;
+      }
+      .loading-spinner {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        border: 2px solid #e5e7eb;
+        border-top-color: #b29670;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .loading-message {
+        margin-top: 1rem;
+        color: #432818;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+      }
+      .font-playfair {
+        font-family: 'Playfair Display', serif;
+      }
+      
+      /* Estilos críticos específicos para o QuizIntro */
+      .quiz-intro {
+        background: linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%);
+      }
+      .quiz-intro img {
+        display: block;
+        width: auto;
+        height: auto;
+        background-color: #f8f6f2;
+      }
+    </style>
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    </noscript>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <script defer type="module" src="https://cdn.gpteng.co/gptengineer.js"></script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" defer></script>
+    <script defer type="text/javascript">
+      !function(f,b,e,v,n,t,s) {
+        if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)
+    </script>
+<style>
+body{margin:0;padding:0;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F4 100%)}*{will-change:auto!important}img{transition:none!important}.loading-fallback{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background-color:#f9fafb}.loading-spinner{width:3rem;height:3rem;border-radius:50%;border:2px solid #e5e7eb;border-top-color:#B89B7A;animation:spin 1s linear infinite;margin-bottom:1rem}.loading-message{color:#432818;font-family:'Inter',sans-serif;font-size:.9rem}@keyframes spin{to{transform:rotate(360deg)}}.font-playfair{font-family:'Playfair Display',serif;font-display:swap}.font-inter{font-family:'Inter',sans-serif;font-display:swap}
+</style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="loading-fallback">
+        <div class="loading-spinner"></div>
+        <div class="loading-message">Carregando...</div>
+      </div>
+    </div>
+    <!-- Script principal: entrada padrão do Vite, será substituído no build -->
+    <script defer type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
