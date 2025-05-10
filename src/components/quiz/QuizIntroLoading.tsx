@@ -1,0 +1,46 @@
+import React from 'react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+
+/**
+ * Componente especializado para o carregamento da página QuizIntro
+ * Usa o spinner padronizado para manter a consistência visual
+ */
+export const QuizIntroLoading: React.FC = () => {
+  // Logo otimizada
+  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_90,w_140,h_60,c_fit,dpr_auto,b_transparent/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
+  
+  return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FBF8F4]">
+      {/* Spinner único e elegante */}
+      <LoadingSpinner 
+        size="lg" 
+        color="#B89B7A" 
+        thickness="normal"
+        className="mb-6" 
+      />
+      
+      {/* Logo após o spinner (sem duplicação de elementos de carregamento) */}
+      <div className="w-36 h-auto">
+        <img 
+          src={logoUrl}
+          alt="Logo Gisele Galvão"
+          width={140}
+          height={60}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          style={{
+            objectFit: 'contain',
+            imageRendering: 'crisp-edges',
+            maxWidth: '100%',
+            background: 'transparent'
+          }}
+        />
+      </div>
+      
+      <p className="text-[#432818] font-medium mt-4">Preparando sua experiência...</p>
+    </div>
+  );
+};
+
+export default QuizIntroLoading;

@@ -248,7 +248,7 @@ const QuizPage: React.FC = () => {
   }, [currentAnswers?.length, currentQuestion]);
 
   return (
-    <LoadingManager isLoading={!pageIsReady}>
+    <LoadingManager isLoading={!pageIsReady} useQuizIntroLoading={true}>
       <div className="relative">
         {/* Barra de progresso */}
         <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">

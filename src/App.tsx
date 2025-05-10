@@ -14,8 +14,14 @@ import { initialCriticalCSS, heroCriticalCSS } from './utils/critical-css';
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
     <div className="text-center">
-      <LoadingSpinner size="lg" color="#B89B7A" className="mx-auto" />
-      <p className="mt-4 text-gray-600">Carregando...</p>
+      <LoadingSpinner 
+        size="lg" 
+        color="#B89B7A" 
+        className="mx-auto" 
+        thickness="normal"
+        showText={true}
+        text="Carregando..."
+      />
     </div>
   </div>
 );

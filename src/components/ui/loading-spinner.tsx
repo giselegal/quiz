@@ -6,13 +6,21 @@ interface LoadingSpinnerProps {
   color?: string;
   className?: string;
   thickness?: 'thin' | 'normal' | 'thick';
+  showText?: boolean;
+  text?: string;
 }
 
+/**
+ * Componente de spinner de carregamento padronizado e elegante
+ * Usado em todas as páginas do quiz para manter consistência visual
+ */
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'md',
   color = '#B89B7A',
   className = '',
-  thickness = 'normal'
+  thickness = 'normal',
+  showText = false,
+  text = 'Carregando'
 }) => {
   const sizeMap = {
     xs: 'w-3 h-3',
@@ -24,21 +32,23 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   const thicknessMap = {
     thin: 'border-2',
-    normal: 'border-4',
-    thick: 'border-[6px]'
+    normal: 'border-3',
+    thick: 'border-4'
   };
 
   const sizeClass = sizeMap[size] || sizeMap.md;
   const thicknessClass = thicknessMap[thickness] || thicknessMap.normal;
 
   return (
-    <div className={`flex justify-center items-center ${className}`} role="status" aria-label="Loading">
+    <div className={`flex flex-col items-center justify-center ${className}`} role="status" aria-live="polite" aria-label={text}>
       <div
         className={`${sizeClass} ${thicknessClass} rounded-full animate-spin`}
         style={{
-          borderColor: `${color} transparent transparent transparent`
+          borderColor: `${color} transparent transparent transparent`,
+          animationDuration: '0.8s'
         }}
       />
+      {showText && <p className="mt-2 text-sm text-gray-600">{text}</p>}
     </div>
   );
 };
