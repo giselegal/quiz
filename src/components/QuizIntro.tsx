@@ -119,105 +119,64 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const introImageUrls = {
     avif: {
       tiny: getTinyPreloadImageUrl(introImageBaseUrl, introImageId, 'avif', 200),
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 345, 80),
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 345, 80), // Candidato LCP
       medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 400, 85),
       large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 450, 90)
     },
     webp: {
       tiny: getTinyPreloadImageUrl(introImageBaseUrl, introImageId, 'webp', 200),
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 345, 75),
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 345, 75), // Alternativa LCP
       medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 400, 80),
       large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 450, 85)
     },
     // Versão base64 tiny inline para mostrar instantaneamente
     placeholder: `${introImageBaseUrl}f_webp,q_1,w_20,c_limit,e_blur:200/${introImageId}.webp`,
-    png: `${introImageBaseUrl}f_png,q_60,w_345,c_limit/${introImageId}.png`
+    // Fallback PNG otimizado usando o mesmo introImageId
+    png: `${introImageBaseUrl}f_png,q_70,w_345,c_limit,fl_progressive/${introImageId}.png` // Qualidade ajustada e progressivo
   };
 
   // Pré-carregamento para LCP com estratégia otimizada e priorização de conteúdo mínimo viável
   useEffect(() => {
-    // Função para instalar headers HTTP para sugestão de recursos ao navegador
-    const addResourceHints = () => {
-      // Adiciona hint de preconnect para o domínio Cloudinary
-      const preconnect = document.createElement('link');
-      preconnect.rel = 'preconnect';
-      preconnect.href = 'https://res.cloudinary.com';
-      preconnect.crossOrigin = 'anonymous';
-      document.head.appendChild(preconnect);
-      
-      // Prioriza DNS-prefetch também
-      const dnsPrefetch = document.createElement('link');
-      dnsPrefetch.rel = 'dns-prefetch';
-      dnsPrefetch.href = 'https://res.cloudinary.com';
-      document.head.appendChild(dnsPrefetch);
-    };
+    const preconnectLink = document.createElement('link');
+    preconnectLink.rel = 'preconnect';
+    preconnectLink.href = 'https://res.cloudinary.com';
+    preconnectLink.crossOrigin = 'anonymous';
+    document.head.appendChild(preconnectLink);
+
+    const dnsPrefetchLink = document.createElement('link');
+    dnsPrefetchLink.rel = 'dns-prefetch';
+    dnsPrefetchLink.href = 'https://res.cloudinary.com';
+    document.head.appendChild(dnsPrefetchLink);
+
+    // Preload do placeholder
+    const placeholderPreload = document.createElement('link');
+    placeholderPreload.rel = 'preload';
+    placeholderPreload.as = 'image';
+    placeholderPreload.href = introImageUrls.placeholder;
+    placeholderPreload.type = 'image/webp';
+    placeholderPreload.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(placeholderPreload);
+
+    // Preload do candidato LCP principal (AVIF small)
+    const lcpCandidatePreload = document.createElement('link');
+    lcpCandidatePreload.rel = 'preload';
+    lcpCandidatePreload.as = 'image';
+    lcpCandidatePreload.href = introImageUrls.avif.small; // Usando a versão 'small' como LCP principal
+    lcpCandidatePreload.type = 'image/avif';
+    lcpCandidatePreload.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(lcpCandidatePreload);
     
-    // Carrega a versão placeholder super tiny para LCP imediato
-    const preloadCriticalAssets = () => {
-      // Carrega o placeholder blurred primeiro (prioridade máxima)
-      const placeholderPreload = document.createElement('link');
-      placeholderPreload.rel = 'preload';
-      placeholderPreload.as = 'image';
-      placeholderPreload.href = introImageUrls.placeholder;
-      placeholderPreload.type = 'image/webp';
-      placeholderPreload.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(placeholderPreload);
-      
-      // Depois a versão tiny (segundo mais importante)
-      const tinyImagePreload = document.createElement('link');
-      tinyImagePreload.rel = 'preload';
-      tinyImagePreload.as = 'image';
-      tinyImagePreload.href = introImageUrls.avif.tiny;
-      tinyImagePreload.type = 'image/avif';
-      tinyImagePreload.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(tinyImagePreload);
-      
-      // Logo em paralelo (menor, mas importante)
-      const logoPreload = document.createElement('link');
-      logoPreload.rel = 'preload';
-      logoPreload.as = 'image';
-      logoPreload.href = logoImageUrls.avif;
-      logoPreload.type = 'image/avif';
-      document.head.appendChild(logoPreload);
-      
-      return { placeholderPreload, tinyImagePreload, logoPreload };
-    };
-    
-    // Adiciona resource hints
-    addResourceHints();
-    
-    // Preload de recursos críticos
-    const criticalAssets = preloadCriticalAssets();
-    
-    // Depois de 150ms, preload da versão de qualidade maior em segundo plano
-    const timer = setTimeout(() => {
-      const betterQualityPreload = document.createElement('link');
-      betterQualityPreload.rel = 'preload';
-      betterQualityPreload.as = 'image';
-      betterQualityPreload.href = introImageUrls.avif.small;
-      betterQualityPreload.type = 'image/avif';
-      document.head.appendChild(betterQualityPreload);
-      
-      // Também preload do fallback webp
-      const webpPreload = document.createElement('link');
-      webpPreload.rel = 'preload';
-      webpPreload.as = 'image';
-      webpPreload.href = introImageUrls.webp.tiny;
-      webpPreload.type = 'image/webp';
-      document.head.appendChild(webpPreload);
-      
-      return { betterQualityPreload, webpPreload };
-    }, 150);
-    
-    // Limpa todos recursos quando componente desmonta
+    // O preload do logo é tratado pela tag <img loading="eager" fetchpriority="high">
+    // Não é necessário pré-carregar via JS aqui, a menos que testes mostrem ser benéfico.
+
+    // Limpa os links de preload quando o componente desmonta
     return () => {
-      clearTimeout(timer);
-      const elements = Object.values(criticalAssets);
-      elements.forEach(el => {
-        if (el.parentNode) el.parentNode.removeChild(el);
-      });
+      if (preconnectLink.parentNode) preconnectLink.parentNode.removeChild(preconnectLink);
+      if (dnsPrefetchLink.parentNode) dnsPrefetchLink.parentNode.removeChild(dnsPrefetchLink);
+      if (placeholderPreload.parentNode) placeholderPreload.parentNode.removeChild(placeholderPreload);
+      if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
     };
-  }, []);
+  }, [introImageUrls.placeholder, introImageUrls.avif.small]); // Dependências atualizadas
 
   // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea
   useEffect(() => {
@@ -330,8 +289,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
               {/* Fallback para navegadores sem suporte a formatos modernos */}
+              {/* O src agora usa uma URL otimizada do mesmo introImageId */}
               <img
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/f_avif,q_auto,w_450,c_limit/v1709737559/quiz-sell-genius/quiz-intro-image.png"
+                src={introImageUrls.png} // Alterado para usar a URL PNG otimizada do introImageId correto
                 alt="Descubra seu estilo predominante"
                 className="w-full h-auto object-contain quiz-intro-image"
                 width={345}
