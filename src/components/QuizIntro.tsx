@@ -193,17 +193,18 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           </h1>
 
           {/* Container de imagem com proporções fixas para evitar layout shift */}
-          <div className="w-full aspect-[7/9] max-w-xs sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md">
+          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md flex items-center justify-center" style={{minHeight: 320, background: '#f8f6f2'}}>
             <img
               src={introImageUrl}
               alt="Intro Quiz"
-              className="w-full h-full object-cover quiz-intro-image"
-              width={480}
-              height={617}
+              className="w-full h-auto max-h-[340px] object-contain quiz-intro-image transition-opacity duration-300"
+              width={320}
+              height={340}
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              style={{background: '#f8f6f2'}}
+              style={{background: '#f8f6f2', display: 'block', margin: '0 auto'}}
+              onError={e => { (e.target as HTMLImageElement).style.opacity = '0.2'; }}
             />
           </div>
 
