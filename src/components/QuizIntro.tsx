@@ -800,6 +800,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
 export default QuizIntro;
 
+// Mover componente para antes de usar no QuizIntro
 // Componente de imagem altamente otimizado para carregamento eficiente
 const OptimizedImage = React.memo(({ 
   sources, 
