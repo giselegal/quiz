@@ -145,11 +145,12 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     placeholderPreload.setAttribute('fetchpriority', 'high');
     document.head.appendChild(placeholderPreload);
 
-    // Preload do candidato LCP principal (AVIF small)
+    // Preload do candidato LCP principal (AVIF large, conforme identificado pelo Lighthouse)
     const lcpCandidatePreload = document.createElement('link');
     lcpCandidatePreload.rel = 'preload';
     lcpCandidatePreload.as = 'image';
-    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.small; // Usar constante
+    // Alterado de .avif.small para .avif.large para corresponder ao LCP identificado
+    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.large; 
     lcpCandidatePreload.type = 'image/avif';
     lcpCandidatePreload.setAttribute('fetchpriority', 'high');
     document.head.appendChild(lcpCandidatePreload);
@@ -203,7 +204,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         }}
         data-section="intro"
       >
-        <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-6 sm:space-y-8">
+        {/* Ajuste no espaçamento vertical para mobile: space-y-5, e mantendo sm:space-y-8 para telas maiores */}
+        <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-5 sm:space-y-8">
           {/* Logo e barra dourada alinhadas */}
           <div className="flex flex-col items-center">
             <div className="relative">
@@ -249,11 +251,13 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           </h1>
 
           {/* Container de imagem com dimensões fixas para evitar layout shift */}
+          {/* Ajuste no max-width para mobile: max-w-[300px], sm:max-w-[345px], md:max-w-sm */}
+          {/* Remoção do minHeight inline para permitir que aspectRatio e max-width controlem melhor as dimensões */}
           <div 
             ref={mainImageRef}
-            className="w-full max-w-[345px] sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md" 
+            className="w-full max-w-[300px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md" 
             style={{
-              minHeight: 320,
+              // minHeight: 320, // Removido para melhor responsividade com aspectRatio
               height: 'auto',
               aspectRatio: '1 / 1.05',
               background: '#f8f6f2',
