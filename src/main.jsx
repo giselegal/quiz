@@ -7,20 +7,12 @@ import { displayVersion } from './utils/version';
 import { injectCriticalCSS, initialCriticalCSS, removeCriticalCSS } from './utils/critical-css';
 import { checkSiteHealth } from './utils/siteHealthCheck';
 import { monitorFunnelRoutes } from './utils/funnelMonitor';
-import { register as registerServiceWorker } from './serviceWorkerRegistration';
-import { applyRuntimeOptimizations } from './utils/treeShake';
-
-// Aplicar otimizações de runtime
-applyRuntimeOptimizations();
 
 // Injetar CSS crítico para renderização inicial mais rápida
 injectCriticalCSS(initialCriticalCSS);
 
 // Exibir informações de versão no console
 displayVersion();
-
-// Registrar o Service Worker para caching e melhor performance offline
-registerServiceWorker();
 
 // Iniciar medição de performance
 if (process.env.NODE_ENV !== 'production') {
@@ -36,10 +28,8 @@ try {
         <App />
       </React.StrictMode>
     );
-    
-    // Inicializar carregamento lazy de scripts
+    // Inicializar lazy loading de scripts
     initLazyLoading();
-    
     console.log('Aplicativo renderizado com sucesso!');
   } else {
     console.error('Elemento root não encontrado!');
@@ -55,10 +45,8 @@ try {
           <App />
         </React.StrictMode>
       );
-      
       // Inicializar carregamento lazy de scripts
       initLazyLoading();
-      
       console.log('Aplicativo renderizado no elemento fallback!');
     }
   }
@@ -67,7 +55,15 @@ try {
   // Tentar renderização alternativa
   const rootElement = document.getElementById('root');
   if (rootElement) {
-    rootElement.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Oops! Algo deu errado.</h2><p>Estamos trabalhando para resolver. Por favor, tente recarregar a página.</p><button onclick="window.location.reload()" style="padding: 8px 16px; background: #B89B7A; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px;">Recarregar Página</button></div>';
+    rootElement.innerHTML = `
+      <div style="padding: 20px; text-align: center;">
+        <h2>Oops! Algo deu errado.</h2>
+        <p>Estamos trabalhando para resolver. Por favor, tente recarregar a página.</p>
+        <button onclick="window.location.reload()" style="padding: 8px 16px; background: #B89B7A; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px;">
+          Recarregar Página
+        </button>
+      </div>
+    `;
   }
 }
 

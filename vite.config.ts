@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import compression from "vite-plugin-compression";
-import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -27,9 +26,7 @@ export default defineConfig(({ mode }) => ({
   },
   
   plugins: [
-    react({
-      plugins: []
-    }),
+    react(),
     componentTagger(),
     // Compressão GZIP
     compression({
@@ -41,13 +38,6 @@ export default defineConfig(({ mode }) => ({
       algorithm: 'brotliCompress',
       ext: '.br',
     }),
-    // Visualizador para identificar pacotes grandes
-    visualizer({
-      filename: 'stats.html',
-      open: false,
-      gzipSize: true,
-      brotliSize: true,
-    }),
   ],
   
   resolve: {
@@ -58,73 +48,46 @@ export default defineConfig(({ mode }) => ({
   },
   
   build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-ui': ['framer-motion', 'tailwindcss'],
+          'vendor-utils': ['lodash', 'dayjs'],
+        }
+      }
+    },
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
-    sourcemap: true, // Ativamos para análise
+    sourcemap: false,
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info', 'console.debug']
-      },
-      mangle: {
-        safari10: true,
-      },
-      format: {
-        comments: false
       }
     },
     // Configurações para otimizar chunks
     rollupOptions: {
       output: {
-        manualChunks: function(id) {
-          // Identificar módulos por caminho
-          if (id.includes('node_modules')) {
-            if (id.includes('react')) {
-              return 'vendor-react';
-            }
-            if (id.includes('framer-motion')) {
-              return 'vendor-motion';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'vendor-radix';
-            }
-            if (id.includes('tailwind') || id.includes('clsx') || id.includes('merge')) {
-              return 'vendor-styling';
-            }
-            if (id.includes('dayjs') || id.includes('lodash') || id.includes('date-fns')) {
-              return 'vendor-utils';
-            }
-            if (id.includes('chart') || id.includes('d3')) {
-              return 'vendor-charts';
-            }
-            // Qualquer outro módulo de node_modules
-            return 'vendor';
-          }
-          
-          // Código da aplicação
-          if (id.includes('/src/components/')) {
-            if (id.includes('QuizIntro')) {
-              return 'quiz-intro'; // Componente crítico para LCP
-            }
-            if (id.includes('Result')) {
-              return 'result-page';
-            }
-            if (id.includes('Quiz') && !id.includes('QuizIntro')) {
-              return 'quiz-components';
-            }
-            return 'components';
-          }
-          
-          if (id.includes('/src/pages/')) {
-            return 'pages';
-          }
-          
-          if (id.includes('/src/utils/')) {
-            return 'utils';
-          }
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-components': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tooltip',
+            'clsx',
+            'tailwind-merge'
+          ],
+          'quiz-intro': [
+            './src/components/QuizIntro.tsx'
+          ],
+          'analytics': [
+            './src/utils/analytics.ts',
+            './src/utils/facebookPixel.ts'
+          ]
         },
         // Garantir que os assets sejam carregados corretamente para as rotas específicas
         entryFileNames: 'assets/[name]-[hash].js',
@@ -146,11 +109,7 @@ export default defineConfig(({ mode }) => ({
   },
   
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
-    esbuildOptions: {
-      target: 'es2020',
-      drop: ['console', 'debugger'],
-    }
+    include: ['react', 'react-dom', 'react-router-dom']
   },
   
   css: {
