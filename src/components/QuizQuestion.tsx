@@ -20,17 +20,28 @@ interface QuizQuestionProps {
   isStrategicQuestion?: boolean; // Nova prop
 }
 
-const QuizQuestion: React.FC<QuizQuestionProps> = ({
-  question,
-  onAnswer,
-  currentAnswers,
-  autoAdvance = false,
-  hideTitle = false,
-  onNextClick,
-  onPreviousClick,
-  showQuestionImage = false,
-  isStrategicQuestion = false // Padrão para false
-}) => {
+const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
+  const {
+    question,
+    onAnswer,
+    currentAnswers,
+    autoAdvance = false,
+    hideTitle = false,
+    onNextClick,
+    onPreviousClick,
+    showQuestionImage = false,
+    isStrategicQuestion = false
+  } = props;
+
+  // Fallback defensivo para evitar tela branca
+  if (!question || !question.title || !Array.isArray(question.options)) {
+    return (
+      <div className="w-full max-w-2xl mx-auto py-12 text-center text-red-700">
+        Erro: Dados da questão ausentes ou inválidos. Por favor, recarregue a página ou tente novamente mais tarde.
+      </div>
+    );
+  }
+
   const isMobile = useIsMobile();
   // const isStrategicQuestion = question.id.startsWith('strategic'); // Removido para usar a prop
   const hasImageOptions = question.type !== 'text';
