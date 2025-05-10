@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -5,32 +6,23 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { OptimizedImage } from './ui/optimized-image';
-import FixedIntroImage from './ui/FixedIntroImage';
 import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
 import { getImageById } from '@/data/imageBank';
-// Remover importações desnecessárias
-// import { LoadingSpinner } from './ui/loading-spinner';
+import Logo from './ui/logo';
 import AutoFixedImages from './ui/AutoFixedImages';
 import '../utils/fix-blurry-images.js';
 import { fixBlurryIntroQuizImages } from '@/utils/fixBlurryIntroQuizImages';
 
 /**
- * QuizIntro - Componente completamente restruturado para a página inicial do quiz
- * 
- * Problemas resolvidos:
- * 1. Problemas de layout que criavam "buracos vazios" e espaçamento irregular
- * 2. Conflitos entre min-h-screen e outros componentes de layout
- * 3. Problemas de renderização da imagem principal que não empurrava o conteúdo
- * 4. Incompatibilidades entre diferentes abordagens de espaçamento (gap-y vs space-y)
+ * QuizIntro - Componente da página inicial do quiz com layout melhorado
  * 
  * Melhorias implementadas:
- * 1. Layout mais previsível com estrutura HTML simplificada
- * 2. Remoção de min-h-screen substituído por uma abordagem mais robusta
- * 3. Imagem principal com aspect-ratio fixo para evitar saltos de layout
- * 4. Gradiente sutil para melhorar a aparência visual
- * 5. Estrutura de formulário com espaçamento tradicional via margins
- * 6. Estado de loading consistente com o layout final
- * 7. Responsividade aprimorada para todos os dispositivos
+ * 1. Layout com espaçamento vertical proporcional e consistente
+ * 2. Barra dourada com largura proporcional ao logo
+ * 3. Performance de carregamento otimizada
+ * 4. Estrutura de componentes simplificada
+ * 5. Transições e animações suavizadas
+ * 6. Responsividade refinada para todos os dispositivos
  */
 
 interface QuizIntroProps {
@@ -41,13 +33,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   onStart
 }) => {
   const [nome, setNome] = useState('');
-  const [isLoading, setIsLoading] = useState(true); // Controla o spinner principal
-  const [showContent, setShowContent] = useState(false); // Controla o fade-in do conteúdo
-  // criticalAssetsLoaded e imagesLoaded foram removidos do controle direto da UI aqui
-  // para simplificar, mas a lógica de preloadCriticalImages('quiz') ainda pode usá-los internamente se necessário.
-  const [criticalAssetsForQuizPreloaded, setCriticalAssetsForQuizPreloaded] = useState(false);
-  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
+  const [assetsPreloaded, setAssetsPreloaded] = useState(false);
 
+  // Efeito para carregamento inicial de recursos
   useEffect(() => {
     let isMounted = true;
 
@@ -55,48 +45,48 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       try {
         console.log("[QuizIntro] Iniciando carregamento de assets...");
         
-        // Pré-carrega imagens críticas para a introdução com maior qualidade
-        preloadCriticalImages('intro'); 
+        // Pré-carrega imagens críticas com otimização para LCP (Largest Contentful Paint)
+        await preloadCriticalImages('intro'); 
         
-        // Pré-carrega a logo e a imagem de introdução com alta qualidade
+        // Pré-carrega os assets mais importantes com alta prioridade
         await preloadImagesByIds(['main-logo', 'intro-image'], {
           batchSize: 2,
           quality: 95,
-          // Garante que os placeholders terão boa qualidade
           generateLowQuality: true
         });
 
         console.log("[QuizIntro] Assets carregados com sucesso");
         
         if (isMounted) {
-          setIsLoading(false); // Desliga o spinner principal
-          setCriticalAssetsForQuizPreloaded(true); // Sinaliza que os assets da intro foram carregados
-          // Inicia a transição para mostrar o conteúdo com um delay menor
+          setIsLoading(false);
+          setAssetsPreloaded(true);
+          
+          // Inicia a transição de fade-in com delay mínimo para fluidez visual
           setTimeout(() => {
             if (isMounted) {
               setShowContent(true);
-              console.log("[QuizIntro] Conteúdo exibido");
             }
-          }, 30); // Reduzido de 50ms para 30ms para transição mais rápida
+          }, 20); // Reduzido para melhorar percepção de velocidade
         }
       } catch (error) {
         console.error("Falha ao pré-carregar imagens da introdução:", error);
         if (isMounted) {
-          setIsLoading(false); // Mesmo em erro, desliga o spinner para não bloquear
-          setShowContent(true); // Tenta mostrar o conteúdo
+          setIsLoading(false);
+          setShowContent(true);
         }
       }
     };
 
     loadInitialAssets();
 
-    // Fallback timer para garantir que a UI não fique presa no carregamento
+    // Fallback timer mais curto para melhorar UX
     const fallbackTimer = setTimeout(() => {
       if (isMounted && isLoading) {
+        console.log("[QuizIntro] Usando fallback timer para mostrar conteúdo");
         setIsLoading(false);
         setShowContent(true);
       }
-    }, 5000); // Reduzido para 5s para melhorar a experiência do usuário
+    }, 3000); // Reduzido de 5s para 3s para melhor experiência
 
     return () => {
       isMounted = false;
@@ -104,22 +94,23 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     };
   }, []);
 
-  // Preload first quiz question images after critical assets of intro are loaded
+  // Pré-carrega imagens da primeira questão após carregar assets críticos
   useEffect(() => {
-    if (criticalAssetsForQuizPreloaded) {
+    if (assetsPreloaded) {
       preloadCriticalImages('quiz');
     }
-  }, [criticalAssetsForQuizPreloaded]);
+  }, [assetsPreloaded]);
 
+  // Correção de imagens após renderização completa
   useEffect(() => {
-    // Aplicar correção específica para imagens borradas quando o componente for montado
     if (showContent && !isLoading) {
-      // Pequeno atraso para garantir que as imagens foram renderizadas
-      setTimeout(() => {
+      // Aplica correção uma vez após renderização
+      const fixImagesTimer = setTimeout(() => {
         console.log('[QuizIntro] Aplicando correção para imagens borradas');
-        const count = fixBlurryIntroQuizImages();
-        console.log(`[QuizIntro] Correção aplicada com sucesso: ${count} imagens corrigidas`);
+        fixBlurryIntroQuizImages();
       }, 100);
+      
+      return () => clearTimeout(fixImagesTimer);
     }
   }, [showContent, isLoading]);
 
@@ -130,8 +121,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   };
 
-  const introImageDetails = getImageById('intro-image');
   const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
+  const introImageUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto,w_700/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png";
 
   if (isLoading) {
     return (
@@ -142,22 +133,20 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         }}
       >
         <div className="flex flex-col items-center justify-center p-6 text-center">
-          <div className="relative">
+          <div className="relative w-32 sm:w-36 md:w-40">
             <img
               src={logoUrl}
               alt="Gisele Galvão"
-              className="h-auto w-32 sm:w-36 md:w-40 mx-auto"
+              className="h-auto w-full mx-auto"
               width={160}
               height={80}
               loading="eager"
               fetchPriority="high"
-              onLoad={() => setLogoLoaded(true)}
             />
-            {/* Efeito de brilho abaixo do logo */}
-            <div className="absolute -bottom-4 -left-4 -right-4 h-2 bg-gradient-to-r from-transparent via-[#B89B7A] to-transparent opacity-70"></div>
+            {/* Barra dourada com largura proporcional ao logo */}
+            <div className="absolute -bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#B89B7A] to-transparent opacity-70"></div>
           </div>
           
-          {/* Texto de carregamento minimalista */}
           <p className="mt-6 text-sm text-[#432818]/60 font-light">
             Preparando sua experiência personalizada...
           </p>
@@ -169,59 +158,58 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   return (
     <AutoFixedImages>
       <div 
-        className={`quiz-intro flex flex-col items-center justify-start pt-4 sm:pt-6 md:pt-8 px-4 sm:px-6 md:px-8 transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+        className={`quiz-intro flex flex-col items-center w-full transition-opacity duration-500 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
         style={{
           background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
-          minHeight: '100vh',
-          paddingBottom: '2rem'
+          minHeight: '100vh'
         }}
         data-section="intro"
       >
-        <div className="w-full max-w-lg flex flex-col items-center space-y-4 pb-6">
-          {/* Logo e barra - mais próxima do topo */}
-          <div className="w-full flex flex-col items-center">
-            <div className="w-28 sm:w-32 md:w-36">
-              <OptimizedImage 
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" 
-                alt="Logo Gisele Galvão" 
-                className="block h-auto w-full"
+        <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-6 sm:space-y-8">
+          {/* Logo e barra dourada alinhadas */}
+          <div className="flex flex-col items-center">
+            <div className="relative w-28 sm:w-32 md:w-36">
+              <Logo 
+                className="w-full h-auto"
                 width={140}
                 height={60}
-                priority={true} 
-                objectFit="contain"
-                quality={99}
-                placeholderColor="#ffffff"
+                priority={true}
               />
+              {/* Barra dourada com largura exatamente igual ao logo */}
+              <div className="h-[2px] w-full bg-[#B89B7A] mt-2 rounded-full"></div>
             </div>
-            <div className="mt-1 h-[2px] w-36 sm:w-44 md:w-52 bg-[#B89B7A] rounded"></div>
           </div>
-          {/* Headline */}
-          <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-[#432818]">
+
+          {/* Título principal com espaçamento proporcional */}
+          <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-[#432818] px-2">
             Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
           </h1>
-          {/* Imagem principal */}
-          <div className="w-full flex justify-center">
-            <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-              <FixedIntroImage 
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto,w_700/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png"
-                alt="Intro Quiz"
-                width={700}
-                height={900}
-                priority={true}
-                className="rounded-lg overflow-hidden shadow-md"
-              />
-            </div>
+
+          {/* Container de imagem com proporções fixas para evitar layout shift */}
+          <div className="w-full aspect-[7/9] max-w-xs sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md">
+            <img
+              src={introImageUrl}
+              alt="Intro Quiz"
+              className="w-full h-full object-cover quiz-intro-image"
+              width={700}
+              height={900}
+              loading="eager"
+              fetchPriority="high"
+              decoding="sync"
+            />
           </div>
-          {/* Texto descritivo */}
-          <p className="text-xs sm:text-sm md:text-base text-[#433830] text-center leading-relaxed max-w-md mx-auto px-2 sm:px-4 mt-2">
+
+          {/* Texto descritivo com espaçamento consistente */}
+          <p className="text-sm md:text-base text-[#433830] text-center leading-relaxed max-w-md mx-auto px-2">
             Em poucos minutos, descubra seu <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
             looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com
             praticidade e <span className="font-semibold text-[#432818]">confiança</span>.
           </p>
-          {/* Formulário */}
-          <form onSubmit={handleSubmit} className="w-full mx-auto mt-1" aria-live="polite">
-            <div className="mb-3">
-              <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1">
+
+          {/* Formulário com espaçamento interno consistente */}
+          <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-4" aria-live="polite">
+            <div>
+              <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1.5">
                 NOME
               </label>
               <Input 
@@ -229,19 +217,21 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 placeholder="Digite seu nome" 
                 value={nome} 
                 onChange={e => setNome(e.target.value)} 
-                className="w-full p-2 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md" 
+                className="w-full p-2.5 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md" 
                 autoFocus 
                 aria-required="true" 
               />
             </div>
+            
             <Button 
               type="submit" 
-              className="w-full mx-auto bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:-translate-y-1 hover:scale-102"
+              className="w-full bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:-translate-y-1 hover:scale-102"
               disabled={!nome.trim()}
             >
               Quero Descobrir meu Estilo Agora!
             </Button>
-            <p className="text-xs text-center text-gray-500 mt-1"> 
+            
+            <p className="text-xs text-center text-gray-500 pt-1"> 
               Ao clicar, você concorda com nossa política de privacidade
             </p>
           </form>

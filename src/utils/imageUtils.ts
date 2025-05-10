@@ -1,8 +1,13 @@
+
 /**
- * Helper function to generate Cloudinary optimization parameters
- * @param url Original Cloudinary URL
- * @param options Optimization options
- * @returns Optimized Cloudinary URL
+ * Funções utilitárias para otimização, gerenciamento e manipulação de imagens
+ */
+
+/**
+ * Otimiza URL do Cloudinary
+ * @param url URL original do Cloudinary
+ * @param options Opções de otimização
+ * @returns URL otimizada para o Cloudinary
  */
 export const optimizeCloudinaryUrl = (
   url: string, 
@@ -18,29 +23,29 @@ export const optimizeCloudinaryUrl = (
     return url;
   }
 
-  // Default optimization options with better quality/size tradeoff
+  // Opções padrão de otimização com melhor equilíbrio qualidade/tamanho
   const defaults = {
     width: 0,
     height: 0,
-    quality: 80, // Reduced from 95 to 80 for better performance
+    quality: 85,
     format: 'auto',
     crop: 'fill'
   };
 
   const settings = { ...defaults, ...options };
   
-  // Extract base URL parts to handle URLs with existing transformations
+  // Extrai partes da URL base para lidar com URLs com transformações existentes
   const baseUrlParts = url.split('/upload/');
   if (baseUrlParts.length !== 2) return url;
   
-  // Extract any path after the version ID (vXXXXXX)
+  // Extrai qualquer caminho após o ID da versão (vXXXXXX)
   const secondPart = baseUrlParts[1];
   const parts = secondPart.split('/');
   
-  // Check if there are existing transformations
+  // Verifica se já existem transformações
   const hasTransformations = parts[0].includes('_') || parts[0].includes(',') || parts[0].startsWith('f_');
   
-  // Build transformation string
+  // Constrói string de transformação
   let transformations = `f_${settings.format}`;
   
   if (settings.quality) {
@@ -55,154 +60,59 @@ export const optimizeCloudinaryUrl = (
     transformations += `,h_${settings.height}`;
   }
   
-  // Apply transformations to URL with proper handling of existing transformations
+  // Aplica transformações à URL com tratamento adequado de transformações existentes
   if (hasTransformations) {
-    // URL already has transformations, replace them
+    // URL já tem transformações, substitui-as
     return `${baseUrlParts[0]}/upload/${transformations}/${parts.slice(1).join('/')}`;
   } else {
-    // URL has no transformations, add them
+    // URL não tem transformações, adiciona-as
     return `${baseUrlParts[0]}/upload/${transformations}/${secondPart}`;
   }
 };
 
 /**
- * Strategic image preloading system
- * - Supports priority levels and callbacks
- * - Avoids duplicate preloads
- * - Tracks loading state
+ * Cria URL de placeholder de baixa qualidade para carregamento progressivo
+ * @param url URL original da imagem
+ * @param options Opções como largura e qualidade
+ * @returns URL de placeholder de baixa qualidade
  */
-const preloadedImages = new Set<string>();
-const preloadQueue: Array<{url: string, priority: number, onLoad?: () => void}> = [];
-let isProcessingQueue = false;
-
-/**
- * Preload images with priority system
- * @param urls Array of image URLs or config objects to preload
- * @param options Additional options for batch preloading
- */
-export const preloadImages = (
-  urls: Array<string | {url: string, priority?: number, onLoad?: () => void}>,
-  options: {
-    batchSize?: number, 
-    quality?: number,
-    onComplete?: () => void
-  } = {}
-): void => {
-  const { batchSize = 3, quality = 99, onComplete } = options;
-  
-  // Process each URL, standardizing the format
-  const processedUrls = urls.map(item => {
-    if (typeof item === 'string') {
-      return {
-        url: optimizeCloudinaryUrl(item, { quality, format: 'auto' }),
-        priority: 1,
-      };
-    } else {
-      return {
-        url: optimizeCloudinaryUrl(item.url, { quality, format: 'auto' }),
-        priority: item.priority || 1,
-        onLoad: item.onLoad
-      };
-    }
-  });
-  
-  // Add to queue, avoiding duplicates
-  processedUrls.forEach(item => {
-    if (!preloadedImages.has(item.url)) {
-      preloadQueue.push(item);
-    }
-  });
-  
-  // Sort queue by priority (higher numbers = higher priority)
-  preloadQueue.sort((a, b) => b.priority - a.priority);
-  
-  // Start processing if not already in progress
-  if (!isProcessingQueue) {
-    processPreloadQueue(batchSize, onComplete);
+export const getLowQualityPlaceholder = (
+  url: string, 
+  options: { width?: number, quality?: number } = {}
+): string => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url;
   }
+  
+  const { width = 30, quality = 20 } = options;
+  
+  // Extrai partes da URL base
+  const baseUrlParts = url.split('/upload/');
+  if (baseUrlParts.length !== 2) return url;
+  
+  // Cria um placeholder otimizado de tamanho pequeno
+  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
 };
 
 /**
- * Process the preload queue
- * @param batchSize Number of images to load concurrently
- * @param onComplete Callback when all are loaded
+ * Gera fontes de imagem responsivas com diferentes tamanhos
+ * @param url URL base da imagem
+ * @param sizes Array de tamanhos de largura para gerar
+ * @returns Objeto com atributos srcset e sizes para imagens responsivas
  */
-const processPreloadQueue = (batchSize: number, onComplete?: () => void): void => {
-  if (preloadQueue.length === 0) {
-    isProcessingQueue = false;
-    if (onComplete) onComplete();
-    return;
-  }
-
-  isProcessingQueue = true;
-  const batch = preloadQueue.splice(0, batchSize);
-  let completedCount = 0;
-
-  batch.forEach(item => {
-    const img = new Image();
-    
-    img.onload = () => {
-      preloadedImages.add(item.url);
-      if (item.onLoad) item.onLoad();
-      completedCount++;
-      
-      if (completedCount === batch.length) {
-        // Process next batch when current batch is done
-        processPreloadQueue(batchSize, onComplete);
-      }
-    };
-    
-    img.onerror = () => {
-      console.error(`Failed to preload image: ${item.url}`);
-      completedCount++;
-      
-      if (completedCount === batch.length) {
-        // Continue with next batch even if there were errors
-        processPreloadQueue(batchSize, onComplete);
-      }
-    };
-    
-    img.src = item.url;
-  });
-};
-
-/**
- * Check if an image has already been preloaded
- * @param url The image URL to check
- * @returns Boolean indicating if image is already preloaded
- */
-export const isImagePreloaded = (url: string): boolean => {
-  const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 95, format: 'auto' });
-  return preloadedImages.has(optimizedUrl);
-};
-
-/**
- * Get optimized Cloudinary params string
- * @returns Optimized parameter string to append to Cloudinary URLs
- */
-export const getOptimizedCloudinaryParams = (): string => {
-  return 'q_95,f_auto';
-};
-
-/**
- * Generate a responsive image URL with different sizes
- * @param baseUrl The base Cloudinary URL
- * @param sizes Array of width sizes to generate
- * @returns Object with srcset and sizes attributes for responsive images
- */
-export const getResponsiveImageUrl = (
-  baseUrl: string,
+export const getResponsiveImageSources = (
+  url: string,
   sizes: number[] = [320, 640, 960, 1280]
 ): { srcSet: string, sizes: string } => {
-  if (!baseUrl || !baseUrl.includes('cloudinary.com')) {
-    return { srcSet: baseUrl, sizes: '100vw' };
+  if (!url || !url.includes('cloudinary.com')) {
+    return { srcSet: url, sizes: '100vw' };
   }
   
   const srcSet = sizes
     .map(size => {
-      const optimizedUrl = optimizeCloudinaryUrl(baseUrl, { 
+      const optimizedUrl = optimizeCloudinaryUrl(url, { 
         width: size,
-        quality: 95,
+        quality: 85,
         format: 'auto'
       });
       return `${optimizedUrl} ${size}w`;
@@ -215,80 +125,46 @@ export const getResponsiveImageUrl = (
   };
 };
 
+// Define sistema de cache para evitar carregamentos duplicados
+const preloadedImages = new Set<string>();
+
 /**
- * Create a low quality image placeholder URL for progressive loading
- * @param url Original URL of the image
- * @returns Low quality placeholder image URL
+ * Verifica se uma imagem já foi pré-carregada
+ * @param url A URL da imagem para verificar
+ * @returns Booleano indicando se a imagem já está pré-carregada
  */
-export const getLowQualityPlaceholder = (url: string, options: { width?: number, quality?: number } = {}): string => {
-  if (!url || !url.includes('cloudinary.com')) {
-    return url;
-  }
-  
-  const { width = 20, quality = 10 } = options;
-  
-  // Extract base URL parts
-  const baseUrlParts = url.split('/upload/');
-  if (baseUrlParts.length !== 2) return url;
-  
-  // Create an optimized tiny placeholder
-  return `${baseUrlParts[0]}/upload/f_auto,q_${quality},w_${width}/${baseUrlParts[1].split('/').slice(1).join('/')}`;
+export const isImagePreloaded = (url: string): boolean => {
+  const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 85, format: 'auto' });
+  return preloadedImages.has(optimizedUrl);
 };
 
 /**
- * Preload the next question images
- * @param nextQuestionImages Array of image URLs for the next question
+ * Pré-carrega próximas imagens de perguntas
+ * @param nextQuestionImages Array de URLs de imagens para a próxima pergunta
  */
 export const preloadNextQuestionImages = (nextQuestionImages: string[]): void => {
   if (!nextQuestionImages || nextQuestionImages.length === 0) {
     return;
   }
   
-  // Preload with higher priority
-  preloadImages(
-    nextQuestionImages.map(url => ({
-      url,
-      priority: 2
-    })),
-    { quality: 95, batchSize: 4 }
-  );
+  nextQuestionImages.forEach(url => {
+    const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 85, format: 'auto' });
+    if (!preloadedImages.has(optimizedUrl)) {
+      const img = new Image();
+      img.onload = () => preloadedImages.add(optimizedUrl);
+      img.src = optimizedUrl;
+    }
+  });
 };
 
 /**
- * Intelligently extract dimensions from Cloudinary URLs
- * @param url Cloudinary image URL
- * @returns Object with width and height if found
- */
-export const extractDimensionsFromUrl = (url: string): { width?: number, height?: number } => {
-  if (!url || !url.includes('cloudinary.com')) {
-    return {};
-  }
-  
-  const dimensions: { width?: number, height?: number } = {};
-  
-  // Look for width parameter
-  const widthMatch = url.match(/[,/]w_(\d+)/);
-  if (widthMatch && widthMatch[1]) {
-    dimensions.width = parseInt(widthMatch[1], 10);
-  }
-  
-  // Look for height parameter
-  const heightMatch = url.match(/[,/]h_(\d+)/);
-  if (heightMatch && heightMatch[1]) {
-    dimensions.height = parseInt(heightMatch[1], 10);
-  }
-  
-  return dimensions;
-};
-
-/**
- * Check if a browser supports modern image formats
- * @returns Object with support flags
+ * Verifica o suporte do navegador a formatos modernos de imagem
+ * @returns Objeto com flags de suporte
  */
 export const checkImageFormatSupport = (): { webp: boolean, avif: boolean } => {
   const result = { webp: false, avif: false };
   
-  // Check for WebP support (simplified version)
+  // Verifica suporte a WebP (versão simplificada)
   if (typeof document !== 'undefined') {
     const canvas = document.createElement('canvas');
     if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
@@ -296,20 +172,17 @@ export const checkImageFormatSupport = (): { webp: boolean, avif: boolean } => {
     }
   }
   
-  // AVIF detection would require more complex logic
-  // For now, we assume no AVIF support
-  
   return result;
 };
 
 /**
- * Get optimal format based on browser support
- * @returns Best available format
+ * Obtém o formato ideal com base no suporte do navegador
+ * @returns Melhor formato disponível
  */
 export const getOptimalImageFormat = (): 'auto' | 'webp' | 'jpg' => {
   const support = checkImageFormatSupport();
   
-  if (support.avif) return 'auto'; // Cloudinary will serve AVIF if available
+  if (support.avif) return 'auto'; // Cloudinary servirá AVIF se disponível
   if (support.webp) return 'webp';
-  return 'auto'; // Default to auto which will typically serve JPEG
+  return 'auto'; // Padrão para auto que normalmente servirá JPEG
 };

@@ -1,69 +1,73 @@
-/**
- * Componente que substitui diretamente as imagens embaçadas usando solução JavaScript pura
- * Esta versão não depende do ciclo de vida do React e funciona imediatamente
- */
+
 import React, { useEffect } from 'react';
-
-// Importar o script de correção de imagens
-import '../../utils/fix-blurry-images.js';
-
-// Declaração de tipos para window.ImageFixer
-declare global {
-  interface Window {
-    ImageFixer?: {
-      fixBlurryImage: (img: HTMLImageElement) => boolean;
-      fixAllBlurryImages: () => number;
-      getHighQualityUrl: (url: string) => string;
-    };
-  }
-}
+import { fixBlurryIntroQuizImages } from '@/utils/fixBlurryIntroQuizImages';
 
 interface AutoFixedImagesProps {
   children: React.ReactNode;
-  priority?: boolean;
+  fixOnMount?: boolean;
+  fixOnUpdate?: boolean;
+  className?: string;
 }
 
 /**
- * Componente que corrige imediatamente as imagens embaçadas
- * Esta versão usa um script direto de JS que substitui todas as imagens embaçadas
- * sem depender do ciclo de vida do React
+ * Componente wrapper que aplica correções de imagens borradas automaticamente
+ * Este componente observa mudanças no DOM para corrigir imagens adicionadas dinamicamente
  */
-const AutoFixedImages: React.FC<AutoFixedImagesProps> = ({ 
+const AutoFixedImages: React.FC<AutoFixedImagesProps> = ({
   children,
-  priority = true
+  fixOnMount = true,
+  fixOnUpdate = true,
+  className = ''
 }) => {
+  // Aplicar correção na montagem inicial
   useEffect(() => {
-    // Usando variáveis globais configuradas pelo script
-    if (window.ImageFixer && priority) {
-      // Executar imediatamente
-      window.ImageFixer.fixAllBlurryImages();
+    if (fixOnMount) {
+      // Pequeno atraso para permitir que a renderização seja completada
+      const timer = setTimeout(() => {
+        fixBlurryIntroQuizImages();
+      }, 100);
       
-      // Executar novamente em intervalos diferentes para capturar 
-      // imagens carregadas assincronamente
-      setTimeout(() => {
-        window.ImageFixer?.fixAllBlurryImages();
-      }, 200);
-      
-      setTimeout(() => {
-        window.ImageFixer?.fixAllBlurryImages();
-      }, 500);
-      
-      setTimeout(() => {
-        window.ImageFixer?.fixAllBlurryImages();
-      }, 1000);
-      
-      setTimeout(() => {
-        window.ImageFixer?.fixAllBlurryImages();
-      }, 2000);
-      
-      setTimeout(() => {
-        window.ImageFixer?.fixAllBlurryImages();
-      }, 3500);
+      return () => clearTimeout(timer);
     }
-  }, [priority]);
+  }, [fixOnMount]);
+  
+  // Observar mudanças no DOM para corrigir imagens adicionadas dinamicamente
+  useEffect(() => {
+    if (fixOnUpdate) {
+      // Configurar MutationObserver para detectar mudanças no DOM
+      const observer = new MutationObserver((mutations) => {
+        let needsFix = false;
+        
+        // Verificar se alguma mutação adicionou imagens
+        mutations.forEach(mutation => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach(node => {
+              if ((node as Element).tagName === 'IMG' || 
+                  (node as Element).querySelector?.('img')) {
+                needsFix = true;
+              }
+            });
+          }
+        });
+        
+        // Aplicar correção apenas se novas imagens foram adicionadas
+        if (needsFix) {
+          fixBlurryIntroQuizImages();
+        }
+      });
+      
+      // Iniciar observação
+      observer.observe(document.body, { 
+        childList: true, 
+        subtree: true 
+      });
+      
+      return () => observer.disconnect();
+    }
+  }, [fixOnUpdate]);
   
   return (
-    <div className="auto-fixed-images">
+    <div className={className}>
       {children}
     </div>
   );
