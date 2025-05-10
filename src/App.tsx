@@ -114,7 +114,8 @@ const App = () => {
                 <Route path="/resultado/editar" element={<Navigate to="/admin/editor?tab=result" replace />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 {/* Manter apenas uma rota principal para o editor unificado */}
-                <Route path="/admin/editor" element={<EditorPage />} />
+                {/* Modificada para aceitar pageType e style para diferentes tipos de página (ex: oferta direta) */}
+                <Route path="/admin/editor/:pageType?/:style?" element={<EditorPage />} />
                 <Route path="/admin/editor/error" element={<EditorNotFoundPage />} />
                 {/* Redirecionar o antigo quiz-builder para o editor unificado com a aba de quiz ativa */}
                 <Route path="/admin/quiz-builder" element={<Navigate to="/admin/editor?tab=quiz" replace />} />

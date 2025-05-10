@@ -1,47 +1,57 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ResultPageVisualEditor } from '@/components/result-editor/ResultPageVisualEditor';
 import { TemplateList } from '@/components/editor/templates/TemplateList';
 import { Button } from '@/components/ui/button';
-import { defaultResultTemplate } from '@/config/resultPageTemplates';
+// Importar ambos os templates
+import { defaultResultTemplate, directOfferTemplate } from '@/config/resultPageTemplates';
 import { createOfferSectionConfig } from '@/utils/config/offerDefaults';
+import { ResultPageConfig } from '@/types/resultPageConfig'; // Para tipagem explícita
 
 export const EditorPage = () => {
   const [showTemplates, setShowTemplates] = useState(false);
-  const { style } = useParams<{ style?: string }>();
+  // Adicionar pageType aos parâmetros da rota
+  const { pageType, style } = useParams<{ pageType?: string; style?: string }>();
   
   const styleCategory = (style as "Natural" | "Clássico" | "Contemporâneo" | "Elegante" | "Romântico" | "Sexy" | "Dramático" | "Criativo") || 'Natural';
   
-  const selectedStyle = {
-    category: styleCategory,
-    score: 100,
-    percentage: 100
-  };
+  // Determinar qual template base usar
+  let templateToUse: ResultPageConfig = defaultResultTemplate as ResultPageConfig;
+  if (pageType === 'direct-offer') {
+    templateToUse = directOfferTemplate as ResultPageConfig;
+  }
   
-  // Ensure the initialConfig follows the ResultPageConfig type structure
-  const initialConfig = {
+  // Construir initialConfig com base no template selecionado
+  const initialConfig: ResultPageConfig = {
     styleType: styleCategory,
+    // Assumindo que header sempre existe nos templates base e é do tipo correto
     header: {
-      ...defaultResultTemplate.header,
-      visible: true,
+      ...(templateToUse.header!), // Usar ! para afirmar que header existe e é completo
       style: {
-        ...defaultResultTemplate.header.style,
-        borderRadius: '0' // Using string value for borderRadius
+        ...(templateToUse.header!.style),
+        borderRadius: '0' // Consistência
       }
     },
-    mainContent: {
-      ...defaultResultTemplate.mainContent,
-      visible: true
-    },
-    offer: createOfferSectionConfig(), // Using the createOfferConfig() function to create a proper OfferSection
-    secondaryStyles: {
-      visible: true,
-      content: {},
-      style: {
-        padding: '20px'
+    
+    // Incluir mainContent apenas se existir no templateToUse
+    ...(templateToUse.mainContent && { 
+      mainContent: {
+        ...templateToUse.mainContent,
       }
-    },
+    }),
+    
+    // Incluir offer se existir, senão usar um default
+    offer: templateToUse.offer ? {
+      ...templateToUse.offer,
+    } : createOfferSectionConfig(), 
+    
+    // Incluir secondaryStyles apenas se existir no templateToUse
+    ...(templateToUse.secondaryStyles && {
+      secondaryStyles: {
+        ...templateToUse.secondaryStyles,
+      }
+    }),
+
     globalStyles: {
       primaryColor: '#B89B7A',
       secondaryColor: '#432818',
@@ -49,7 +59,8 @@ export const EditorPage = () => {
       backgroundColor: '#FAF9F7',
       fontFamily: 'Playfair Display, serif'
     },
-    blocks: []
+    // Manter blocks como um array vazio se não estiver definido no template
+    blocks: (templateToUse as any).blocks || [] 
   };
   
   return (
@@ -67,9 +78,13 @@ export const EditorPage = () => {
         </div>
       ) : (
         <ResultPageVisualEditor 
-          selectedStyle={selectedStyle} 
+          selectedStyle={{ // selectedStyle ainda é necessário pelo ResultPageVisualEditor
+            category: styleCategory,
+            score: 100,
+            percentage: 100
+          }} 
           onShowTemplates={() => setShowTemplates(true)}
-          initialConfig={initialConfig}
+          initialConfig={initialConfig} // Passar a configuração dinâmica
         />
       )}
     </div>
