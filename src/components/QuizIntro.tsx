@@ -201,14 +201,13 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             <img
               src={introImageUrl}
               alt="Intro Quiz"
-              className="w-full h-auto max-h-[340px] object-contain quiz-intro-image transition-opacity duration-300"
+              className="w-full h-auto max-h-[340px] object-contain quiz-intro-image"
               width={320}
               height={340}
               loading="eager"
               fetchPriority="high"
               decoding="async"
               style={{background: '#f8f6f2', display: 'block', margin: '0 auto'}}
-              onError={e => { (e.target as HTMLImageElement).style.opacity = '0.2'; }}
             />
           </div>
 
