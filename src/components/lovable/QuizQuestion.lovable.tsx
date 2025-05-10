@@ -219,6 +219,15 @@ export default defineLovable({
     totalQuestions,
     navigation
   }) => {
+    // Fallback defensivo para evitar tela branca no Lovable
+    if (!question || !question.title || !Array.isArray(options) || !layout) {
+      return (
+        <div className="w-full max-w-2xl mx-auto py-12 text-center text-red-700">
+          Erro: Dados da questão ausentes ou inválidos. Verifique as props no Lovable Studio.
+        </div>
+      );
+    }
+
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
     
     const handleOptionClick = (optionId: string) => {
