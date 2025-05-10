@@ -44,7 +44,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ image
   const [quality, setQuality] = useState<number>(80);
   const [width, setWidth] = useState<number | undefined>(undefined);
   const [height, setHeight] = useState<number | undefined>(undefined);
-  const [format, setFormat] = useState<'auto' | 'webp' | 'jpg' | 'png'>('auto');
+  const [format, setFormat] = useState<'auto' | 'webp' | 'avif'>('auto');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [isPreloading, setIsPreloading] = useState<boolean>(false);
   const [isLqipGenerating, setIsLqipGenerating] = useState<boolean>(false);
@@ -170,9 +170,11 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ image
     setErrorMessage('');
 
     try {
-      const responsive = getResponsiveImageSources(imageUrl);
-      setResponsiveSrcSet(responsive.srcSet);
-      setResponsiveSizes(responsive.sizes);
+      const response = getResponsiveImageSources(imageUrl);
+      if (typeof response === 'object' && response !== null) {
+        setResponsiveSrcSet(response.srcSet || '');
+        setResponsiveSizes(response.sizes || '');
+      }
     } catch (error: any) {
       console.error('Error generating responsive images:', error);
       setIsError(true);
@@ -312,12 +314,11 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ image
               id="format"
               className="border rounded-md p-1"
               value={format}
-              onChange={(e) => setFormat(e.target.value as 'auto' | 'webp' | 'jpg' | 'png')}
+              onChange={(e) => setFormat(e.target.value as 'auto' | 'webp' | 'avif')}
             >
               <option value="auto">Auto</option>
               <option value="webp">WebP</option>
-              <option value="jpg">JPG</option>
-              <option value="png">PNG</option>
+              <option value="avif">AVIF</option>
             </select>
           </div>
         </div>
@@ -528,15 +529,15 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ image
           <TableBody>
             <TableRow>
               <TableCell className="font-medium">Total Images Rendered</TableCell>
-              <TableCell>{(totalImages as React.ReactNode)}</TableCell>
+              <TableCell>{totalImages ? String(totalImages) : '0'}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell className="font-medium">Total Images with Issues</TableCell>
-              <TableCell>{(totalIssues as React.ReactNode)}</TableCell>
+              <TableCell>{totalIssues ? String(totalIssues) : '0'}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell className="font-medium">Total Downloaded Bytes</TableCell>
-              <TableCell>{(totalSize as React.ReactNode)}</TableCell>
+              <TableCell>{totalSize ? String(totalSize) : '0'}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

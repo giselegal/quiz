@@ -65,7 +65,7 @@ export interface ImageDiagnosticResult {
   }[];
 }
 
-// Add ImageSettings type
+// Add ImageSettings type with proper format values
 export interface ImageSettings {
   width?: number;
   height?: number;
@@ -74,11 +74,15 @@ export interface ImageSettings {
   crop?: 'fill' | 'fit' | 'limit';
 }
 
-// Add ImageCacheEntry type
+// Add ImageCacheEntry type with loadStatus and lowQualityUrl
 export interface ImageCacheEntry {
   url: string;
-  metadata: ImageMetadata;
+  metadata?: ImageMetadata;
   lastAccessed: number;
+  loadStatus?: 'idle' | 'loading' | 'loaded' | 'error';
+  element?: HTMLImageElement;
+  optimizedUrl?: string;
+  lowQualityUrl?: string;
 }
 
 // Update BankImage to include priority
@@ -90,4 +94,6 @@ export interface BankImage {
   width?: number;
   height?: number;
   priority?: number;
+  preloadPriority?: number;
+  alt?: string;
 }

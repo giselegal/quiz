@@ -119,9 +119,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Calcular a proporção de aspecto para o container
   const aspectRatio = height / width;
   
-  // Se width e height são strings, convert para number
-  const widthNum = typeof width === 'string' ? parseInt(width, 10) : width;
-  const heightNum = typeof height === 'string' ? parseInt(height, 10) : height;
+  // Convert width and height to string for img element
+  const widthStr = String(width);
+  const heightStr = String(height);
   
   return (
     <AspectRatioContainer 
@@ -134,8 +134,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         <img
           src={lowQualitySrc}
           alt={alt}
-          width={String(width)}
-          height={String(height)}
+          width={widthStr}
+          height={heightStr}
           className={`w-full h-full object-${objectFit} absolute inset-0 transition-opacity duration-300 ${className}`}
           loading="eager"
           decoding="async"
@@ -147,8 +147,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         <img
           src={optimizedSrc}
           alt={alt}
-          width={String(width)}
-          height={String(height)}
+          width={widthStr}
+          height={heightStr}
           className={`w-full h-full object-${objectFit} absolute inset-0 transition-opacity duration-500 ${className} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={handleImageLoad}
           onError={handleImageError}

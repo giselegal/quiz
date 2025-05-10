@@ -58,7 +58,8 @@ export const updateImageCache = (
     imageCache.set(url, { ...existingEntry, ...entry });
   } else {
     imageCache.set(url, {
-      loadStatus: 'idle',
+      url: entry.url,
+      lastAccessed: Date.now(),
       ...entry
     });
   }
@@ -74,9 +75,10 @@ export const getImageFromCache = (url: string): ImageCacheEntry | undefined => {
 /**
  * Check if an image is in cache with specified status
  */
-export const hasImageWithStatus = (url: string, status: ImageCacheEntry['loadStatus']): boolean => {
+export const hasImageWithStatus = (url: string, status: 'idle' | 'loading' | 'loaded' | 'error'): boolean => {
   if (imageCache.has(url)) {
-    return imageCache.get(url)!.loadStatus === status;
+    const entry = imageCache.get(url);
+    return entry?.loadStatus === status;
   }
   return false;
 };

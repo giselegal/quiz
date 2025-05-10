@@ -1,4 +1,3 @@
-
 import { BankImage, getImageById } from '@/data/imageBank';
 import { PreloadOptions } from './types';
 import { optimizeCloudinaryUrl, getLowQualityPlaceholder } from './optimization';
@@ -48,8 +47,8 @@ export const preloadImagesByUrls = (
   const tempImages: BankImage[] = urls.map(url => ({
     id: url,
     src: url,
-    alt: 'Preloaded image',
     category: 'external',
+    tags: [],
   }));
   
   const { generateLowQuality = true, ...restOptions } = options;
@@ -74,7 +73,7 @@ export const preloadImagesByUrls = (
         // Update cache with low quality URL
         updateImageCache(optimizedUrl, {
           url: url,
-          lowQualityUrl
+          lowQualityUrl: lowQualityUrl
         });
         
         // Also preload the low quality version
@@ -161,7 +160,7 @@ export const preloadImages = (
       updateImageCache(optimizedUrl, {
         url: img.src,
         loadStatus: 'loading',
-        lowQualityUrl
+        lowQualityUrl: lowQualityUrl
       });
       
       const imgElement = new Image();
@@ -173,7 +172,7 @@ export const preloadImages = (
           loadStatus: 'loaded',
           element: imgElement,
           optimizedUrl,
-          lowQualityUrl
+          lowQualityUrl: lowQualityUrl
         });
         
         loadedCount++;
@@ -193,7 +192,7 @@ export const preloadImages = (
         updateImageCache(optimizedUrl, {
           url: img.src,
           loadStatus: 'error',
-          lowQualityUrl
+          lowQualityUrl: lowQualityUrl
         });
         
         console.error(`Failed to preload image: ${img.src}`);
@@ -229,7 +228,7 @@ export const getLowQualityImage = (url: string): string => {
   // Check if we already have this in the cache
   const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 90, format: 'auto' });
   
-  // Here was the problematic code - fixed by retrieving the cache entry first
+  // Get cache entry first
   const cacheEntry = imageCache.get(optimizedUrl);
   
   // Then check if the cache entry has a lowQualityUrl
