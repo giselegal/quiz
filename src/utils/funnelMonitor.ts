@@ -4,6 +4,12 @@ export function monitorFunnelRoutes() {
   
   // Detectar a rota atual
   const currentPath = window.location.pathname;
+  const validRoutes = ['/', '/resultado', '/quiz-descubra-seu-estilo'];
+  if (!validRoutes.includes(currentPath)) {
+    console.warn(`⚠️ Rota atual inválida: ${currentPath}. As rotas válidas são: ${validRoutes.join(', ')}`);
+  } else {
+    console.log(`✅ Rota atual válida: ${currentPath}`);
+  }
   const currentRoute = currentPath === '/' ? 'home' : 
                       currentPath === '/resultado' ? 'resultado' : 
                       currentPath === '/quiz-descubra-seu-estilo' ? 'venda' : 'other';

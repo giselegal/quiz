@@ -118,6 +118,8 @@ const App = () => {
                 <Route path="/admin/ab-test-manager" element={<ABTestManagerPage />} />
                 {/* Adicionando acesso ao protótipo no painel admin */}
                 <Route path="/admin/prototipo" element={<ResultPagePrototype />} />
+                <Route path="/oferta-direta" element={React.createElement(lazy(() => import('./pages/Funil2OfertaDireta')))} />
+                <Route path="/quiz-descubra-seu-estilo/oferta" element={React.createElement(lazy(() => import('./pages/Funil2OfertaDireta')))} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

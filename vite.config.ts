@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import compression from "vite-plugin-compression";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   root: '.',
   base: './',
   
@@ -19,7 +19,10 @@ export default defineConfig({
     },
     fs: {
       allow: ['../']
-    }
+    },
+    allowedHosts: [
+      "a10d1b34-b5d4-426b-8c97-45f125d03ec1.lovableproject.com"
+    ]
   },
   
   plugins: [
@@ -80,6 +83,6 @@ export default defineConfig({
   },
   
   css: {
-    devSourcemap: true,
+    devSourcemap: mode === 'development',
   }
-});
+}));
