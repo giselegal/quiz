@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -11,7 +10,7 @@ import { monitorFunnelRoutes } from './utils/funnelMonitor';
 // Injetar CSS crítico para renderização inicial mais rápida
 injectCriticalCSS(initialCriticalCSS);
 
-// Display version information in console
+// Exibir informações de versão no console
 displayVersion();
 
 // Iniciar medição de performance
@@ -37,7 +36,6 @@ try {
       const fallbackRoot = document.createElement('div');
       fallbackRoot.id = 'root';
       bodyElement.appendChild(fallbackRoot);
-      
       // Tentar renderizar novamente
       ReactDOM.createRoot(fallbackRoot).render(
         <React.StrictMode>
@@ -65,15 +63,13 @@ try {
 }
 
 // Remover CSS crítico após carregamento completo
-window.addEventListener('load', () => {
+document.addEventListener('load', () => {
   if (process.env.NODE_ENV !== 'production') {
     console.timeEnd('App Render');
     console.log('Componentes carregados, removendo CSS crítico');
   }
-  
   // Programar remoção do CSS crítico após carregamento completo
   setTimeout(removeCriticalCSS, 1000);
-  
   // Aplicar correção para imagens borradas
   if (typeof window.fixBlurryIntroQuizImages === 'function') {
     // Tentar corrigir imagens várias vezes para pegar aquelas carregadas tardiamente
