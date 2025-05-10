@@ -25,8 +25,7 @@
     <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'" rel="stylesheet">
     
     <!-- Preload critical images -->
     <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_webp,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" type="image/webp" fetchpriority="high">
@@ -113,9 +112,9 @@
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     </noscript>
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <script defer type="module" src="https://cdn.gpteng.co/gptengineer.js"></script>
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" defer></script>
-    <script defer type="text/javascript">
+    <script type="module" src="https://cdn.gpteng.co/gptengineer.js"></script>
+    <script src="https://static.cloudflareinsights.com/beacon.min.js" defer></script>
+    <script type="text/javascript">
       !function(f,b,e,v,n,t,s) {
         if(f.fbq)return;n=f.fbq=function(){n.callMethod?
         n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -123,11 +122,8 @@
         n.queue=[];t=b.createElement(e);t.async=!0;
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)
-      }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js" async defer');
+      }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
     </script>
-<style>
-body{margin:0;padding:0;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F4 100%)}*{will-change:auto!important}img{transition:none!important}.loading-fallback{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background-color:#f9fafb}.loading-spinner{width:3rem;height:3rem;border-radius:50%;border:2px solid #e5e7eb;border-top-color:#B89B7A;animation:spin 1s linear infinite;margin-bottom:1rem}.loading-message{color:#432818;font-family:'Inter',sans-serif;font-size:.9rem}@keyframes spin{to{transform:rotate(360deg)}}.font-playfair{font-family:'Playfair Display',serif;font-display:swap}.font-inter{font-family:'Inter',sans-serif;font-display:swap}
-</style>
   </head>
   <body>
     <div id="root">
@@ -137,6 +133,6 @@ body{margin:0;padding:0;font-family:'Inter',sans-serif;-webkit-font-smoothing:an
       </div>
     </div>
     <!-- Script principal: entrada padrão do Vite, será substituído no build -->
-    <script defer type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

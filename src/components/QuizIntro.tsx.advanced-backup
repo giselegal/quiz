@@ -38,10 +38,10 @@ const STATIC_LOGO_IMAGE_URLS = {
 
 const STATIC_INTRO_IMAGE_URLS = {
   avif: {
-    tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 180),
-    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 345, 70),
-    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 400, 75),
-    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 450, 80)
+    tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 200),
+    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 345, 75),
+    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 400, 80),
+    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 450, 85)
   },
   webp: {
     tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 200),
@@ -49,70 +49,12 @@ const STATIC_INTRO_IMAGE_URLS = {
     medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 400, 75),
     large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 450, 80)
   },
-  placeholder: `${INTRO_IMAGE_BASE_URL}f_webp,q_10,w_20,c_limit,e_blur:80/${INTRO_IMAGE_ID}.webp`,
+  placeholder: `${INTRO_IMAGE_BASE_URL}f_webp,q_5,w_30,c_limit,e_blur:100/${INTRO_IMAGE_ID}.webp`,
   png: `${INTRO_IMAGE_BASE_URL}f_png,q_75,w_345,c_limit,fl_progressive/${INTRO_IMAGE_ID}.png`
 };
 
 // --- Fim das otimizações de escopo do módulo ---
 
-  // Hook personalizado para pré-carregamento de recursos críticos
-  const usePreloadResources = () => {
-    useEffect(() => {
-      // Função para criar e adicionar link de preload
-      // Marcar o tempo de renderização para métricas
-      if (window.performance && window.performance.mark) {
-        window.performance.mark('quiz-intro-rendered');
-      }
-      const addPreloadLink = (href: string, as: string, type?: string, crossOrigin?: boolean) => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.href = href;
-        link.as = as;
-        
-        if (type) {
-          link.type = type;
-        }
-        
-        if (crossOrigin) {
-          link.crossOrigin = '';
-        }
-        
-        document.head.appendChild(link);
-        return link;
-      };
-      
-      // Prefetch do recurso principal logo no início
-      const imgPreload = addPreloadLink(
-        STATIC_INTRO_IMAGE_URLS.avif.large, 
-        'image', 
-        'image/avif'
-      );
-      imgPreload.setAttribute('fetchpriority', 'high');
-      
-      // Prefetch do recurso de logo
-      const logoPreload = addPreloadLink(
-        STATIC_LOGO_IMAGE_URLS.webp,
-        'image',
-        'image/webp'
-      );
-      
-      // Preconnect com o domínio Cloudinary
-      const preconnectLink = document.createElement('link');
-      preconnectLink.rel = 'preconnect';
-      preconnectLink.href = 'https://res.cloudinary.com';
-      preconnectLink.crossOrigin = '';
-      document.head.appendChild(preconnectLink);
-      
-      // Limpeza ao desmontar
-      return () => {
-        [imgPreload, logoPreload, preconnectLink].forEach(el => {
-          if (el && el.parentNode) {
-            el.parentNode.removeChild(el);
-          }
-        });
-      };
-    }, []);
-  };
 /**
  * QuizIntro - Componente da página inicial do quiz com layout melhorado e performance otimizada
  * 
@@ -137,36 +79,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const [nome, setNome] = useState('');
   const [mainImageWidth, setMainImageWidth] = useState(0);
   const [tinyBase64, setTinyBase64] = useState<string>('');
-  // Pré-carregar recursos críticos para melhorar LCP
-  usePreloadResources();
   
   // Refs para medir e otimizar
   const mainImageRef = useRef<HTMLDivElement>(null);
   const imageLoaded = useRef<boolean>(false);
   
-  // Função para controlar estados de carregamento e reportar métricas
-  const handleMainImageLoad = () => {
-    imageLoaded.current = true;
-    
-    // Registrar o tempo de carregamento como métrica de performance
-    if (window.performance && window.performance.mark) {
-      window.performance.mark('main-image-loaded');
-      
-      // Se tivermos uma marca de início, podemos medir o tempo de carregamento
-      if (performance.getEntriesByName('quiz-intro-rendered').length > 0) {
-        performance.measure(
-          'main-image-load-time', 
-          'quiz-intro-rendered', 
-          'main-image-loaded'
-        );
-        
-        const measureEntry = performance.getEntriesByName('main-image-load-time')[0];
-        if (measureEntry && console) {
-          console.log(`[Performance] Main image loaded in ${measureEntry.duration.toFixed(2)}ms`);
-        }
-      }
-    }
-  };
   // Efeito para capturar a largura da imagem principal
   useEffect(() => {
     if (mainImageRef.current) {
@@ -317,7 +234,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                     maxWidth: '100%',
                     aspectRatio: '140/60',
                     width: '140px',
-                    height: '60px',
+                    height: '60px', background: 'none',
                     background: 'none'
                   }}
                 />
