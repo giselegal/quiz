@@ -1,3 +1,4 @@
+
 import { initLazyLoading } from './utils/lazyScript';
 import React from 'react';
 import ReactDOM from 'react-dom/client';

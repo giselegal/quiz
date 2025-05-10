@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -98,7 +99,6 @@ const App = () => {
           <Router>
             {/* Injetar CSS crítico para melhorar o First Contentful Paint */}
             <CriticalCSSLoader cssContent={initialCriticalCSS} id="initial-critical" removeOnLoad={true} />
-            <CriticalCSSLoader cssContent={heroCriticalCSS} id="hero-critical" removeOnLoad={true} />
             
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
