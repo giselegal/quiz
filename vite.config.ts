@@ -48,15 +48,6 @@ export default defineConfig(({ mode }) => ({
   },
   
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-ui': ['framer-motion', 'tailwindcss'],
-          'vendor-utils': ['lodash', 'dayjs'],
-        }
-      }
-    },
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
@@ -69,11 +60,12 @@ export default defineConfig(({ mode }) => ({
         pure_funcs: ['console.log', 'console.info', 'console.debug']
       }
     },
-    // Configurações para otimizar chunks
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['framer-motion', 'tailwindcss'],
+          'vendor-utils': ['lodash', 'dayjs'],
           'ui-components': [
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
@@ -81,19 +73,15 @@ export default defineConfig(({ mode }) => ({
             'clsx',
             'tailwind-merge'
           ],
-          'quiz-intro': [
-            './src/components/QuizIntro.tsx'
-          ],
+          'quiz-intro': ['./src/components/QuizIntro.tsx'],
           'analytics': [
             './src/utils/analytics.ts',
             './src/utils/facebookPixel.ts'
           ]
         },
-        // Garantir que os assets sejam carregados corretamente para as rotas específicas
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
-          // Otimização: Coloca fontes e imagens em pastas separadas
           const fileName = assetInfo.name || '';
           if (/\.(woff|woff2|eot|ttf|otf)$/.test(fileName)) {
             return 'assets/fonts/[name]-[hash].[ext]';

@@ -26,7 +26,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useABTest } from '@/hooks/useABTest';
 import { Link } from 'react-router-dom';
 import { preloadCriticalImages } from '@/utils/imageManager';
-import { resultPageCriticalCSS } from '@/utils/critical-css';
+// import { resultPageCriticalCSS } from '@/utils/critical-css';
 import CriticalCSSLoader from '@/components/CriticalCSSLoader';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 
@@ -134,7 +134,6 @@ const ResultPage: React.FC = () => {
   
   return (
     <div className="min-h-screen relative overflow-hidden" style={getStyleOverrides()}>
-      <CriticalCSSLoader cssContent={resultPageCriticalCSS} />
       
       {/* Gradientes sutis para dar profundidade */}
       <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#B89B7A]/5 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3"></div>
@@ -198,7 +197,7 @@ const ResultPage: React.FC = () => {
             
             {/* Guia visualização */}
             <AnimatedWrapper animation={isLowPerformance ? 'none' : 'fade'} show={true} duration={400} delay={50}>
-              <div className="mt-12 md:mt-16 max-w-[650px] mx-auto relative p-5 bg-gradient-to-br from-[#fdfbf9] to-[#faf5f0] dark:from-[#3a2e26] dark:to-[#332820] rounded-xl shadow-lg border border-[#B89B7A]/30 dark:border-[#E0C9B1]/30">
+              <div className="mt-12 md:mt-16 max-w-[650px] mx-auto relative p-5 bg-gradient-to-br from-[#fdfbf9] to-[#faf5f0] dark:from-[#3a2e26] dark:to-[#332820] rounded-xl shadow-lg border border-[#B89B7A]/30">
                 <OptimizedImage
                   src={guideImage}
                   alt={`Guia de Estilo ${category}`}
