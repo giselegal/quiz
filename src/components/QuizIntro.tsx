@@ -57,66 +57,64 @@ const STATIC_INTRO_IMAGE_URLS = {
 
 // --- Fim das otimizações de escopo do módulo ---
 
-// Hook personalizado para pré-carregamento de recursos críticos
-const usePreloadResources = () => {
-  useEffect(() => {
-    // Marcar o tempo de renderização para métricas
-    if (window.performance && window.performance.mark) {
-      window.performance.mark('quiz-intro-rendered');
-    }
-    
-    // Função para criar e adicionar link de preload
-    const addPreloadLink = (href: string, as: string, type?: string, crossOrigin?: boolean) => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.href = href;
-      link.as = as;
-      
-      if (type) {
-        link.type = type;
+  // Hook personalizado para pré-carregamento de recursos críticos
+  const usePreloadResources = () => {
+    useEffect(() => {
+      // Função para criar e adicionar link de preload
+      // Marcar o tempo de renderização para métricas
+      if (window.performance && window.performance.mark) {
+        window.performance.mark('quiz-intro-rendered');
       }
-      
-      if (crossOrigin) {
-        link.crossOrigin = '';
-      }
-      
-      document.head.appendChild(link);
-      return link;
-    };
-    
-    // Prefetch do recurso principal logo no início
-    const imgPreload = addPreloadLink(
-      STATIC_INTRO_IMAGE_URLS.avif.large, 
-      'image', 
-      'image/avif'
-    );
-    imgPreload.setAttribute('fetchpriority', 'high');
-    
-    // Prefetch do recurso de logo
-    const logoPreload = addPreloadLink(
-      STATIC_LOGO_IMAGE_URLS.webp,
-      'image',
-      'image/webp'
-    );
-    
-    // Preconnect com o domínio Cloudinary
-    const preconnectLink = document.createElement('link');
-    preconnectLink.rel = 'preconnect';
-    preconnectLink.href = 'https://res.cloudinary.com';
-    preconnectLink.crossOrigin = '';
-    document.head.appendChild(preconnectLink);
-    
-    // Limpeza ao desmontar
-    return () => {
-      [imgPreload, logoPreload, preconnectLink].forEach(el => {
-        if (el && el.parentNode) {
-          el.parentNode.removeChild(el);
+      const addPreloadLink = (href: string, as: string, type?: string, crossOrigin?: boolean) => {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.href = href;
+        link.as = as;
+        
+        if (type) {
+          link.type = type;
         }
-      });
-    };
-  }, []); // Dependências vazias = executa uma vez
-};
-
+        
+        if (crossOrigin) {
+          link.crossOrigin = '';
+        }
+        
+        document.head.appendChild(link);
+        return link;
+      };
+      
+      // Prefetch do recurso principal logo no início
+      const imgPreload = addPreloadLink(
+        STATIC_INTRO_IMAGE_URLS.avif.large, 
+        'image', 
+        'image/avif'
+      );
+      imgPreload.setAttribute('fetchpriority', 'high');
+      
+      // Prefetch do recurso de logo
+      const logoPreload = addPreloadLink(
+        STATIC_LOGO_IMAGE_URLS.webp,
+        'image',
+        'image/webp'
+      );
+      
+      // Preconnect com o domínio Cloudinary
+      const preconnectLink = document.createElement('link');
+      preconnectLink.rel = 'preconnect';
+      preconnectLink.href = 'https://res.cloudinary.com';
+      preconnectLink.crossOrigin = '';
+      document.head.appendChild(preconnectLink);
+      
+      // Limpeza ao desmontar
+      return () => {
+        [imgPreload, logoPreload, preconnectLink].forEach(el => {
+          if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        });
+      };
+    }, []);
+  };
 /**
  * QuizIntro - Componente da página inicial do quiz com layout melhorado e performance otimizada
  * 
@@ -141,7 +139,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const [nome, setNome] = useState('');
   const [mainImageWidth, setMainImageWidth] = useState(0);
   const [tinyBase64, setTinyBase64] = useState<string>('');
-  
   // Pré-carregar recursos críticos para melhorar LCP
   usePreloadResources();
   
@@ -174,7 +171,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   }, []);
   
   // Efeito para capturar a largura da imagem principal - otimizado com ResizeObserver
-  // Removida a dependência de mainImageWidth para evitar loop infinito
   useEffect(() => {
     if (mainImageRef.current) {
       // Função para atualizar a largura usando dados do ResizeObserver (mais eficiente)
@@ -218,10 +214,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         return () => window.removeEventListener('resize', updateWidth);
       }
     }
-  }, []); // Removendo dependência de mainImageWidth para evitar loops
+  }, [mainImageWidth]);
 
   // Monitoramento de métricas de performance vital para ajustes finos
-  // Modificado para evitar criação de múltiplos observadores causando loops
   useEffect(() => {
     // Registra o paint inicial como referência
     if (window.performance && window.performance.mark) {
@@ -230,76 +225,66 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     
     // Monitorar métricas Web Vitals
     if (typeof PerformanceObserver === 'function') {
-      let lcpObserver: PerformanceObserver | null = null;
-      let fidObserver: PerformanceObserver | null = null;
-      let clsObserver: PerformanceObserver | null = null;
+      // Monitorar LCP (Largest Contentful Paint)
+      const lcpObserver = new PerformanceObserver((entryList) => {
+        for (const entry of entryList.getEntries()) {
+          console.log(`[Performance] LCP: ${entry.startTime.toFixed(1)}ms`);
+        }
+      });
       
       try {
-        // Monitorar LCP (Largest Contentful Paint)
-        lcpObserver = new PerformanceObserver((entryList) => {
-          for (const entry of entryList.getEntries()) {
-            console.log(`[Performance] LCP: ${entry.startTime.toFixed(1)}ms`);
-          }
-          // Desconectar após registrar para evitar loop
-          lcpObserver?.disconnect();
-        });
         lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
       } catch (e) {
         console.warn('[Performance] LCP observation not supported');
       }
       
+      // Monitorar FID (First Input Delay)
+      const fidObserver = new PerformanceObserver((entryList) => {
+        for (const entry of entryList.getEntries()) {
+          const delay = (entry as PerformanceEventTiming).processingStart - entry.startTime;
+          console.log(`[Performance] FID: ${delay.toFixed(1)}ms`);
+        }
+      });
+      
       try {
-        // Monitorar FID (First Input Delay)
-        fidObserver = new PerformanceObserver((entryList) => {
-          for (const entry of entryList.getEntries()) {
-            const delay = (entry as PerformanceEventTiming).processingStart - entry.startTime;
-            console.log(`[Performance] FID: ${delay.toFixed(1)}ms`);
-          }
-          // Desconectar após registrar para evitar loop
-          fidObserver?.disconnect();
-        });
         fidObserver.observe({ type: 'first-input', buffered: true });
       } catch (e) {
         console.warn('[Performance] FID observation not supported');
       }
       
-      try {
-        // Monitorar CLS (Cumulative Layout Shift) com limite de entradas
-        let clsValue = 0;
-        let clsEntryCount = 0;
-        const MAX_CLS_ENTRIES = 10; // Limitar número de entradas para evitar loop
-        
-        clsObserver = new PerformanceObserver((entryList) => {
-          for (const entry of entryList.getEntries()) {
-            if (!(entry as any).hadRecentInput) {
-              clsValue += (entry as any).value;
-              clsEntryCount++;
-              
-              if (clsEntryCount >= MAX_CLS_ENTRIES) {
-                console.log(`[Performance] CLS: ${clsValue.toFixed(3)}`);
-                clsObserver?.disconnect();
-                break;
-              }
-            }
+      // Monitorar CLS (Cumulative Layout Shift)
+      const clsObserver = new PerformanceObserver((entryList) => {
+        let cls = 0;
+        for (const entry of entryList.getEntries()) {
+          if (!(entry as any).hadRecentInput) {
+            cls += (entry as any).value;
           }
-        });
+        }
+        console.log(`[Performance] CLS: ${cls.toFixed(3)}`);
+      });
+      
+      try {
         clsObserver.observe({ type: 'layout-shift', buffered: true });
       } catch (e) {
         console.warn('[Performance] CLS observation not supported');
       }
       
       return () => {
-        lcpObserver?.disconnect();
-        fidObserver?.disconnect();
-        clsObserver?.disconnect();
+        lcpObserver.disconnect();
+        fidObserver.disconnect();
+        clsObserver.disconnect();
       };
     }
     
     return () => {};
   }, []);
 
+
+
+// Novo arquivo otimizado para o useEffect de preload
+// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente de preload
+
   // Estratégia de preload altamente otimizada para pontuação máxima de performance
-  // Removido PerformanceObserver adicional para evitar loops
   useEffect(() => {
     // Função para criação de links HTTP/2 para melhor paralelização
     const createResourceHint = (rel: string, href: string, options: {as?: string, type?: string, crossOrigin?: boolean} = {}) => {
@@ -358,16 +343,39 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       window.performance.mark('quiz-intro-lcp-start');
     }
     
+    // Adicionar event listener para LCP na imagem principal
+    const recordLCP = () => {
+      if (window.performance && window.performance.mark) {
+        window.performance.mark('quiz-intro-lcp-complete');
+        window.performance.measure('quiz-intro-lcp', 'quiz-intro-lcp-start', 'quiz-intro-lcp-complete');
+      }
+    };
+    
+    // Configuração para monitorar LCP
+    const observer = new PerformanceObserver((entryList) => {
+      for (const entry of entryList.getEntries()) {
+        if (entry.entryType === 'largest-contentful-paint') {
+          recordLCP();
+          observer.disconnect();
+        }
+      }
+    });
+    
+    // Observar eventos LCP
+    observer.observe({ type: 'largest-contentful-paint', buffered: true });
+    
     // Limpar recursos ao desmontar
     return () => {
+      observer.disconnect();
       hints.forEach(hint => {
         if (hint.parentNode) hint.parentNode.removeChild(hint);
       });
     };
   }, []); // Dependências vazias = executa uma vez na montagem
+// Novo arquivo otimizado para o useEffect de carregamento base64
+// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente
 
   // Efeito para carregamento eficiente da imagem base64 - OTIMIZADO
-  // Modificado para evitar renderizações desnecessárias
   useEffect(() => {
     // Estratégia otimizada com armazenamento em cache local
     const loadOptimizedTinyBase64 = async () => {
@@ -409,9 +417,14 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     
     // Iniciar carregamento imediatamente
     loadOptimizedTinyBase64();
+    
+    // Carregar versão high-res após o componente ser montado
+    // Isso permite que o LCP seja registrado para a imagem principal
+    return () => {
+      // Cleanup (se necessário)
+    };
   }, []); // Apenas na montagem
-
-  // Efeito único para carregamento posterior de recursos não-críticos
+  // Efeito único e simplificado para carregamento posterior de recursos
   useEffect(() => {
     let cleanup: (() => void) | undefined;
     
@@ -487,7 +500,74 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       };
     }
   }, []);
-
+  // Efeito para carregamento posterior de recursos não-críticos
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    
+    // Função para carregar recursos não críticos após o LCP
+    const loadNonCriticalResources = () => {
+      // Registrar início da carga não-crítica
+      if (window.performance && window.performance.mark) {
+        window.performance.mark('quiz-intro-load-non-critical');
+      }
+      
+      // Carregar imagens adicionais do quiz
+      preloadCriticalImages('quiz');
+      
+      // Preconnects para domínios adicionais
+      const links = [
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: true }
+      ];
+      
+      const elements = links.map(link => {
+        const el = document.createElement('link');
+        el.rel = link.rel;
+        el.href = link.href;
+        if (link.crossOrigin) el.crossOrigin = 'anonymous';
+        document.head.appendChild(el);
+        return el;
+      });
+      
+      cleanup = () => {
+        elements.forEach(el => {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        });
+      };
+    };
+    
+    // Usar IntersectionObserver para detectar visibilidade do componente
+    if (typeof IntersectionObserver === 'function') {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          // Usar requestIdleCallback para melhor performance
+          if (typeof requestIdleCallback === 'function') {
+            requestIdleCallback(() => {
+              loadNonCriticalResources();
+            }, { timeout: 2000 });
+          } else {
+            setTimeout(loadNonCriticalResources, 1500);
+          }
+          observer.disconnect();
+        }
+      }, { threshold: 0.1 });
+      
+      if (mainImageRef.current) {
+        observer.observe(mainImageRef.current);
+      }
+      
+      return () => {
+        observer.disconnect();
+        if (cleanup) cleanup();
+      };
+    } else {
+      // Fallback para navegadores antigos
+      setTimeout(loadNonCriticalResources, 1500);
+      return () => {
+        if (cleanup) cleanup();
+      };
+    }
+  }, []);
   // Event handler memoizado para evitar re-renders desnecessários
   const handleSubmit = React.useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -717,6 +797,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
 export default QuizIntro;
 
+// Mover componente para antes de usar no QuizIntro
 // Componente de imagem altamente otimizado para carregamento eficiente
 const OptimizedImage = React.memo(({ 
   sources, 
