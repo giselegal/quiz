@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import Logo from '../ui/logo';
@@ -27,13 +26,13 @@ export const Header: React.FC<HeaderProps> = ({
   const displayName = userName || user?.userName || 'Visitante';
   
   return (
-    <Card className="bg-white shadow-sm p-6 mb-6">
-      <div className="flex flex-col items-center gap-5">
-        <div className="flex justify-center w-full">
+    <Card className="bg-white/95 shadow-md p-4 sm:p-6 md:p-8 mb-6 border border-[#B89B7A]/20">
+      <div className="flex flex-col md:flex-row items-center gap-5 justify-between">
+        <div className="flex justify-center">
           <Logo 
             src={logo} 
             alt={logoAlt} 
-            className="h-auto mx-auto" 
+            className="h-auto mx-auto md:mx-0" 
             style={{
               height: `${logoHeight}px`,
               maxWidth: '100%'
@@ -41,13 +40,13 @@ export const Header: React.FC<HeaderProps> = ({
           />
         </div>
         
-        <div className="text-center">
-          <h1 className="text-xl md:text-2xl font-playfair text-[#432818]">
+        <div className="text-center md:text-right">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-playfair text-[#432818]">
             {title} <span className="font-medium">{displayName}</span>, seu Estilo Predominante é:
           </h1>
           
           {primaryStyle && (
-            <h2 className="font-bold text-[#B89B7A] mt-2 text-2xl">
+            <h2 className="font-bold text-[#B89B7A] mt-2 text-xl sm:text-2xl md:text-3xl">
               {primaryStyle.category}
             </h2>
           )}

@@ -1,19 +1,22 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Award } from 'lucide-react'; // Ícones para o selo
+import { Award, Shield } from 'lucide-react'; // Ícones para o selo
 
 const GuaranteeSection: React.FC = () => {
   return (
-    <Card className="p-6 md:p-8 mb-10 bg-gradient-to-br from-[#fdfaf8] to-[#fbf5ef] dark:from-[#3a2e26] dark:to-[#332820] shadow-xl border border-[#B89B7A]/30 dark:border-[#E0C9B1]/30 card-elegant overflow-hidden rounded-xl">
+    <Card className="p-6 sm:p-8 h-full bg-gradient-to-br from-[#fdfaf8] to-[#fbf5ef] dark:from-[#3a2e26] dark:to-[#332820] shadow-xl border border-[#B89B7A]/30 dark:border-[#E0C9B1]/30 card-elegant overflow-hidden rounded-xl">
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
         <div className="md:w-1/4 flex flex-col items-center justify-center text-[#B89B7A] dark:text-[#E0C9B1]">
-          <Award size={64} className="mb-3 opacity-80" strokeWidth={1.5} />
+          <div className="relative">
+            <Shield size={64} className="absolute top-1 left-1 opacity-40" strokeWidth={1.5} />
+            <Award size={64} className="relative z-10" strokeWidth={1.5} />
+          </div>
           {/* Elemento decorativo elegante */}
-          <div className="w-24 h-1 bg-gradient-to-r from-[#B89B7A] to-[#aa6b5d] dark:from-[#D4B79F] dark:to-[#C8A88A] rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-[#B89B7A] to-[#aa6b5d] dark:from-[#D4B79F] dark:to-[#C8A88A] rounded-full mt-4"></div>
         </div>
         
         <div className="md:w-3/4 text-center md:text-left">
-          <h2 className="text-2xl md:text-3xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-4">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-playfair text-[#aa6b5d] dark:text-[#D4B79F] mb-4">
             Sua Satisfação <span className="font-semibold">Garantida</span>
           </h2>
           <p className="text-[#432818] dark:text-[#d1c7b8] mb-3 text-base leading-relaxed">
