@@ -21,36 +21,40 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
   ];
 
   useEffect(() => {
-    // Start preloading critical result page images
-    preloadCriticalImages('results');
+    // Iniciamos o preload de imagens em paralelo com a animação
+    const preloadPromise = Promise.resolve().then(() => {
+      preloadCriticalImages('results');
+      return true;
+    });
     
-    // Fake progress animation
+    // Fake progress animation - com velocidade aumentada (8ms)
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        return prev + 1;
+        // Aceleração da progressão para finalizar em ~800ms
+        return prev + (prev < 50 ? 1.3 : 1.5);
       });
-    }, 10); // Reduzido de 20ms para 10ms (total 1 segundo)
+    }, 8); // Reduzido para 8ms para um total de ~800ms
 
-    // Update step based on progress
+    // Update step based on progress - mostra passos mais rapidamente
     const stepInterval = setInterval(() => {
       setStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 250); // Reduzido de 1000ms para 250ms para mostrar mais etapas
+    }, 200); // Reduzido para 200ms para mostrar passos mais rapidamente
 
     // Cleanup
     return () => {
       clearInterval(interval);
       clearInterval(stepInterval);
     };
-  }, []);
+  }, [steps.length]);
 
   useEffect(() => {
-    // When progress reaches 100, navigate to result page
-    if (progress === 100) {
-      // Removido o setTimeout de 500ms
+    // Transição mais rápida quando o progresso atinge 98%
+    if (progress >= 98) {
+      // Navegamos imediatamente quando atingir 98% para eliminar espera
       if (onShowResult) {
         onShowResult();
       } else {

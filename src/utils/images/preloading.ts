@@ -255,35 +255,40 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
   // Determine which images are critical based on the page
   let minPriority = 4;
   let categoryFilter: string | undefined;
+  let batchSize = 3; // Padrão
   
   switch (page) {
     case 'intro':
       categoryFilter = 'branding';
-      // Aumenta a qualidade das imagens da introdução para evitar embaçamento
+      batchSize = 2;
+      // Apenas preload otimizadas do logo e imagens de marca
       preloadImagesByCategory('branding', { 
         quality: 90, 
         batchSize: 2,
-        width: 800,
+        width: 160, // Reduzindo para apenas o tamanho visível inicialmente
         format: 'auto'
       });
       break;
     case 'quiz':
       categoryFilter = undefined; // All high priority images
+      batchSize = 4; // Mais imagens em paralelo para quiz
       break;
     case 'results':
       minPriority = 3;
-      // Also preload transformation images with optimized settings
+      batchSize = 2;
+      // Otimização específica para imagens de transformação
       preloadImagesByCategory('transformation', { 
         quality: 85, 
         batchSize: 2,
-        width: 800, // Limit width to improve loading
-        format: 'webp' // Use modern format
+        width: 640, // Largura reduzida para carregamento mais rápido
+        format: 'webp' // Formato moderno mais eficiente
       });
       categoryFilter = undefined;
       break;
     case 'strategic':
       categoryFilter = 'strategic';
       minPriority = 3;
+      batchSize = 3;
       break;
   }
   
@@ -295,11 +300,16 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
       : meetsMinPriority;
   });
   
-  // Preload these images with optimized settings
+  // Calcula largura otimizada com base na página
+  const optimalWidth = page === 'intro' ? 300 : 
+                       page === 'results' ? 600 : 
+                       page === 'strategic' ? 400 : 500;
+  
+  // Preload these images with optimized settings - revisados para melhor performance
   preloadImages(highPriorityImages, {
-    quality: 90, // Increased quality for better visual appearance
-    batchSize: 3,
-    width: page === 'intro' ? 800 : 600, // Limit width based on context
+    quality: page === 'results' ? 85 : 90, // Qualidade adaptada por contexto
+    batchSize: batchSize, // Configuração adaptada por contexto
+    width: optimalWidth, // Largura adaptativa
     format: 'auto', // Auto format for best browser compatibility
     onComplete: () => {
       console.log(`Preloaded ${highPriorityImages.length} critical images for ${page}`);

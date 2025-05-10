@@ -8,12 +8,10 @@ import { OptimizedImage } from './ui/optimized-image';
 import FixedIntroImage from './ui/FixedIntroImage';
 import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
 import { getImageById } from '@/data/imageBank';
-import { LoadingSpinner } from './ui/loading-spinner';
-// Importar AutoFixedImages para resolver problemas de imagens borradas
+// Remover importações desnecessárias
+// import { LoadingSpinner } from './ui/loading-spinner';
 import AutoFixedImages from './ui/AutoFixedImages';
-// Importar script personalizado para correção de imagens embaçadas
 import '../utils/fix-blurry-images.js';
-// Importar função de correção específica para o quiz de introdução
 import { fixBlurryIntroQuizImages } from '@/utils/fixBlurryIntroQuizImages';
 
 /**
@@ -48,7 +46,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   // criticalAssetsLoaded e imagesLoaded foram removidos do controle direto da UI aqui
   // para simplificar, mas a lógica de preloadCriticalImages('quiz') ainda pode usá-los internamente se necessário.
   const [criticalAssetsForQuizPreloaded, setCriticalAssetsForQuizPreloaded] = useState(false);
-
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -133,29 +131,36 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   };
 
   const introImageDetails = getImageById('intro-image');
+  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-6 sm:px-8" 
-           style={{
-             minHeight: '100vh',  
-             background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)'
-           }}
-           data-section="intro">
-        <div className="w-full max-w-md flex flex-col items-center justify-center text-center">
-          {/* Logo sem animação de pulso para melhorar o desempenho */}
-          <div className="flex justify-center w-full"> 
+      <div 
+        className="flex flex-col items-center justify-center min-h-screen"
+        style={{
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)'
+        }}
+      >
+        <div className="flex flex-col items-center justify-center p-6 text-center">
+          <div className="relative">
             <img
-              src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
-              alt="Logo Gisele Galvão"
+              src={logoUrl}
+              alt="Gisele Galvão"
               className="h-auto w-32 sm:w-36 md:w-40 mx-auto"
               width={160}
               height={80}
               loading="eager"
               fetchPriority="high"
+              onLoad={() => setLogoLoaded(true)}
             />
+            {/* Efeito de brilho abaixo do logo */}
+            <div className="absolute -bottom-4 -left-4 -right-4 h-2 bg-gradient-to-r from-transparent via-[#B89B7A] to-transparent opacity-70"></div>
           </div>
-          {/* LoadingSpinner e textos removidos */}
+          
+          {/* Texto de carregamento minimalista */}
+          <p className="mt-6 text-sm text-[#432818]/60 font-light">
+            Preparando sua experiência personalizada...
+          </p>
         </div>
       </div>
     );
