@@ -75,7 +75,7 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
             height={64}
             loading="eager"
             fetchPriority="high"
-            style={{objectFit: 'contain'}}
+            style={{objectFit: 'contain', background: 'none'}}
           />
         </div>
 

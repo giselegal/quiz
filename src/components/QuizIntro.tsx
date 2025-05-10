@@ -31,9 +31,9 @@ const buildTinyIntroImageUrl = (baseUrl: string, imageId: string, format: string
 };
 
 const STATIC_LOGO_IMAGE_URLS = {
-  webp: `${LOGO_BASE_URL}f_webp,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.webp`,
-  png: `${LOGO_BASE_URL}f_png,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.png`,
-  avif: `${LOGO_BASE_URL}f_avif,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.avif`
+  webp: `${LOGO_BASE_URL}f_webp,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100/${LOGO_IMAGE_ID}.webp`,
+  png: `${LOGO_BASE_URL}f_png,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100/${LOGO_IMAGE_ID}.png`,
+  avif: `${LOGO_BASE_URL}f_avif,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100/${LOGO_IMAGE_ID}.avif`
 };
 
 const STATIC_INTRO_IMAGE_URLS = {
@@ -234,7 +234,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                     maxWidth: '100%',
                     aspectRatio: '140/60',
                     width: '140px',
-                    height: '60px'
+                    height: '60px',
+                    background: 'none'
                   }}
                 />
               </picture>
