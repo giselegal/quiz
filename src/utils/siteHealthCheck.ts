@@ -1,4 +1,8 @@
+
 // Utilitário para verificar a saúde do site após o deploy na Hostinger
+import React from 'react';
+import ReactDOM from 'react-dom';
+
 export function checkSiteHealth() {
   console.log('🔍 Verificando a saúde do site...');
   
@@ -32,7 +36,7 @@ export function checkSiteHealth() {
   checks.styles = computedStyle && computedStyle.backgroundColor !== '';
   
   // 4. Verificar se o Facebook Pixel está funcionando
-  checks.facebookPixel = typeof fbq !== 'undefined';
+  checks.facebookPixel = typeof window.fbq !== 'undefined';
   
   // Resumo dos resultados
   console.log('📊 Resultado das verificações:');

@@ -1,225 +1,186 @@
-/**
- * ImageDiagnostic.ts
- * Utilitário para diagnóstico e monitoramento de imagens no Quiz Sell Genius
- */
 
-import { imageCache } from './images/caching';
-import { analyzeImageUrl as jsAnalyzeImageUrl } from '../ImageChecker';
-
-interface ImageDiagnosticReport {
-  url: string;
-  optimizedUrl?: string;
-  hasPlaceholder: boolean;
-  loadStatus?: 'loading' | 'loaded' | 'error';
-  isCloudinary: boolean;
-  dimensionsProvided: boolean;
-  transformationsApplied: string[];
-  loadTime?: number;
-  quality?: number | string;
-  format?: string;
-  version?: string | null;
-  width?: string | number;
-  height?: string | number;
-  suggestions: string[];
-}
+// Image diagnostic utility functions
 
 /**
- * Analisa uma URL de imagem e retorna um relatório diagnóstico
- * @param url URL da imagem para análise
+ * Analyzes an image URL to check for optimization issues
+ * @param url The image URL to analyze
+ * @returns Analysis results including suggestions
  */
-export const analyzeImageUrl = (url: string): ImageDiagnosticReport => {
-  // Usar a função avançada de análise do ImageChecker
-  const jsAnalysis = jsAnalyzeImageUrl(url);
-  
-  const isCloudinary = url.includes('cloudinary.com') || url.includes('res.cloudinary.com');
-  const cacheEntry = imageCache.get(url);
-  
-  // Combinar resultados de ambas as análises
-  const report: ImageDiagnosticReport = {
+export const analyzeImageUrl = (url: string) => {
+  const results = {
     url,
-    optimizedUrl: cacheEntry?.optimizedUrl,
-    hasPlaceholder: !!cacheEntry?.lowQualityUrl,
-    loadStatus: cacheEntry?.loadStatus,
-    isCloudinary,
-    dimensionsProvided: jsAnalysis.width !== 'não especificado' || jsAnalysis.height !== 'não especificado',
-    transformationsApplied: jsAnalysis.transformations || [],
-    quality: jsAnalysis.quality,
-    format: jsAnalysis.format,
-    version: jsAnalysis.version,
-    width: jsAnalysis.width,
-    height: jsAnalysis.height,
-    suggestions: [...(jsAnalysis.suggestions || [])]
+    format: 'unknown',
+    quality: 'unknown',
+    width: 'unknown',
+    height: 'unknown',
+    transformations: [] as string[],
+    issues: [] as string[],
+    suggestions: [] as string[]
   };
-  
-  // Verificar informações adicionais específicas do cache
-  if (cacheEntry) {
-    if (cacheEntry.loadTime) {
-      report.loadTime = cacheEntry.loadTime;
-      
-      if (cacheEntry.loadTime > 1000) {
-        report.suggestions.push('Imagem com tempo de carregamento alto (>1s), considerar otimização adicional');
-      }
-    }
-    
-    if (cacheEntry.sizeFactor && cacheEntry.sizeFactor > 2) {
-      report.suggestions.push(`Imagem sendo servida em tamanho muito maior (${cacheEntry.sizeFactor}x) que o necessário`);
-    }
-  }
-  
-  // Validação do cache
-  if (!report.hasPlaceholder && isCloudinary) {
-    report.suggestions.push('Criar placeholder para melhorar a experiência de carregamento');
-  }
-  
-  // Validação de status de carregamento
-  if (!report.loadStatus && isCloudinary) {
-    report.suggestions.push('Pré-carregar a imagem para evitar atrasos no carregamento');
-  }
-  
-  return report;
-};
 
-/**
- * Verifica imagens renderizadas na página para detecção de problemas
- */
-export const checkRenderedImages = () => {
-  const imgElements = document.querySelectorAll('img');
-  const results: {url: string, issues: string[], element: HTMLImageElement}[] = [];
-  
-  console.group('📷 Diagnóstico de Imagens Renderizadas');
-  console.log(`Analisando ${imgElements.length} imagens na página atual...`);
-  
-  imgElements.forEach(img => {
-    const src = img.src;
-    const issues: string[] = [];
-    
-    // Verifica tamanho real vs definido
-    if (img.naturalWidth > 0) {
-      if (img.width > 0 && img.naturalWidth / img.width > 2) {
-        issues.push(`Imagem muito grande (${img.naturalWidth}px) para o tamanho exibido (${img.width}px)`);
+  // Check if it's a Cloudinary URL
+  if (url.includes('cloudinary.com')) {
+    // Extract transformations
+    const transformMatch = url.match(/\/upload\/([^\/]+)\//);
+    if (transformMatch && transformMatch[1]) {
+      const transforms = transformMatch[1].split(',');
+      results.transformations = transforms;
+
+      // Check for format
+      const formatMatch = transforms.find(t => t.startsWith('f_'));
+      if (formatMatch) {
+        results.format = formatMatch.replace('f_', '');
+      } else {
+        results.issues.push('No explicit format specified');
+        results.suggestions.push('Add f_auto for automatic format optimization');
       }
-    }
-    
-    // Verifica atributos de largura e altura
-    if (!img.hasAttribute('width') || !img.hasAttribute('height')) {
-      issues.push('Faltam atributos width/height (pode causar CLS)');
-    }
-    
-    // Verifica atributos de carregamento 
-    if (img.loading !== 'lazy' && img.loading !== 'eager') {
-      issues.push('Falta atributo loading (lazy/eager)');
-    }
-    
-    // Verifica se tem uma classe de estilo de objeto definida
-    if (!img.className.includes('object-')) {
-      issues.push('Falta definição de object-fit');
-    }
-    
-    // Analisa URL para otimizações avançadas
-    const report = analyzeImageUrl(src);
-    if (report.suggestions.length > 0) {
-      issues.push(...report.suggestions);
-    }
-    
-    // Verifica visibilidade
-    const rect = img.getBoundingClientRect();
-    const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
-    
-    if (isVisible && img.loading === 'lazy') {
-      issues.push('Imagem visível na abertura usando loading="lazy" - deve usar eager ou priority');
-    }
-    
-    // Verifica se o tamanho real é muito menor que o tamanho exibido (pixelado)
-    if (img.naturalWidth > 0 && img.width > 0 && img.naturalWidth / img.width < 0.5) {
-      issues.push(`Imagem sendo esticada (${img.naturalWidth}px para ${img.width}px) - possível pixelação`);
-    }
-    
-    if (issues.length > 0) {
-      results.push({url: src, issues, element: img});
-      
-      // Adicionar borda vermelha em modo de desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-        img.style.border = '2px solid red';
-        img.setAttribute('title', issues.join('\n'));
+
+      // Check for quality
+      const qualityMatch = transforms.find(t => t.startsWith('q_'));
+      if (qualityMatch) {
+        results.quality = qualityMatch.replace('q_', '');
+        if (results.quality === 'auto') {
+          // Good practice
+        } else {
+          const qualityNum = parseInt(results.quality as string);
+          if (qualityNum > 85) {
+            results.suggestions.push('Consider using q_auto or reducing quality to 85 for better performance');
+          }
+        }
+      } else {
+        results.issues.push('No quality parameter specified');
+        results.suggestions.push('Add q_auto for automatic quality optimization');
       }
+
+      // Check for width/DPR
+      const widthMatch = transforms.find(t => t.startsWith('w_'));
+      if (widthMatch) {
+        results.width = widthMatch.replace('w_', '');
+      } else {
+        results.issues.push('No width specified');
+        results.suggestions.push('Specify image width to avoid oversized images');
+      }
+
+      // Check for DPR
+      const dprMatch = transforms.find(t => t.startsWith('dpr_'));
+      if (!dprMatch) {
+        results.suggestions.push('Add dpr_auto for automatic device pixel ratio handling');
+      }
+    } else {
+      results.issues.push('No transformations found in Cloudinary URL');
+      results.suggestions.push('Add optimization parameters like f_auto,q_auto,w_[appropriate width]');
     }
-  });
-  
-  if (results.length > 0) {
-    console.warn(`⚠️ Encontrados ${results.length} problemas em imagens:`);
-    results.forEach((result, i) => {
-      console.group(`Imagem ${i+1}: ${result.url.substring(0, 50)}...`);
-      console.log('Elemento:', result.element);
-      console.log('Problemas:');
-      result.issues.forEach(issue => console.log(`- ${issue}`));
-      console.groupEnd();
-    });
   } else {
-    console.log('✅ Nenhum problema encontrado nas imagens renderizadas!');
+    results.issues.push('Not a Cloudinary URL, optimization status unknown');
+    results.suggestions.push('Consider using Cloudinary for better image optimization');
   }
-  
-  console.groupEnd();
+
   return results;
 };
 
 /**
- * Gera um relatório completo de diagnóstico de imagens
- * para uma análise detalhada de desempenho de imagens no site
+ * Checks all rendered images on the page for optimization issues
+ * @returns List of images with potential issues
  */
-export const generateImageReport = () => {
-  const renderedImages = checkRenderedImages();
-  const cachedImagesCount = Object.keys(imageCache.getAll()).length;
-  const totalDownloadedBytes = Object.values(imageCache.getAll())
-    .reduce((sum, entry: any) => sum + (entry.size || 0), 0);
-  
-  const report = {
-    timestamp: new Date().toISOString(),
-    summary: {
-      totalImagesRendered: document.querySelectorAll('img').length,
-      totalImagesWithIssues: renderedImages.length,
-      totalImagesCached: cachedImagesCount,
-      totalDownloadedBytes,
-      estimatedPerformanceImpact: renderedImages.length > 5 ? 'Alto' : renderedImages.length > 0 ? 'Médio' : 'Baixo',
-    },
-    issuesByCategory: {
-      optimization: 0,
-      sizing: 0,
-      format: 0,
-      loading: 0,
-      others: 0
-    },
-    detailedIssues: renderedImages
-  };
-  
-  // Classificar problemas por categoria
-  renderedImages.forEach(item => {
-    item.issues.forEach(issue => {
-      if (issue.includes('qualidade') || issue.includes('otimiz')) {
-        report.issuesByCategory.optimization++;
-      } else if (issue.includes('tamanho') || issue.includes('grande') || issue.includes('pequen')) {
-        report.issuesByCategory.sizing++;
-      } else if (issue.includes('formato') || issue.includes('webp') || issue.includes('avif')) {
-        report.issuesByCategory.format++;
-      } else if (issue.includes('carreg') || issue.includes('lazy') || issue.includes('eager')) {
-        report.issuesByCategory.loading++;
-      } else {
-        report.issuesByCategory.others++;
+export const checkRenderedImages = () => {
+  if (typeof document === 'undefined') return [];
+
+  const allImages = document.querySelectorAll('img');
+  const imageIssues = [];
+
+  for (let i = 0; i < allImages.length; i++) {
+    const img = allImages[i];
+    const src = img.src;
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+    const displayWidth = img.width;
+    const displayHeight = img.height;
+
+    const issues = [];
+
+    // Check for missing alt text
+    if (!img.alt) {
+      issues.push('Missing alt text');
+    }
+
+    // Check for oversized images (more than 1.5x display size accounting for DPR)
+    const dpr = window.devicePixelRatio || 1;
+    if (naturalWidth > displayWidth * 1.5 * dpr && displayWidth > 0) {
+      issues.push(`Oversized: ${naturalWidth}x${naturalHeight} natural size for ${displayWidth}x${displayHeight} display size`);
+    }
+
+    // Check for lazy loading on above-the-fold images
+    const rect = img.getBoundingClientRect();
+    const isAboveTheFold = rect.top < window.innerHeight;
+    if (isAboveTheFold && img.loading === 'lazy') {
+      issues.push('Above-the-fold image using lazy loading');
+    }
+
+    // Check for Cloudinary optimization
+    if (src.includes('cloudinary.com')) {
+      if (!src.includes('f_auto')) {
+        issues.push('Missing f_auto parameter for automatic format optimization');
       }
-    });
-  });
-  
-  console.group('📊 Relatório Completo de Diagnóstico de Imagens');
-  console.log('Sumário:', report.summary);
-  console.log('Problemas por categoria:', report.issuesByCategory);
-  console.log('Data e hora:', report.timestamp);
-  console.groupEnd();
-  
-  return report;
+      if (!src.includes('q_auto') && !src.includes('q_')) {
+        issues.push('Missing quality parameter');
+      }
+      if (src.includes('q_100')) {
+        issues.push('Using maximum quality (q_100) which is unnecessary for most use cases');
+      }
+    }
+
+    if (issues.length > 0) {
+      imageIssues.push({
+        url: src,
+        element: img,
+        issues,
+        dimensions: {
+          natural: { width: naturalWidth, height: naturalHeight },
+          display: { width: displayWidth, height: displayHeight }
+        }
+      });
+    }
+  }
+
+  return imageIssues;
 };
 
 /**
- * Exporta utilitários de diagnóstico de imagem
+ * Generates a comprehensive report about all images on the page
+ * @returns Detailed image optimization report
  */
+export const generateImageReport = () => {
+  if (typeof document === 'undefined') {
+    return {
+      summary: {
+        totalImagesRendered: 0,
+        totalImagesWithIssues: 0,
+        totalDownloadedBytes: 0,
+        estimatedPerformanceImpact: 'Unknown'
+      },
+      detailedIssues: []
+    };
+  }
+
+  const allImages = document.querySelectorAll('img');
+  const imageIssues = checkRenderedImages();
+  
+  // Calculate total download size (approximate)
+  let totalBytes = 0;
+  let issueBytes = 0;
+
+  // Return the report
+  return {
+    summary: {
+      totalImagesRendered: allImages.length,
+      totalImagesWithIssues: imageIssues.length,
+      totalDownloadedBytes: totalBytes,
+      estimatedPerformanceImpact: imageIssues.length > 0 ? 'High' : 'Low'
+    },
+    detailedIssues: imageIssues
+  };
+};
+
 export default {
   analyzeImageUrl,
   checkRenderedImages,

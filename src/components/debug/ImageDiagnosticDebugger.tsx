@@ -4,9 +4,9 @@
  * Adicione este componente temporariamente às páginas para analisar problemas em imagens
  */
 import React, { useEffect, useState } from 'react';
-import { analyzeImageUrl, checkRenderedImages, generateImageReport } from '../utils/images/diagnostic';
-import { analyzeImageUrl as jsAnalyzeImageUrl } from '../utils/ImageChecker';
-import { replaceBlurryIntroImages, isLikelyBlurryImage, getHighQualityImageUrl } from '../utils/images/blurry-image-fixer';
+import { analyzeImageUrl, checkRenderedImages, generateImageReport } from '../../utils/images/diagnostic';
+import { analyzeImageUrl as jsAnalyzeImageUrl } from '../../utils/ImageChecker';
+import { replaceBlurryIntroImages, isLikelyBlurryImage, getHighQualityImageUrl } from '../../utils/images/blurry-image-fixer';
 
 // Estilos para o componente de diagnóstico
 const diagnosticStyles = {
@@ -106,12 +106,39 @@ const diagnosticStyles = {
   }
 };
 
+interface ImageIssue {
+  url: string;
+  element: HTMLImageElement;
+  issues: string[];
+  dimensions?: {
+    natural: { width: number, height: number };
+    display: { width: number, height: number };
+  }
+}
+
+interface CustomUrlAnalysis {
+  url: string;
+  format: string | unknown;
+  quality: string | unknown;
+  width: string | unknown;
+  height: string | unknown;
+  transformations?: string[];
+  suggestions?: string[];
+}
+
+interface SummaryData {
+  totalImagesRendered: number;
+  totalImagesWithIssues: number;
+  totalDownloadedBytes: number;
+  estimatedPerformanceImpact: string;
+}
+
 const ImageDiagnosticDebugger = () => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [imageIssues, setImageIssues] = useState([]);
+  const [imageIssues, setImageIssues] = useState<ImageIssue[]>([]);
   const [customUrl, setCustomUrl] = useState('');
-  const [customUrlAnalysis, setCustomUrlAnalysis] = useState(null);
-  const [summary, setSummary] = useState(null);
+  const [customUrlAnalysis, setCustomUrlAnalysis] = useState<CustomUrlAnalysis | null>(null);
+  const [summary, setSummary] = useState<SummaryData | null>(null);
   const [fixStatus, setFixStatus] = useState({ fixed: 0, total: 0 });
 
   // Executar diagnóstico ao montar o componente
@@ -122,7 +149,7 @@ const ImageDiagnosticDebugger = () => {
     const observer = new MutationObserver((mutations) => {
       const hasNewImages = mutations.some(mutation => 
         Array.from(mutation.addedNodes).some(node => 
-          node.nodeName === 'IMG' || 
+          (node as HTMLElement).nodeName === 'IMG' || 
           (node.nodeType === 1 && (node as Element).querySelector('img'))
         )
       );
@@ -186,7 +213,7 @@ const ImageDiagnosticDebugger = () => {
   };
   
   // Destacar imagens embaçadas
-  const highlightBlurryImage = (img) => {
+  const highlightBlurryImage = (img: HTMLImageElement) => {
     img.classList.add('image-diagnostic-highlight');
     img.dataset.blurryImage = 'true';
   };
@@ -207,7 +234,7 @@ const ImageDiagnosticDebugger = () => {
   };
 
   // Destacar imagem com problemas e tentar consertar o embaçamento
-  const highlightImage = (element) => {
+  const highlightImage = (element: HTMLImageElement | null) => {
     if (!element) return;
     
     // Remover destaques anteriores
@@ -244,7 +271,7 @@ const ImageDiagnosticDebugger = () => {
   };
   
   // Função para corrigir imagens embaçadas
-  const fixBlurryImage = (imgElement) => {
+  const fixBlurryImage = (imgElement: HTMLImageElement) => {
     if (!imgElement || !imgElement.src) return;
     
     const currentSrc = imgElement.src;
@@ -355,7 +382,7 @@ const ImageDiagnosticDebugger = () => {
               <div>Qualidade: {customUrlAnalysis.quality}</div>
               <div>Largura: {customUrlAnalysis.width}</div>
               <div>Transformações: {customUrlAnalysis.transformations?.length || 0}</div>
-              {customUrlAnalysis.suggestions?.length > 0 && (
+              {customUrlAnalysis.suggestions?.length ? (
                 <>
                   <div style={{ marginTop: '8px', fontWeight: 'bold' }}>Sugestões:</div>
                   {customUrlAnalysis.suggestions.map((sugestão, i) => (
@@ -364,7 +391,7 @@ const ImageDiagnosticDebugger = () => {
                     </div>
                   ))}
                 </>
-              )}
+              ) : null}
             </div>
           )}
           

@@ -1,11 +1,25 @@
+
 // Utilitário para verificar as rotas específicas do site da Gisele Galvão
 // Versão: 1.0.0
+
+interface RouteStatus {
+  path: string;
+  name: string;
+  fullUrl: string;
+  status: 'pendente' | 'carregada' | 'erro';
+}
+
+interface RouteCheckResult {
+  routes: RouteStatus[];
+  currentRoute: string;
+  isRouterWorking: boolean;
+}
 
 /**
  * Verifica se todas as rotas principais estão funcionando corretamente
  * @returns {Object} Objeto com o status de cada rota
  */
-export function checkMainRoutes() {
+export function checkMainRoutes(): RouteCheckResult {
   console.log('🧪 Verificando rotas principais do site...');
   
   const mainRoutes = [
@@ -14,7 +28,7 @@ export function checkMainRoutes() {
     { path: '/quiz-descubra-seu-estilo', name: 'Página do Quiz' }
   ];
   
-  const results = mainRoutes.map(route => {
+  const results: RouteStatus[] = mainRoutes.map(route => {
     // Criar o URL completo
     const baseUrl = window.location.origin;
     const fullUrl = new URL(route.path, baseUrl).href;
@@ -59,7 +73,7 @@ export function checkMainRoutes() {
 
 // Expor a função globalmente
 if (typeof window !== 'undefined') {
-  window.checkMainRoutes = checkMainRoutes;
+  (window as any).checkMainRoutes = checkMainRoutes;
 }
 
 export default checkMainRoutes;

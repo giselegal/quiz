@@ -1,93 +1,93 @@
-import { getPixelId } from '@/services/pixelManager';
 
+// Facebook Pixel utility functions
+
+// Define types for fbq function
 declare global {
   interface Window {
-    fbq: any;
-    _fbq: any;
+    fbq?: any;
+    _fbq?: any;
   }
 }
 
 /**
- * Carrega e inicializa o Facebook Pixel de forma robusta
+ * Initialize Facebook Pixel with the provided ID
+ * @param pixelId Facebook Pixel ID to initialize
+ * @returns True if initialization was successful
  */
-export const loadFacebookPixel = () => {
-  if (typeof window === 'undefined') return;
-  
+export const initFacebookPixel = (pixelId: string): boolean => {
   try {
-    // Verifica se o objeto fbq já existe
-    if (!window.fbq) {
-      // Se não existir, criamos o script do Facebook Pixel manualmente
-      (function(f,b,e,v,n,t,s) {
-        if (f.fbq) return; n=f.fbq=function() {
-          n.callMethod ? n.callMethod.apply(n,arguments) : n.queue.push(arguments)
-        };
-        if (!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
-        n.queue=[]; t=b.createElement(e); t.async=!0;
-        t.src=v; s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)
-      })(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
-      
-      console.log('Facebook Pixel script carregado manualmente');
+    if (!pixelId) {
+      console.warn('Facebook Pixel ID not provided');
+      return false;
     }
-    
-    // Obtém o ID do pixel para o funil atual
-    const pixelId = getPixelId();
-    
-    // Função segura para inicializar e rastrear
-    const safeInitPixel = () => {
-      try {
-        if (window.fbq) {
-          window.fbq('init', pixelId);
-          window.fbq('track', 'PageView');
-          console.log('Facebook Pixel inicializado com ID:', pixelId);
-          return true;
-        }
-        return false;
-      } catch (err) {
-        console.error('Erro ao inicializar Facebook Pixel:', err);
-        return false;
-      }
+
+    // Initialize Facebook Pixel
+    window.fbq = window.fbq || function() {
+      (window.fbq.q = window.fbq.q || []).push(arguments);
     };
     
-    // Tenta inicializar imediatamente
-    if (!safeInitPixel()) {
-      // Se falhar, tenta novamente após 1 segundo
-      setTimeout(() => {
-        if (!safeInitPixel()) {
-          // Última tentativa após 3 segundos
-          setTimeout(safeInitPixel, 3000);
-        }
-      }, 1000);
-    }
+    window._fbq = window._fbq || window.fbq;
+    
+    window.fbq('init', pixelId);
+    window.fbq('track', 'PageView');
+    
+    console.log(`Facebook Pixel initialized with ID: ${pixelId}`);
+    return true;
   } catch (error) {
-    console.error('Erro ao inicializar o Facebook Pixel:', error);
+    console.error('Error initializing Facebook Pixel:', error);
+    return false;
   }
 };
 
 /**
- * Rastreia um evento personalizado
+ * Track a custom event with Facebook Pixel
+ * @param eventName Name of the event to track
+ * @param params Additional parameters to send
  */
-export const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
-  if (typeof window === 'undefined') return;
-  
+export const trackPixelEvent = (
+  eventName: string, 
+  params?: Record<string, any>
+): void => {
   try {
-    if (!window.fbq) {
-      console.warn('Facebook Pixel não está disponível para rastrear evento:', eventName);
-      // Tenta inicializar novamente antes de rastrear
-      loadFacebookPixel();
-      // Tenta rastrear após um pequeno delay
-      setTimeout(() => {
-        if (window.fbq) {
-          window.fbq('track', eventName, eventData);
-          console.log(`Evento rastreado (retry): ${eventName}`, eventData);
-        }
-      }, 300);
+    if (typeof window === 'undefined' || !window.fbq) {
+      console.warn('Facebook Pixel not initialized');
       return;
     }
+
+    if (params) {
+      window.fbq('track', eventName, params);
+    } else {
+      window.fbq('track', eventName);
+    }
     
-    window.fbq('track', eventName, eventData);
-    console.log(`Evento rastreado: ${eventName}`, eventData);
+    console.log(`Tracked Facebook Pixel event: ${eventName}`, params || '');
   } catch (error) {
-    console.error(`Erro ao rastrear evento ${eventName}:`, error);
+    console.error(`Error tracking Facebook Pixel event ${eventName}:`, error);
   }
+};
+
+/**
+ * Track PageView event on route change
+ * @param url The URL to track
+ */
+export const trackPageView = (url?: string): void => {
+  try {
+    if (typeof window === 'undefined' || !window.fbq) {
+      return;
+    }
+
+    window.fbq('track', 'PageView');
+    
+    if (url) {
+      console.log(`Tracked Facebook Pixel PageView: ${url}`);
+    }
+  } catch (error) {
+    console.error('Error tracking Facebook Pixel PageView:', error);
+  }
+};
+
+export default {
+  initFacebookPixel,
+  trackPixelEvent,
+  trackPageView
 };

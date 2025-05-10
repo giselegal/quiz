@@ -1,43 +1,64 @@
 
-import { BankImage } from '@/data/imageBank';
+// Type definitions for image utility functions
 
-/**
- * Interface for the image cache entry
- */
-export interface ImageCacheEntry {
-  url: string;
-  loadStatus: 'idle' | 'loading' | 'loaded' | 'error';
-  element?: HTMLImageElement;
-  optimizedUrl?: string;
-  lowQualityUrl?: string;
-}
-
-/**
- * Image preload options
- */
+// Options for preloading images
 export interface PreloadOptions {
   quality?: number;
-  width?: number;
-  height?: number;
-  format?: 'auto' | 'webp' | 'avif';
+  format?: 'auto' | 'webp' | 'jpg' | 'png';
   onProgress?: (loaded: number, total: number) => void;
   onComplete?: () => void;
   batchSize?: number;
   generateLowQuality?: boolean;
-  removeParams?: string[]; // Parâmetros para remover das URLs durante a otimização
+  timeout?: number; // Added for preload-critical.ts
 }
 
-/**
- * Image optimization options
- */
-export interface OptimizationOptions {
-  quality?: number;
-  format?: 'auto' | 'webp' | 'avif';
+// Image definition for preloading
+export interface PreloadImageDefinition {
+  src: string; // Changed from 'url' to 'src' for consistency
+  priority?: number;
   width?: number;
   height?: number;
-  crop?: 'fill' | 'fit' | 'limit';
-  removeParams?: string[]; // Parâmetros para remover das URLs durante a otimização
+  quality?: number;
 }
 
-// Alias para compatibilidade
-export type ImageSettings = OptimizationOptions;
+// Type for image metadata cache
+export interface ImageMetadata {
+  width: number;
+  height: number;
+  format?: string;
+  aspectRatio?: number;
+  dominantColor?: string;
+  lastAccessed: number;
+}
+
+// Type for comprehensive image analysis
+export interface ImageAnalysis {
+  url: string;
+  format: string;
+  quality: string | number;
+  width: string | number;
+  height: string | number;
+  isOptimized: boolean;
+  isResponsive: boolean;
+  suggestedImprovements: string[];
+  estimatedSizeReduction?: number;
+}
+
+// Type for image diagnostic result
+export interface ImageDiagnosticResult {
+  summary: {
+    totalImagesRendered: number;
+    totalImagesWithIssues: number;
+    totalDownloadedBytes: number;
+    estimatedPerformanceImpact: string;
+  };
+  detailedIssues: {
+    url: string;
+    element: HTMLImageElement;
+    issues: string[];
+    dimensions?: {
+      natural: { width: number, height: number };
+      display: { width: number, height: number };
+    }
+  }[];
+}

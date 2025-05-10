@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { ShoppingCart, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
 import { OptimizedImage } from '../ui/optimized-image';
-import { preloadImagesByUrls, getLowQualityPlaceholder, getTinyPlaceholder } from '@/utils/imageManager';
+import { preloadImagesByUrls, getLowQualityPlaceholder } from '@/utils/imageManager';
 
 interface BeforeAfterTransformationProps {
   handleCTAClick?: () => void;
@@ -151,7 +151,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
     }
   };
 
-  const getTinyPlaceholder = (url: string) => {
+  const createTinyPlaceholder = (url: string) => {
     const baseUrlParts = url.split('/upload/');
     if (baseUrlParts.length !== 2) return url;
     const tinyPlaceholder = `${baseUrlParts[0]}/upload/f_auto,q_20,w_20/${baseUrlParts[1].split('/').slice(1).join('/')}`;
