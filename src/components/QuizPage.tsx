@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuizLogic } from '../hooks/useQuizLogic';
 import { UserResponse } from '@/types/quiz';
@@ -9,7 +10,7 @@ import QuizNavigation from './quiz/QuizNavigation';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { useAuth } from '../context/AuthContext';
 import { trackQuizStart, trackQuizAnswer, trackQuizComplete, trackResultView } from '@/utils/analytics';
-import { preloadImages } from '@/utils/imageUtils';
+import { preloadImages } from '@/utils/imageManager';
 import LoadingManager from './quiz/LoadingManager';
 import { motion, AnimatePresence } from 'framer-motion';
 
