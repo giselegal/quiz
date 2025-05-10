@@ -121,8 +121,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   };
 
-  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
-  const introImageUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto,w_700/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png";
+  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
+  const introImageUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_480/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png";
 
   // Substituir o spinner de carregamento pela logo
   if (isLoading) {
@@ -130,13 +130,18 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       <LoadingState 
         message="Preparando sua experiência personalizada..." 
         showLogo={true} 
+        // Melhoria: role e aria-busy para acessibilidade
+        role="status"
+        aria-busy="true"
       />
     );
   }
 
   if (!showContent) {
     // Garante que nada é renderizado até o fade-in
-    return null;
+    return (
+      <div aria-hidden="true" style={{display: 'none'}} />
+    );
   }
 
   return (
@@ -161,6 +166,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 height={60}
                 loading="eager"
                 fetchPriority="high"
+                decoding="async"
                 style={{objectFit: 'contain'}}
               />
               {/* Barra dourada com largura exatamente igual ao logo */}
@@ -179,11 +185,12 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               src={introImageUrl}
               alt="Intro Quiz"
               className="w-full h-full object-cover quiz-intro-image"
-              width={700}
-              height={900}
+              width={480}
+              height={617}
               loading="eager"
               fetchPriority="high"
-              decoding="sync"
+              decoding="async"
+              style={{background: '#f8f6f2'}}
             />
           </div>
 
@@ -195,7 +202,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           </p>
 
           {/* Formulário com espaçamento interno consistente */}
-          <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-4" aria-live="polite">
+          <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-4" aria-live="polite" autoComplete="off">
             <div>
               <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1.5">
                 NOME
@@ -208,6 +215,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 className="w-full p-2.5 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md" 
                 autoFocus 
                 aria-required="true" 
+                autoComplete="off"
+                inputMode="text"
+                maxLength={32}
               />
             </div>
             
