@@ -1,11 +1,17 @@
 'use client';
 
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { preloadCriticalImages } from '@/utils/imageManager';
 import AutoFixedImages from './ui/AutoFixedImages';
+import { 
+  getTinyBase64ImageUrl, 
+  loadTinyImageAsBase64, 
+  getOptimizedImageUrl,
+  getTinyImageUrl
+} from '@/utils/inlineImageUtils';
 
 /**
  * QuizIntro - Componente da página inicial do quiz com layout melhorado e performance otimizada
@@ -30,9 +36,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 }) => {
   const [nome, setNome] = useState('');
   const [mainImageWidth, setMainImageWidth] = useState(0);
+  const [tinyBase64, setTinyBase64] = useState<string>('');
   
-  // Ref para medir a largura da imagem principal
-  const mainImageRef = React.useRef<HTMLDivElement>(null);
+  // Refs para medir e otimizar
+  const mainImageRef = useRef<HTMLDivElement>(null);
+  const imageLoaded = useRef<boolean>(false);
   
   // Efeito para capturar a largura da imagem principal
   useEffect(() => {
@@ -90,61 +98,137 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   
   // Função para criar URLs otimizadas com diferentes tamanhos e formatos
   const getOptimizedImageUrl = (baseUrl: string, imageId: string, format: string, width: number, quality: number) => {
-    return `${baseUrl}f_${format},q_${quality},w_${width},c_limit,dpr_auto${width > 300 ? ',e_sharpen:30' : ''}/${imageId}.${format}`;
+    // Parâmetros otimizados para acelerar carregamento
+    return `${baseUrl}f_${format},q_${quality},w_${width},c_limit,dpr_auto,fl_progressive,fl_lossy${width > 300 ? ',e_sharpen:30' : ''}/${imageId}.${format}`;
+  };
+  
+  // Versão extremamente leve para preload inicial - garante LCP rápido
+  const getTinyPreloadImageUrl = (baseUrl: string, imageId: string, format: string, width: number) => {
+    // Versão super-otimizada com qualidade mínima aceitável
+    return `${baseUrl}f_${format},q_50,w_${width},c_limit,dpr_1.0/${imageId}.${format}`;
   };
   
   // URLs otimizadas para diferentes tamanhos e formatos
   const introImageUrls = {
     avif: {
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 345, 90), // Aumentado para melhor visualização no mobile
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 400, 90),
+      tiny: getTinyPreloadImageUrl(introImageBaseUrl, introImageId, 'avif', 200),
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 345, 80),
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 400, 85),
       large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 450, 90)
     },
     webp: {
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 345, 90), // Aumentado para melhor visualização no mobile
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 400, 90),
-      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 450, 90)
+      tiny: getTinyPreloadImageUrl(introImageBaseUrl, introImageId, 'webp', 200),
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 345, 75),
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 400, 80),
+      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 450, 85)
     },
-    // Inclui versão de baixa qualidade para carregamento progressivo
-    placeholder: `${introImageBaseUrl}f_webp,q_20,w_60,c_limit,e_blur:150/${introImageId}.webp`,
-    png: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'png', 480, 85)
+    // Versão base64 tiny inline para mostrar instantaneamente
+    placeholder: `${introImageBaseUrl}f_webp,q_1,w_20,c_limit,e_blur:200/${introImageId}.webp`,
+    png: `${introImageBaseUrl}f_png,q_60,w_345,c_limit/${introImageId}.png`
   };
 
-  // Pré-carregamento otimizado com link rel=preload para o LCP
+  // Pré-carregamento para LCP com estratégia otimizada e priorização de conteúdo mínimo viável
   useEffect(() => {
-    // Pré-carrega imagem principal em AVIF (formato mais eficiente) como prioridade crítica
-    const mainImagePreloadAvif = document.createElement('link');
-    mainImagePreloadAvif.rel = 'preload';
-    mainImagePreloadAvif.as = 'image';
-    mainImagePreloadAvif.href = introImageUrls.avif.small;
-    mainImagePreloadAvif.type = 'image/avif';
-    mainImagePreloadAvif.setAttribute('fetchpriority', 'high');
-    mainImagePreloadAvif.setAttribute('media', '(max-width: 640px)');
-    document.head.appendChild(mainImagePreloadAvif);
+    // Função para instalar headers HTTP para sugestão de recursos ao navegador
+    const addResourceHints = () => {
+      // Adiciona hint de preconnect para o domínio Cloudinary
+      const preconnect = document.createElement('link');
+      preconnect.rel = 'preconnect';
+      preconnect.href = 'https://res.cloudinary.com';
+      preconnect.crossOrigin = 'anonymous';
+      document.head.appendChild(preconnect);
+      
+      // Prioriza DNS-prefetch também
+      const dnsPrefetch = document.createElement('link');
+      dnsPrefetch.rel = 'dns-prefetch';
+      dnsPrefetch.href = 'https://res.cloudinary.com';
+      document.head.appendChild(dnsPrefetch);
+    };
     
-    // Fallback para WebP se AVIF não for suportado
-    const mainImagePreload = document.createElement('link');
-    mainImagePreload.rel = 'preload';
-    mainImagePreload.as = 'image';
-    mainImagePreload.href = introImageUrls.webp.small;
-    mainImagePreload.type = 'image/webp';
-    mainImagePreload.setAttribute('fetchpriority', 'high');
-    document.head.appendChild(mainImagePreload);
+    // Carrega a versão placeholder super tiny para LCP imediato
+    const preloadCriticalAssets = () => {
+      // Carrega o placeholder blurred primeiro (prioridade máxima)
+      const placeholderPreload = document.createElement('link');
+      placeholderPreload.rel = 'preload';
+      placeholderPreload.as = 'image';
+      placeholderPreload.href = introImageUrls.placeholder;
+      placeholderPreload.type = 'image/webp';
+      placeholderPreload.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(placeholderPreload);
+      
+      // Depois a versão tiny (segundo mais importante)
+      const tinyImagePreload = document.createElement('link');
+      tinyImagePreload.rel = 'preload';
+      tinyImagePreload.as = 'image';
+      tinyImagePreload.href = introImageUrls.avif.tiny;
+      tinyImagePreload.type = 'image/avif';
+      tinyImagePreload.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(tinyImagePreload);
+      
+      // Logo em paralelo (menor, mas importante)
+      const logoPreload = document.createElement('link');
+      logoPreload.rel = 'preload';
+      logoPreload.as = 'image';
+      logoPreload.href = logoImageUrls.avif;
+      logoPreload.type = 'image/avif';
+      document.head.appendChild(logoPreload);
+      
+      return { placeholderPreload, tinyImagePreload, logoPreload };
+    };
     
-    // Preload para o logo (importante, mas pequeno)
-    const logoPreload = document.createElement('link');
-    logoPreload.rel = 'preload';
-    logoPreload.as = 'image';
-    logoPreload.href = logoImageUrls.avif;
-    logoPreload.type = 'image/avif';
-    document.head.appendChild(logoPreload);
+    // Adiciona resource hints
+    addResourceHints();
     
+    // Preload de recursos críticos
+    const criticalAssets = preloadCriticalAssets();
+    
+    // Depois de 150ms, preload da versão de qualidade maior em segundo plano
+    const timer = setTimeout(() => {
+      const betterQualityPreload = document.createElement('link');
+      betterQualityPreload.rel = 'preload';
+      betterQualityPreload.as = 'image';
+      betterQualityPreload.href = introImageUrls.avif.small;
+      betterQualityPreload.type = 'image/avif';
+      document.head.appendChild(betterQualityPreload);
+      
+      // Também preload do fallback webp
+      const webpPreload = document.createElement('link');
+      webpPreload.rel = 'preload';
+      webpPreload.as = 'image';
+      webpPreload.href = introImageUrls.webp.tiny;
+      webpPreload.type = 'image/webp';
+      document.head.appendChild(webpPreload);
+      
+      return { betterQualityPreload, webpPreload };
+    }, 150);
+    
+    // Limpa todos recursos quando componente desmonta
     return () => {
-      if (mainImagePreload.parentNode) mainImagePreload.parentNode.removeChild(mainImagePreload);
-      if (mainImagePreloadAvif.parentNode) mainImagePreloadAvif.parentNode.removeChild(mainImagePreloadAvif);
-      if (logoPreload.parentNode) logoPreload.parentNode.removeChild(logoPreload);
+      clearTimeout(timer);
+      const elements = Object.values(criticalAssets);
+      elements.forEach(el => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      });
     };
   }, []);
+
+  // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea
+  useEffect(() => {
+    // Carrega a versão mais leve possível da imagem como base64 para exibição instantânea
+    const loadTinyBase64 = async () => {
+      try {
+        // Carrega apenas uma vez
+        if (!tinyBase64 && !imageLoaded.current) {
+          const base64Data = await loadTinyImageAsBase64(introImageUrls.placeholder);
+          setTinyBase64(base64Data);
+        }
+      } catch (error) {
+        console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
+      }
+    };
+    
+    loadTinyBase64();
+  }, [introImageUrls.placeholder, tinyBase64]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,24 +295,30 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           {/* Container de imagem com dimensões fixas para evitar layout shift */}
           <div 
             ref={mainImageRef}
-            className="w-full max-w-[345px] sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md flex items-center justify-center" 
+            className="w-full max-w-[345px] sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md" 
             style={{
               minHeight: 320,
               height: 'auto',
               aspectRatio: '1 / 1.05',
               background: '#f8f6f2',
-              contain: 'layout'
+              contain: 'layout',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundImage: tinyBase64 ? `url('${tinyBase64}')` : `url('${introImageUrls.placeholder}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
             }}
           >
             <picture>
-              {/* Formatos modernos para browsers que suportam */}
+              {/* Formatos modernos para browsers que suportam, com preload da versão tiny primeiro */}
               <source 
-                srcSet={`${introImageUrls.avif.small} 345w, ${introImageUrls.avif.medium} 400w, ${introImageUrls.avif.large} 450w`} 
+                srcSet={`${introImageUrls.avif.tiny} 200w, ${introImageUrls.avif.small} 345w, ${introImageUrls.avif.medium} 400w, ${introImageUrls.avif.large} 450w`} 
                 type="image/avif" 
                 sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
               <source 
-                srcSet={`${introImageUrls.webp.small} 345w, ${introImageUrls.webp.medium} 400w, ${introImageUrls.webp.large} 450w`} 
+                srcSet={`${introImageUrls.webp.tiny} 200w, ${introImageUrls.webp.small} 345w, ${introImageUrls.webp.medium} 400w, ${introImageUrls.webp.large} 450w`} 
                 type="image/webp" 
                 sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
@@ -242,6 +332,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
+                onLoad={() => { imageLoaded.current = true; }}
                 style={{
                   background: '#f8f6f2', 
                   display: 'block', 
@@ -250,7 +341,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                   aspectRatio: '345/360',
                   backgroundImage: `url('${introImageUrls.placeholder}')`,
                   backgroundSize: 'cover',
-                  backgroundPosition: 'center'
+                  backgroundPosition: 'center',
+                  imageRendering: 'auto',
+                  contain: 'paint'
                 }}
                 sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
