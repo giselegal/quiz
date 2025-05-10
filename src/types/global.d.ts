@@ -1,3 +1,4 @@
+
 // Global type declarations
 
 interface Window {
@@ -23,4 +24,8 @@ interface Window {
 interface EventTarget {
   tagName?: string;
   closest?: (selector: string) => Element | null;
+  href?: string;
+  getAttribute?: (name: string) => string | null;
+  textContent?: string | null;
 }
+

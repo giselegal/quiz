@@ -9,12 +9,14 @@ export interface PreloadOptions {
   onComplete?: () => void;
   batchSize?: number;
   generateLowQuality?: boolean;
-  timeout?: number; // Added for preload-critical.ts
+  timeout?: number;
+  width?: number;
+  height?: number;
 }
 
 // Image definition for preloading
 export interface PreloadImageDefinition {
-  src: string; // Changed from 'url' to 'src' for consistency
+  src: string;
   priority?: number;
   width?: number;
   height?: number;
@@ -61,4 +63,31 @@ export interface ImageDiagnosticResult {
       display: { width: number, height: number };
     }
   }[];
+}
+
+// Add ImageSettings type
+export interface ImageSettings {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'auto' | 'webp' | 'avif' | 'jpg' | 'png';
+  crop?: 'fill' | 'fit' | 'limit';
+}
+
+// Add ImageCacheEntry type
+export interface ImageCacheEntry {
+  url: string;
+  metadata: ImageMetadata;
+  lastAccessed: number;
+}
+
+// Update BankImage to include priority
+export interface BankImage {
+  id: string;
+  src: string;
+  category: string;
+  tags: string[];
+  width?: number;
+  height?: number;
+  priority?: number;
 }

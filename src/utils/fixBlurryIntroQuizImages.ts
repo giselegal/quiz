@@ -1,10 +1,9 @@
-
 /**
  * Utilitário otimizado para corrigir imagens borradas na seção de introdução do quiz
  */
 
 // Função principal para corrigir imagens borradas
-export function fixBlurryIntroQuizImages() {
+export const fixBlurryIntroQuizImages = (): number => {
   console.log('Iniciando correção de imagens borradas na seção de introdução do quiz...');
   
   // 1. Identificar todas as imagens na seção de introdução do quiz com seletores precisos
@@ -77,7 +76,7 @@ export function fixBlurryIntroQuizImages() {
   
   console.log(`Correção finalizada: ${count} imagens corrigidas de ${quizIntroImages.length} total`);
   return count;
-}
+};
 
 // Expor a função globalmente para acesso externo
 declare global {

@@ -4,7 +4,7 @@
 // Define types for fbq function
 declare global {
   interface Window {
-    fbq?: any;
+    fbq?: (event: string, eventName: string, params?: any) => void;
     _fbq?: any;
   }
 }
@@ -23,7 +23,8 @@ export const initFacebookPixel = (pixelId: string): boolean => {
 
     // Initialize Facebook Pixel
     window.fbq = window.fbq || function() {
-      (window.fbq.q = window.fbq.q || []).push(arguments);
+      (window.fbq as any).q = (window.fbq as any).q || [];
+      (window.fbq as any).q.push(arguments);
     };
     
     window._fbq = window._fbq || window.fbq;
@@ -86,8 +87,19 @@ export const trackPageView = (url?: string): void => {
   }
 };
 
+// Adding the loadFacebookPixel function to match App.tsx import
+export const loadFacebookPixel = (): void => {
+  const pixelId = process.env.REACT_APP_FACEBOOK_PIXEL_ID || '';
+  if (pixelId) {
+    initFacebookPixel(pixelId);
+  } else {
+    console.warn('Facebook Pixel ID not found in environment variables');
+  }
+};
+
 export default {
   initFacebookPixel,
   trackPixelEvent,
-  trackPageView
+  trackPageView,
+  loadFacebookPixel
 };

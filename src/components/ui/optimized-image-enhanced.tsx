@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getLowQualityImage } from '@/utils/imageManager';
 import { AspectRatioContainer } from './aspect-ratio-container';
@@ -135,8 +134,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         <img
           src={lowQualitySrc}
           alt={alt}
-          width={widthNum}
-          height={heightNum}
+          width={String(width)}
+          height={String(height)}
           className={`w-full h-full object-${objectFit} absolute inset-0 transition-opacity duration-300 ${className}`}
           loading="eager"
           decoding="async"
@@ -148,8 +147,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         <img
           src={optimizedSrc}
           alt={alt}
-          width={widthNum}
-          height={heightNum}
+          width={String(width)}
+          height={String(height)}
           className={`w-full h-full object-${objectFit} absolute inset-0 transition-opacity duration-500 ${className} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={handleImageLoad}
           onError={handleImageError}
