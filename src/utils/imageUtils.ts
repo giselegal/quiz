@@ -186,3 +186,4 @@ export const getOptimalImageFormat = (): 'auto' | 'webp' | 'jpg' => {
   if (support.webp) return 'webp';
   return 'auto'; // Padrão para auto que normalmente servirá JPEG
 };
+

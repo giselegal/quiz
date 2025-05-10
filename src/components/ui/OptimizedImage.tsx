@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { optimizeCloudinaryUrl, getResponsiveImageUrl, getLowQualityPlaceholder } from '@/utils/imageUtils';
+import { optimizeCloudinaryUrl, getResponsiveImageSources, getLowQualityPlaceholder } from '@/utils/imageUtils';
 import { getImageMetadata, isImagePreloaded, getOptimizedImage } from '@/utils/imageManager';
 
 interface OptimizedImageProps {
@@ -69,7 +70,7 @@ export default function OptimizedImage({
   const responsiveImageProps = useMemo(() => {
     if (!src) return { srcSet: '', sizes: '' };
     if (width && width > 300) {
-      return getResponsiveImageUrl(src);
+      return getResponsiveImageSources(src, [width/2, width, width*1.5]);
     }
     return { srcSet: '', sizes: '' };
   }, [src, width]);
