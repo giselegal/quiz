@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -149,11 +148,15 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           {/* Logo e barra dourada alinhadas */}
           <div className="flex flex-col items-center">
             <div className="relative w-28 sm:w-32 md:w-36">
-              <Logo 
-                className="w-full h-auto"
+              <img 
+                src={logoUrl}
+                alt="Logo Gisele Galvão"
+                className="w-full h-auto mx-auto"
                 width={140}
                 height={60}
-                priority={true}
+                loading="eager"
+                fetchPriority="high"
+                style={{objectFit: 'contain'}}
               />
               {/* Barra dourada com largura exatamente igual ao logo */}
               <div className="h-[2px] w-full bg-[#B89B7A] mt-2 rounded-full"></div>
