@@ -1,22 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '../ui/button';
 import { ShoppingCart, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
-im                  <OptimizedImage
-                    src={activeTransformation.image}
-                    alt={`${activeTransformation.name} - Transformação`}
-                    width={activeTransformation.width || 800}
-                    height={activeTransformation.height || 1000}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl"
-                    onLoad={() => {
-                      console.log('OptimizedImage onLoad triggered for:', activeTransformation.image);
-                      setImageLoaded(true);
-                      setIsLoading(false);
-                    }}
-                    priority={true}
-                    quality={85}
-                    placeholderColor="#f8f4ef"
-                  />uttonClick } from '@/utils/analytics';
+import { trackButtonClick } from '@/utils/analytics';
 import { OptimizedImage } from '../ui/optimized-image';
 import { preloadImagesByUrls, getLowQualityPlaceholder, getTinyPlaceholder } from '@/utils/imageManager';
 

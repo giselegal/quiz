@@ -1,3 +1,4 @@
+
 /**
  * Componente de diagnóstico de imagens para desenvolvimento
  * Adicione este componente temporariamente às páginas para analisar problemas em imagens
@@ -408,7 +409,6 @@ const ImageDiagnosticDebugger = () => {
               Verificar novamente
             </button>
             <button 
-              <button 
               style={{...diagnosticStyles.button as React.CSSProperties, backgroundColor: '#4CAF50'}}
               onClick={() => {
                 console.log('🔧 Corrigindo todas as imagens embaçadas...');
