@@ -114,6 +114,19 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   }, [showContent, isLoading]);
 
+  // Pré-carregamento explícito do LCP (imagem principal do quiz)
+  React.useEffect(() => {
+    const lcpLink = document.createElement('link');
+    lcpLink.rel = 'preload';
+    lcpLink.as = 'image';
+    lcpLink.href = introImageUrl;
+    lcpLink.crossOrigin = 'anonymous';
+    document.head.appendChild(lcpLink);
+    return () => {
+      document.head.removeChild(lcpLink);
+    };
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nome.trim()) {
@@ -121,7 +134,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   };
 
-  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
+  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_112,h_56,c_limit,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
   const introImageUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_480/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png";
 
   // Substituir o spinner de carregamento pela logo
