@@ -5,24 +5,21 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { OptimizedImage } from './ui/optimized-image';
-import { preloadImagesByIds, preloadCriticalImages } from '@/utils/imageManager';
-import { getImageById } from '@/data/imageBank';
+import { preloadCriticalImages } from '@/utils/imageManager';
 import Logo from './ui/logo';
 import AutoFixedImages from './ui/AutoFixedImages';
-import '../utils/fix-blurry-images.js';
-import { fixBlurryIntroQuizImages } from '@/utils/fixBlurryIntroQuizImages';
-import { LoadingState } from './ui/loading-state';
 
 /**
- * QuizIntro - Componente da página inicial do quiz com layout melhorado
+ * QuizIntro - Componente da página inicial do quiz com layout melhorado e performance otimizada
  * 
  * Melhorias implementadas:
  * 1. Layout com espaçamento vertical proporcional e consistente
  * 2. Barra dourada com largura proporcional ao logo
  * 3. Performance de carregamento otimizada
  * 4. Estrutura de componentes simplificada
- * 5. Transições e animações suavizadas
- * 6. Responsividade refinada para todos os dispositivos
+ * 5. Responsividade refinada para todos os dispositivos
+ * 6. Remoção de transições e animações desnecessárias
+ * 7. Carregamento imediato com estratégia de recursos otimizada
  */
 
 interface QuizIntroProps {
@@ -33,99 +30,26 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   onStart
 }) => {
   const [nome, setNome] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [showContent, setShowContent] = useState(false);
-  const [assetsPreloaded, setAssetsPreloaded] = useState(false);
 
-  // Efeito para carregamento inicial de recursos
+  // Efeito único e simplificado para carregamento posterior de recursos
   useEffect(() => {
-    let isMounted = true;
-
-    // Iniciar carregamento avançado da imagem principal, antes de qualquer coisa
-    const preloadMainImage = new Image();
-    preloadMainImage.src = introImageUrls.webp.small; // Formato webp para prioridade mais alta
-    preloadMainImage.sizes = "(max-width: 640px) 320px, (max-width: 768px) 384px, 420px";
-    
-    // Precarregar logo de alta qualidade
-    const preloadLogo = new Image();
-    preloadLogo.src = logoImageUrls.webp;
-    
-    const loadInitialAssets = async () => {
-      try {
-        console.log("[QuizIntro] Iniciando carregamento de assets...");
-        
-        // Pré-carrega imagens críticas com otimização para LCP (Largest Contentful Paint)
-        await preloadCriticalImages('intro'); 
-        
-        // Pré-carrega os assets mais importantes com alta prioridade
-        await preloadImagesByIds(['main-logo', 'intro-image'], {
-          batchSize: 2,
-          quality: 95,
-          generateLowQuality: true
-        });
-
-        console.log("[QuizIntro] Assets carregados com sucesso");
-        
-        if (isMounted) {
-          setIsLoading(false);
-          setAssetsPreloaded(true);
-          
-          // Inicia a transição de fade-in com delay mínimo para fluidez visual
-          setTimeout(() => {
-            if (isMounted) {
-              setShowContent(true);
-            }
-          }, 20); // Reduzido para melhorar percepção de velocidade
-        }
-      } catch (error) {
-        console.error("Falha ao pré-carregar imagens da introdução:", error);
-        if (isMounted) {
-          setIsLoading(false);
-          setShowContent(true);
-        }
-      }
-    };
-
-    loadInitialAssets();
-
-    // Fallback timer mais curto para melhorar UX
-    const fallbackTimer = setTimeout(() => {
-      if (isMounted && isLoading) {
-        console.log("[QuizIntro] Usando fallback timer para mostrar conteúdo");
-        setIsLoading(false);
-        setShowContent(true);
-      }
-    }, 3000); // Reduzido de 5s para 3s para melhor experiência
-
-    return () => {
-      isMounted = false;
-      clearTimeout(fallbackTimer);
-    };
+    // Carrega recursos adicionais após o componente estar visível
+    if (typeof requestIdleCallback === 'function') {
+      // Usa tempos ociosos do browser para carregar recursos não-críticos
+      requestIdleCallback(() => {
+        preloadCriticalImages('quiz');
+      }, { timeout: 2000 });
+    } else {
+      // Fallback para browsers que não suportam requestIdleCallback
+      const idleTimer = setTimeout(() => {
+        preloadCriticalImages('quiz');
+      }, 2000); // Tempo suficiente para garantir que o LCP ocorreu
+      
+      return () => clearTimeout(idleTimer);
+    }
   }, []);
 
-  // Pré-carrega imagens da primeira questão após carregar assets críticos
-  useEffect(() => {
-    if (assetsPreloaded) {
-      preloadCriticalImages('quiz');
-    }
-  }, [assetsPreloaded]);
-
-  // Correção de imagens após renderização completa
-  useEffect(() => {
-    if (showContent && !isLoading) {
-      // Aplica correção uma vez após renderização
-      const fixImagesTimer = setTimeout(() => {
-        console.log('[QuizIntro] Aplicando correção para imagens borradas');
-        fixBlurryIntroQuizImages();
-      }, 100);
-      
-      return () => clearTimeout(fixImagesTimer);
-    }
-  }, [showContent, isLoading]);
-
-  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_100,w_140,h_60,c_limit,dpr_2.0,e_sharpen:100/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
-  
-  // Melhor configuração para o logo com múltiplos formatos
+  // Configuração optimizada do logo
   const logoBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
   const logoImageId = "v1744911572/LOGO_DA_MARCA_GISELE_r14oz2";
   
@@ -133,7 +57,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const logoImageUrls = {
     webp: `${logoBaseUrl}f_webp,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.webp`,
     png: `${logoBaseUrl}f_png,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.png`,
-    // Formatos de fallback para maior compatibilidade
     avif: `${logoBaseUrl}f_avif,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.avif`
   };
   
@@ -149,58 +72,43 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   // URLs otimizadas para diferentes tamanhos e formatos
   const introImageUrls = {
     avif: {
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 320, 85),
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 384, 85),
-      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 420, 85)
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 320, 90),
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 384, 90),
+      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 420, 90)
     },
     webp: {
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 320, 85),
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 384, 85),
-      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 420, 85)
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 320, 90),
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 384, 90),
+      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 420, 90)
     },
     // Inclui versão de baixa qualidade para carregamento progressivo
-    placeholder: `${introImageBaseUrl}f_webp,q_10,w_30,c_limit,e_blur:200/${introImageId}.webp`,
-    png: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'png', 480, 80)
+    placeholder: `${introImageBaseUrl}f_webp,q_20,w_60,c_limit,e_blur:150/${introImageId}.webp`,
+    png: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'png', 480, 85)
   };
 
-  // Pré-carregamento explícito do LCP (imagem principal do quiz e logo)
-  React.useEffect(() => {
-    // Remove qualquer preload duplicado
-    const preloadSelector = `link[rel="preload"][as="image"][href*="${introImageId}"]`;
-    const existing = document.querySelectorAll(preloadSelector);
-    existing.forEach(el => el.parentNode?.removeChild(el));
+  // Pré-carregamento otimizado com link rel=preload para o LCP
+  useEffect(() => {
+    // Apenas adiciona preload para a imagem principal (LCP)
+    const mainImagePreload = document.createElement('link');
+    mainImagePreload.rel = 'preload';
+    mainImagePreload.as = 'image';
+    mainImagePreload.href = introImageUrls.webp.small;
+    mainImagePreload.type = 'image/webp';
+    document.head.appendChild(mainImagePreload);
     
-    // Remove preloads duplicados para o logo
-    const logoPreloadSelector = `link[rel="preload"][as="image"][href*="${logoImageId}"]`;
-    const existingLogoPreloads = document.querySelectorAll(logoPreloadSelector);
-    existingLogoPreloads.forEach(el => el.parentNode?.removeChild(el));
-    
-    // Adiciona preloads para formatos modernos e fallback
-    const preloadFormats = [
-      { href: introImageUrls.avif.small, type: 'image/avif' },
-      { href: introImageUrls.webp.small, type: 'image/webp' },
-      { href: introImageUrls.png, type: 'image/png' },
-      // Adiciona logo para preload com alta prioridade
-      { href: logoImageUrls.webp, type: 'image/webp' }
-    ];
-    
-    const preloadLinks = preloadFormats.map(format => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = format.href;
-      link.type = format.type;
-      link.crossOrigin = '';
-      document.head.appendChild(link);
-      return link;
-    });
+    // Preload para o logo (importante, mas pequeno)
+    const logoPreload = document.createElement('link');
+    logoPreload.rel = 'preload';
+    logoPreload.as = 'image';
+    logoPreload.href = logoImageUrls.webp;
+    logoPreload.type = 'image/webp';
+    document.head.appendChild(logoPreload);
     
     return () => {
-      preloadLinks.forEach(link => {
-        if (link.parentNode) link.parentNode.removeChild(link);
-      });
+      if (mainImagePreload.parentNode) mainImagePreload.parentNode.removeChild(mainImagePreload);
+      if (logoPreload.parentNode) logoPreload.parentNode.removeChild(logoPreload);
     };
-  }, [introImageId]);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,27 +117,10 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   };
 
-  // Substituir o spinner de carregamento pela logo
-  if (isLoading) {
-    return (
-      <LoadingState 
-        message="Preparando sua experiência personalizada..." 
-        showLogo={true} 
-      />
-    );
-  }
-
-  if (!showContent) {
-    // Garante que nada é renderizado até o fade-in
-    return (
-      <div aria-hidden="true" style={{display: 'none'}} />
-    );
-  }
-
   return (
     <AutoFixedImages>
       <div 
-        className={`quiz-intro flex flex-col items-center w-full transition-opacity duration-500 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}`}
+        className="quiz-intro flex flex-col items-center w-full"
         style={{
           background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
           minHeight: '100vh'
@@ -287,7 +178,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               <img
                 src={introImageUrls.png}
                 alt="Descubra seu estilo predominante"
-                className="w-full h-auto max-h-[340px] object-contain quiz-intro-image transition-opacity duration-300"
+                className="w-full h-auto max-h-[340px] object-contain quiz-intro-image"
                 width={320}
                 height={340}
                 loading="eager"
@@ -302,12 +193,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                   backgroundPosition: 'center'
                 }}
                 sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, 420px"
-                onLoad={() => {
-                  // Marca a imagem como carregada para métricas de LCP
-                  if (window.performance && window.performance.mark) {
-                    window.performance.mark('quiz-intro-image-loaded');
-                  }
-                }}
               />
             </picture>
           </div>
@@ -341,7 +226,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             
             <Button 
               type="submit" 
-              className="w-full bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:-translate-y-1 hover:scale-102"
+              className="w-full bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2"
               disabled={!nome.trim()}
             >
               Quero Descobrir meu Estilo Agora!

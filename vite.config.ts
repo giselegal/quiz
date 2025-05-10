@@ -52,7 +52,15 @@ export default defineConfig(({ mode }) => ({
     assetsDir: 'assets',
     emptyOutDir: true,
     sourcemap: false,
-    // Configurações para evitar problemas de MIME type
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug']
+      }
+    },
+    // Configurações para otimizar chunks
     rollupOptions: {
       output: {
         manualChunks: {
@@ -64,6 +72,9 @@ export default defineConfig(({ mode }) => ({
             'clsx',
             'tailwind-merge'
           ],
+          'quiz-intro': [
+            './src/components/QuizIntro.tsx'
+          ],
           'analytics': [
             './src/utils/analytics.ts',
             './src/utils/facebookPixel.ts'
@@ -72,7 +83,17 @@ export default defineConfig(({ mode }) => ({
         // Garantir que os assets sejam carregados corretamente para as rotas específicas
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: (assetInfo) => {
+          // Otimização: Coloca fontes e imagens em pastas separadas
+          const fileName = assetInfo.name || '';
+          if (/\.(woff|woff2|eot|ttf|otf)$/.test(fileName)) {
+            return 'assets/fonts/[name]-[hash].[ext]';
+          }
+          if (/\.(png|jpe?g|gif|svg|webp|avif)$/.test(fileName)) {
+            return 'assets/images/[name]-[hash].[ext]';
+          }
+          return 'assets/[name]-[hash].[ext]';
+        }
       }
     },
     chunkSizeWarningLimit: 1000,
