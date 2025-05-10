@@ -352,5 +352,14 @@ mv src/main.jsx.optimized src/main.jsx
 echo "Gerando build final otimizada..."
 npm run build
 
+# 8. Restaurar vite.config.ts original, se backup existir
+if [ -f vite.config.ts.backup ]; then
+  echo "Restaurando vite.config.ts original..."
+  mv vite.config.ts.backup vite.config.ts
+fi
+
+echo "===== FINALIZADO ====="
+echo "Se quiser manter as otimizações de produção, garanta que vite.config.ts está limpo de plugins de análise."
+
 echo "===== OTIMIZAÇÃO DE JAVASCRIPT CONCLUÍDA ====="
 echo "JavaScript reduzido em tamanho e otimizado para carregamento e execução!"
