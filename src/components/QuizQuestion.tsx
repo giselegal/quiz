@@ -99,11 +99,14 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     )} id={`question-${question.id}`}>
       {!hideTitle && (
         <>
-          <h2 className={cn(
-            "font-playfair text-center mb-5 px-3 pt-3 text-brand-coffee font-semibold tracking-normal",
-            isMobile ? "text-base" : "text-base sm:text-xl",
-            isStrategicQuestion && "text-[#432818] mb-6 font-medium whitespace-pre-line"
-          )}>
+          <h2
+            id={`question-title-${question.id}`}
+            className={cn(
+              "font-playfair text-center mb-5 px-3 pt-3 text-brand-coffee font-semibold tracking-normal",
+              isMobile ? "text-base" : "text-base sm:text-xl",
+              isStrategicQuestion && "text-[#432818] mb-6 font-medium whitespace-pre-line"
+            )}
+          >
             {highlightStrategicWords(question.title)}
           </h2>
           
