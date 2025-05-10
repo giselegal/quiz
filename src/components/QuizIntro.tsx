@@ -12,6 +12,7 @@ import Logo from './ui/logo';
 import AutoFixedImages from './ui/AutoFixedImages';
 import '../utils/fix-blurry-images.js';
 import { fixBlurryIntroQuizImages } from '@/utils/fixBlurryIntroQuizImages';
+import { LoadingState } from './ui/loading-state';
 
 /**
  * QuizIntro - Componente da página inicial do quiz com layout melhorado
@@ -124,34 +125,13 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
   const introImageUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto,w_700/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.png";
 
+  // Substituir o spinner de carregamento pela logo
   if (isLoading) {
     return (
-      <div 
-        className="flex flex-col items-center justify-center min-h-screen"
-        style={{
-          background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)'
-        }}
-      >
-        <div className="flex flex-col items-center justify-center p-6 text-center">
-          <div className="relative w-32 sm:w-36 md:w-40">
-            <img
-              src={logoUrl}
-              alt="Gisele Galvão"
-              className="h-auto w-full mx-auto"
-              width={160}
-              height={80}
-              loading="eager"
-              fetchPriority="high"
-            />
-            {/* Barra dourada com largura proporcional ao logo */}
-            <div className="absolute -bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#B89B7A] to-transparent opacity-70"></div>
-          </div>
-          
-          <p className="mt-6 text-sm text-[#432818]/60 font-light">
-            Preparando sua experiência personalizada...
-          </p>
-        </div>
-      </div>
+      <LoadingState 
+        message="Preparando sua experiência personalizada..." 
+        showLogo={true} 
+      />
     );
   }
 
