@@ -1,40 +1,45 @@
-
 /**
  * Utility para gerenciar Facebook Pixel
  */
 
-export const loadFacebookPixel = () => {
-  // Configuração do Facebook Pixel apenas se não estiver em ambiente de desenvolvimento
-  if (process.env.NODE_ENV !== 'development') {
-    try {
-      // Inicialização padrão do Facebook Pixel
-      // Este código normalmente é fornecido pelo Facebook
-      const pixelId = '123456789012345'; // Substituir pelo ID real do pixel
-      
-      // Criar objeto fbq se não existir
-      if (!(window as any).fbq) {
-        (window as any).fbq = function() {
-          (window as any).fbq.queue.push(arguments);
-        };
-        (window as any).fbq.queue = [];
-      }
-      
-      console.log('[Analytics] Facebook Pixel inicializado');
-      
-      // Adicionar script do Facebook
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = `https://connect.facebook.net/en_US/fbevents.js`;
-      document.head.appendChild(script);
-      
-      // Inicializar pixel
-      (window as any).fbq('init', pixelId);
-      (window as any).fbq('track', 'PageView');
-      
-    } catch (error) {
-      console.error('[Analytics] Erro ao inicializar Facebook Pixel:', error);
-    }
-  } else {
-    console.log('[Analytics] Facebook Pixel não inicializado em ambiente de desenvolvimento');
+declare global {
+  interface Window {
+    fbq: any;
   }
+}
+
+// Inicialização do Facebook Pixel
+export const initFacebookPixel = (pixelId: string): void => {
+  if (typeof window !== 'undefined') {
+    // Inicialização do código do pixel
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    
+    fbq('init', pixelId);
+    fbq('track', 'PageView');
+  }
+};
+
+// Função para rastrear eventos - esta é a função que está faltando
+export const trackPixelEvent = (eventName: string, params?: object): void => {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', eventName, params);
+  } else {
+    console.log(`Facebook Pixel Event (simulado): ${eventName}`, params);
+  }
+};
+
+// Outras funções de utilidade para o pixel podem ser adicionadas aqui
+export const trackLead = (value?: number, currency?: string): void => {
+  trackPixelEvent('Lead', { value, currency });
+};
+
+export const trackPurchase = (value: number, currency?: string): void => {
+  trackPixelEvent('Purchase', { value, currency });
 };
