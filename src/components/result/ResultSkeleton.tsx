@@ -17,10 +17,10 @@ const ResultSkeleton: React.FC<ResultSkeletonProps> = ({ primaryStyle }) => {
   const BASE_HEIGHT = Math.round(BASE_WIDTH / IMAGE_ASPECT_RATIO);
 
   return (
-    <div className="min-h-screen bg-[#fffaf7] p-4 md:p-6">
+    <div className="min-h-screen bg-[#fffaf7] p-4 md:p-6" aria-busy="true" role="status">
       <div className="container mx-auto max-w-4xl">
         {/* Header skeleton with brand logo */}
-        <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-white relative overflow-hidden">
+        <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-white relative overflow-hidden" aria-busy="true" role="status">
           <div className="flex flex-col items-center gap-4 sm:gap-5">
             <div className="w-36 sm:w-48 h-16 sm:h-20 relative flex justify-center items-center">
               <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse rounded-md"></div>
