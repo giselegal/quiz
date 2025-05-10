@@ -323,9 +323,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 />
               </picture>
               
-              {/* Barra dourada com largura igual à imagem principal para visual mais equilibrado */}
+              {/* Barra dourada com efeito gradiente para visual mais premium */}
               <div 
-                className="h-[2px] bg-[#B89B7A] mt-2 rounded-full mx-auto" 
+                className="h-[3px] bg-gradient-to-r from-[#B89B7A] via-[#D4B79F] to-[#B89B7A] mt-2 rounded-full mx-auto" 
                 style={{ 
                   width: mainImageWidth > 0 ? `${mainImageWidth}px` : '100%',
                   maxWidth: '100%',
@@ -341,13 +341,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           </h1>
 
           {/* Container de imagem com dimensões fixas para evitar layout shift */}
-          {/* Ajuste no max-width para mobile: max-w-[300px], sm:max-w-[345px], md:max-w-sm */}
-          {/* Remoção do minHeight inline para permitir que aspectRatio e max-width controlem melhor as dimensões */}
+          {/* Largura reduzida em 10% para mobile: max-w-[270px] (antes era 300px) */}
           <div 
             ref={mainImageRef}
-            className="w-full max-w-[300px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md" 
+            className="w-full max-w-[270px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md" 
             style={{
-              // minHeight: 320, // Removido para melhor responsividade com aspectRatio
               height: 'auto',
               aspectRatio: '1 / 1.05',
               background: '#f8f6f2',
@@ -366,13 +364,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`} 
                 type="image/avif" 
                 sizes="450px"
-                fetchpriority="high"
               />
               <source 
                 srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`} 
                 type="image/webp" 
                 sizes="450px"
-                fetchpriority="high"
               />
               {/* Fallback para navegadores sem suporte a formatos modernos */}
               {/* O src agora usa uma URL otimizada do mesmo introImageId */}
@@ -383,7 +379,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 width={450}
                 height={470}
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
                 decoding="sync"
                 onLoad={() => { imageLoaded.current = true; }}
                 style={{
@@ -392,7 +388,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                   margin: '0 auto',
                   objectFit: 'contain',
                   aspectRatio: '450/470',
-                  imageRendering: 'high-quality'
+                  imageRendering: 'auto'
                 }}
                 sizes="450px"
               />
@@ -417,24 +413,35 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 placeholder="Digite seu nome" 
                 value={nome} 
                 onChange={e => setNome(e.target.value)} 
-                className="w-full p-2.5 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md" 
+                className="w-full p-3 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md shadow-sm hover:shadow-md transition-shadow duration-200" 
                 autoFocus 
                 aria-required="true" 
                 autoComplete="off"
                 inputMode="text"
                 maxLength={32}
+                style={{
+                  fontSize: '1.05rem'
+                }}
               />
             </div>
             
             <Button 
               type="submit" 
-              className="w-full bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2"
+              className="w-full bg-gradient-to-r from-[#B89B7A] to-[#A1835D] hover:from-[#A1835D] hover:to-[#927346] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:scale-[1.01] active:scale-[0.98]"
               disabled={!nome.trim()}
+              style={{
+                textShadow: '0px 1px 1px rgba(0, 0, 0, 0.15)'
+              }}
             >
-              Quero Descobrir meu Estilo Agora!
+              Quero Descobrir meu Estilo Agora! ✨
             </Button>
             
-            <p className="text-xs text-center text-gray-500 pt-1"> 
+            <p className="text-xs text-center text-gray-600 pt-2 flex items-center justify-center gap-1.5"> 
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                <path d="M8 12h8" />
+                <path d="M12 8v8" />
+              </svg>
               Ao clicar, você concorda com nossa política de privacidade
             </p>
           </form>
