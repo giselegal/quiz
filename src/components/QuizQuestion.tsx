@@ -36,21 +36,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   const hasImageOptions = question.type !== 'text';
   const [imageError, setImageError] = useState(false);
   const { scrollToQuestion } = useQuestionScroll();
-  const [isButtonActive, setIsButtonActive] = useState(false); // Novo estado para efeito visual
-
+  
   useEffect(() => {
     scrollToQuestion(question.id);
   }, [question.id, scrollToQuestion]);
-
-  // Efeito para o botão de questões estratégicas
-  useEffect(() => {
-    if (isStrategicQuestion) {
-      const isActive = currentAnswers.length > 0;
-      if (isActive !== isButtonActive) { // Apenas atualiza se o estado mudar
-        setIsButtonActive(isActive);
-      }
-    }
-  }, [currentAnswers, isStrategicQuestion, isButtonActive]); // Adicionado isButtonActive às dependências
   
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];
@@ -67,13 +56,15 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       }
     }
     
-    onAnswer({ // Movido onAnswer para fora do bloco condicional de auto-avanço
+    onAnswer({
       questionId: question.id,
       selectedOptions: newSelectedOptions
     });
 
+    // Auto advance if:
+    // 1. Auto advance is enabled (and not strategic) and we've reached the required number of selections
     const shouldAutoAdvance = 
-      !isStrategicQuestion &&
+      !isStrategicQuestion && // Não avançar automaticamente para questões estratégicas
       autoAdvance && 
       newSelectedOptions.length === question.multiSelect;
     
@@ -158,14 +149,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
           <Button 
             onClick={onNextClick}
             disabled={currentAnswers.length === 0}
-            className={cn(
-              "text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
-              isButtonActive && !(currentAnswers.length === 0) // Aplicar efeito apenas se ativo e não desabilitado
-                ? "bg-brand-primary hover:bg-brand-primary/90 transform hover:scale-105 focus:ring-brand-primary hover:shadow-lg" 
-                : "bg-brand-primary", // Estilo base quando não está no efeito "ativo" mas pode estar habilitado
-              currentAnswers.length === 0 && "bg-gray-300 hover:bg-gray-300" // Estilo para desabilitado
-            )}
+            className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
           >
             Continuar <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
