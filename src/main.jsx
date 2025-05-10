@@ -1,4 +1,3 @@
-
 import { initLazyLoading } from './utils/lazyScript';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -25,12 +24,12 @@ try {
   const rootElement = document.getElementById('root');
   if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
+    // Inicializar lazy loading de scripts
+    initLazyLoading();
       <React.StrictMode>
         <App />
       </React.StrictMode>
     );
-    // Inicializar lazy loading de scripts
-    initLazyLoading();
     console.log('Aplicativo renderizado com sucesso!');
   } else {
     console.error('Elemento root não encontrado!');
@@ -42,12 +41,12 @@ try {
       bodyElement.appendChild(fallbackRoot);
       // Tentar renderizar novamente
       ReactDOM.createRoot(fallbackRoot).render(
+// Inicializar carregamento lazy de scripts
+initLazyLoading();
         <React.StrictMode>
           <App />
         </React.StrictMode>
       );
-      // Inicializar carregamento lazy de scripts
-      initLazyLoading();
       console.log('Aplicativo renderizado no elemento fallback!');
     }
   }
