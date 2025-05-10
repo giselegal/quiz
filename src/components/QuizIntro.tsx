@@ -146,7 +146,10 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     return (
       <LoadingState 
         message="Preparando sua experiência personalizada..." 
-        showLogo={false} // Não exibe a logo no loading
+        showLogo={true} 
+        // Melhoria: role e aria-busy para acessibilidade
+        role="status"
+        aria-busy="true"
       />
     );
   }
@@ -170,7 +173,23 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       >
         <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-6 sm:space-y-8">
           {/* Logo e barra dourada alinhadas */}
-          {/* Removido bloco da logo na introdução para não exibir logotipo no carregamento */}
+          <div className="flex flex-col items-center">
+            <div className="relative w-28 sm:w-32 md:w-36">
+              <img 
+                src={logoUrl}
+                alt="Logo Gisele Galvão"
+                className="w-full h-auto mx-auto"
+                width={140}
+                height={60}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                style={{objectFit: 'contain'}}
+              />
+              {/* Barra dourada com largura exatamente igual ao logo */}
+              <div className="h-[2px] w-full bg-[#B89B7A] mt-2 rounded-full"></div>
+            </div>
+          </div>
 
           {/* Título principal com espaçamento proporcional */}
           <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-[#432818] px-2">
