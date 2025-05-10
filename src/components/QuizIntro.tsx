@@ -230,6 +230,26 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     loadTinyBase64();
   }, [introImageUrls.placeholder, tinyBase64]);
 
+  // Adicionando preload para otimizar o carregamento da imagem principal e melhorar o LCP
+  useEffect(() => {
+    const preloadImage = (url: string, type: string) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = url;
+      link.type = type;
+      document.head.appendChild(link);
+    };
+
+    // Preload da imagem principal em formato AVIF e WebP
+    preloadImage(introImageUrls.avif.large, 'image/avif');
+    preloadImage(introImageUrls.webp.large, 'image/webp');
+
+    // Preload do logo
+    preloadImage(logoImageUrls.avif, 'image/avif');
+    preloadImage(logoImageUrls.webp, 'image/webp');
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nome.trim()) {

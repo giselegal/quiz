@@ -1,21 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button } from '../ui/button';
 import { ShoppingCart, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { trackButtonClick } from '@/utils/analytics';
-import { OptimizedImage } from '@/components/ui/optimized-image';
+import { OptimizedImage } from '../ui/optimized-image';
 import { preloadImagesByUrls } from '@/utils/imageManager';
 
-interface BeforeAfterTransformationProps {
-  handleCTAClick?: () => void;
-}
-
 interface TransformationItem {
-  image: string; 
+  image: string;
   name: string;
-  id: string; 
-  width?: number;
-  height?: number;
+  id: string;
+  description: string;
 }
 
 const transformations: TransformationItem[] = [
@@ -23,136 +18,70 @@ const transformations: TransformationItem[] = [
     image: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_90,w_800/v1745519979/Captura_de_tela_2025-03-31_034324_pmdn8y.webp",
     name: "Adriana",
     id: "transformation-adriana",
-    width: 800,
-    height: 1000
-  }, 
+    description: "De básico para elegante, mantendo o conforto e autenticidade"
+  },
   {
     image: "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_90,w_800/v1745522326/Captura_de_tela_2025-03-31_034324_cpugfj.webp",
     name: "Mariangela",
     id: "transformation-mariangela",
-    width: 800,
-    height: 1000
+    description: "Do casual ao sofisticado, valorizando seu tipo de corpo"
   }
 ];
 
-const preloadInitialTransformationImages = () => {
-  const imageUrls: string[] = transformations.map(item => item.image);
-  
-  if (imageUrls.length > 0) {
-    preloadImagesByUrls(imageUrls, {
-      quality: 90, 
-      batchSize: 2,
-    });
-  }
-};
-
-const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ handleCTAClick }) => {
+const BeforeAfterTransformation: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   const activeTransformation = transformations[activeIndex];
-  const autoSlideInterval = 5000; // Intervalo em milissegundos (5 segundos)
+  const autoSlideInterval = 5000; // 5 segundos
 
-  // Pré-carregar imagens ao montar o componente
+  // Pré-carregamento inicial das imagens
   useEffect(() => {
-    preloadInitialTransformationImages(); 
-    const fallbackLoadingTimer = setTimeout(() => {
-      if (isLoading) {
-        setIsLoading(false);
-      }
-    }, 2500); 
+    const imageUrls = transformations.map(t => t.image);
+    preloadImagesByUrls(imageUrls, {
+      quality: 90,
+      batchSize: 2
+    });
+  }, []);
 
-    return () => clearTimeout(fallbackLoadingTimer);
-  }, []); // Executa apenas uma vez na montagem
-  
-  // Controle de carregamento e precarregamento de imagens
+  // Gerenciamento da transição automática
   useEffect(() => {
-    setImageLoaded(false); 
-    setIsLoading(true);    
+    if (!imageLoaded || isTransitioning) return;
 
-    const currentImage = activeTransformation?.image;
-    if (currentImage) {
-      console.log("Carregando imagem:", currentImage);
-
-      // Carrega a imagem atual
-      const img = new Image();
-      img.src = currentImage;
-      img.onload = () => {
-        setImageLoaded(true);
-        setIsLoading(false);
-        console.log("Imagem carregada com sucesso:", currentImage);
-      };
-      img.onerror = (err) => {
-        console.error("Falha ao carregar imagem:", currentImage, err);
-        setIsLoading(false);
-      };
-
-      // Precarrega a próxima imagem (se houver)
-      const nextIndex = (activeIndex + 1) % transformations.length;
-      if (transformations.length > 1 && transformations[nextIndex] && nextIndex !== activeIndex) {
-        const nextTransformationImage = transformations[nextIndex].image;
-        const nextImg = new Image();
-        nextImg.src = nextTransformationImage;
-      }
-
-      // Fallback para garantir que a UI não fique bloqueada
-      const timer = setTimeout(() => {
-        if (!imageLoaded) { 
-          console.warn("Tempo esgotado para carregamento da imagem:", currentImage);
-          setIsLoading(false);
-        }
-      }, 3000);
-      return () => clearTimeout(timer);
-    } else {
-      console.log("Nenhuma imagem de transformação para carregar.");
-      setIsLoading(false); 
-    }
-  }, [activeIndex, activeTransformation]); 
-
-  // Efeito para a transição automática de slides
-  useEffect(() => {
-    if (transformations.length <= 1 || !imageLoaded) return;
-
-    const intervalId = setInterval(() => {
-      setActiveIndex(prev => (prev === transformations.length - 1 ? 0 : prev + 1));
+    const timer = setTimeout(() => {
+      handleNextSlide();
     }, autoSlideInterval);
 
-    return () => clearInterval(intervalId); 
-  }, [transformations.length, autoSlideInterval, imageLoaded]); 
+    return () => clearTimeout(timer);
+  }, [imageLoaded, isTransitioning, activeIndex]);
 
-  // Atualiza estado de carregamento quando a imagem estiver pronta
-  useEffect(() => {
-    if (imageLoaded) {
-      setIsLoading(false);
-    }
-  }, [imageLoaded]);
+  const handleNextSlide = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setActiveIndex((prev) => (prev + 1) % transformations.length);
+    setTimeout(() => setIsTransitioning(false), 500); // Duração da transição
+  }, [isTransitioning]);
 
-  const handleDotClick = (index: number) => {
+  const handlePrevSlide = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setActiveIndex((prev) => (prev - 1 + transformations.length) % transformations.length);
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [isTransitioning]);
+
+  const handleDotClick = useCallback((index: number) => {
+    if (isTransitioning || index === activeIndex) return;
+    setIsTransitioning(true);
     setActiveIndex(index);
-  };
-  
-  const handlePrevClick = () => {
-    setActiveIndex(prev => (prev === 0 ? transformations.length - 1 : prev - 1));
-  };
-  
-  const handleNextClick = () => {
-    setActiveIndex(prev => (prev === transformations.length - 1 ? 0 : prev + 1));
-  };
-  
-  const handleButtonClick = () => {
-    trackButtonClick('checkout_button', 'Iniciar Checkout', 'transformation_section');
-    if (handleCTAClick) {
-      handleCTAClick();
-    } else {
-      window.location.href = 'https://pay.hotmart.com/W98977034C?checkoutMode=10&bid=1744967466912';
-    }
-  };
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [isTransitioning, activeIndex]);
 
-  if (!activeTransformation) {
-    return null; 
-  }
+  const handleCTAClick = useCallback(() => {
+    trackButtonClick('transformation_cta', 'Transformação CTA', 'result_page');
+    window.location.href = 'https://pay.hotmart.com/W98977034C?checkoutMode=10&bid=1744967466912';
+  }, []);
 
   return (
     <div className="py-12 md:py-16 bg-gradient-to-b from-white to-[#fffaf7] dark:from-[#2c2520] dark:to-[#251f1a]">
@@ -180,7 +109,7 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                 { text: "Construir looks com intenção e identidade visual." },
                 { text: "Utilizar cores, modelagens e tecidos a seu favor." },
                 { text: "Alinhar sua imagem aos seus objetivos pessoais e profissionais." },
-                { text: "Desenvolver um guarda-roupa funcional e inteligente, evitando compras por impulso." }
+                { text: "Desenvolver um guarda-roupa funcional e inteligente." }
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-[#B89B7A] dark:text-[#D4B79F] mr-3 mt-1 flex-shrink-0" />
@@ -188,9 +117,10 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
                 </li>
               ))}
             </ul>
-            <Button 
-              onClick={handleButtonClick} 
-              className="text-white py-3.5 px-8 rounded-lg transition-all duration-300 w-full sm:w-auto text-base font-medium"
+            
+            <Button
+              onClick={handleCTAClick}
+              className="w-full sm:w-auto text-white py-3.5 px-8 rounded-lg transition-all duration-300 hover:scale-102 active:scale-98"
               style={{
                 background: "linear-gradient(to right, #aa6b5d, #B89B7A)",
                 boxShadow: "0 4px 14px rgba(184, 155, 122, 0.3)"
@@ -205,57 +135,66 @@ const BeforeAfterTransformation: React.FC<BeforeAfterTransformationProps> = ({ h
             </Button>
           </div>
 
-          {/* Seção do Slider de Imagem */}
+          {/* Seção do Slider */}
           <div className="lg:w-3/5 order-1 lg:order-2 w-full max-w-xl mx-auto">
-            {isLoading && !imageLoaded ? (
-              <div className="aspect-[4/5] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center w-full mx-auto">
-                <p className="text-gray-500 dark:text-gray-400">Carregando transformação...</p>
+            <Card className="overflow-hidden shadow-2xl rounded-xl border border-[#B89B7A]/20 dark:border-[#E0C9B1]/20 bg-white dark:bg-[#332820]">
+              <div className={`relative w-full aspect-[4/5] transition-opacity duration-500 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
+                <OptimizedImage
+                  src={activeTransformation.image}
+                  alt={`${activeTransformation.name} - Transformação`}
+                  width={800}
+                  height={1000}
+                  className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl"
+                  onLoad={() => setImageLoaded(true)}
+                  priority={true}
+                  quality={90}
+                  placeholderColor="#f8f4ef"
+                />
               </div>
-            ) : (
-              <Card className="overflow-hidden shadow-2xl rounded-xl border border-[#B89B7A]/20 dark:border-[#E0C9B1]/20 bg-white dark:bg-[#332820]">
-                <div className="relative w-full aspect-[4/5] mx-auto">
-                  <OptimizedImage
-                    src={activeTransformation.image}
-                    alt={`${activeTransformation.name} - Transformação`}
-                    width={activeTransformation.width || 800}
-                    height={activeTransformation.height || 1000}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl"
-                    onLoad={() => {
-                      console.log('OptimizedImage onLoad triggered for:', activeTransformation.image);
-                      setImageLoaded(true);
-                      setIsLoading(false);
-                    }}
-                    priority={true}
-                    quality={90}
-                    placeholderColor="#f8f4ef"
-                  />
+              
+              <div className="p-4 bg-white dark:bg-[#332820] rounded-b-xl">
+                <p className="text-center text-xl font-medium text-[#432818] dark:text-[#E0C9B1] mb-2">
+                  {activeTransformation.name}
+                </p>
+                <p className="text-center text-sm text-[#432818]/80 dark:text-[#E0C9B1]/80 mb-4">
+                  {activeTransformation.description}
+                </p>
+                <div className="flex justify-center space-x-2">
+                  {transformations.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleDotClick(index)}
+                      className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                        activeIndex === index 
+                          ? 'bg-[#B89B7A] dark:bg-[#D4B79F]' 
+                          : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                      }`}
+                      aria-label={`Ver transformação ${index + 1}`}
+                    />
+                  ))}
                 </div>
-                <div className="p-4 bg-white dark:bg-[#332820] rounded-b-xl">
-                  <p className="text-center text-xl font-medium text-[#432818] dark:text-[#E0C9B1] mb-2">{activeTransformation.name}</p>
-                  <div className="flex justify-center space-x-2 mt-2">
-                    {transformations.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleDotClick(index)}
-                        className={`w-3 h-3 rounded-full transition-colors ${ 
-                          activeIndex === index ? 'bg-[#B89B7A] dark:bg-[#D4B79F]' : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-                        }`}
-                        aria-label={`Ver transformação ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            )}
-             {transformations.length > 1 && (
-                <div className="flex justify-between mt-4">
-                    <Button variant="outline" onClick={handlePrevClick} className="text-[#432818] dark:text-[#d1c7b8] border-[#B89B7A] dark:border-[#E0C9B1]/50 hover:bg-[#B89B7A]/10 dark:hover:bg-[#E0C9B1]/10">
-                        <ChevronLeft className="w-5 h-5 mr-1" /> Anterior
-                    </Button>
-                    <Button variant="outline" onClick={handleNextClick} className="text-[#432818] dark:text-[#d1c7b8] border-[#B89B7A] dark:border-[#E0C9B1]/50 hover:bg-[#B89B7A]/10 dark:hover:bg-[#E0C9B1]/10">
-                        Próxima <ChevronRight className="w-5 h-5 ml-1" />
-                    </Button>
-                </div>
+              </div>
+            </Card>
+
+            {transformations.length > 1 && (
+              <div className="flex justify-between mt-4">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevSlide}
+                  className="text-[#432818] dark:text-[#d1c7b8] border-[#B89B7A] dark:border-[#E0C9B1]/50 hover:bg-[#B89B7A]/10 dark:hover:bg-[#E0C9B1]/10"
+                  disabled={isTransitioning}
+                >
+                  <ChevronLeft className="w-5 h-5 mr-1" /> Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleNextSlide}
+                  className="text-[#432818] dark:text-[#d1c7b8] border-[#B89B7A] dark:border-[#E0C9B1]/50 hover:bg-[#B89B7A]/10 dark:hover:bg-[#E0C9B1]/10"
+                  disabled={isTransitioning}
+                >
+                  Próxima <ChevronRight className="w-5 h-5 ml-1" />
+                </Button>
+              </div>
             )}
           </div>
         </div>
