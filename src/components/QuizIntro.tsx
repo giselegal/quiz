@@ -46,6 +46,10 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     preloadMainImage.src = introImageUrls.webp.small; // Formato webp para prioridade mais alta
     preloadMainImage.sizes = "(max-width: 640px) 320px, (max-width: 768px) 384px, 420px";
     
+    // Precarregar logo de alta qualidade
+    const preloadLogo = new Image();
+    preloadLogo.src = logoImageUrls.webp;
+    
     const loadInitialAssets = async () => {
       try {
         console.log("[QuizIntro] Iniciando carregamento de assets...");
@@ -119,7 +123,20 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   }, [showContent, isLoading]);
 
-  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_80,w_112,h_56,c_limit,dpr_auto,e_sharpen:60/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
+  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_100,w_140,h_60,c_limit,dpr_2.0,e_sharpen:100/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
+  
+  // Melhor configuração para o logo com múltiplos formatos
+  const logoBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
+  const logoImageId = "v1744911572/LOGO_DA_MARCA_GISELE_r14oz2";
+  
+  // URLs otimizadas para o logo em diferentes formatos
+  const logoImageUrls = {
+    webp: `${logoBaseUrl}f_webp,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.webp`,
+    png: `${logoBaseUrl}f_png,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.png`,
+    // Formatos de fallback para maior compatibilidade
+    avif: `${logoBaseUrl}f_avif,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.avif`
+  };
+  
   // Otimização: Adicionando múltiplos tamanhos com formatos modernos e parâmetros de qualidade
   const introImageBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
   const introImageId = "v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up";
@@ -146,18 +163,25 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     png: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'png', 480, 80)
   };
 
-  // Pré-carregamento explícito do LCP (imagem principal do quiz)
+  // Pré-carregamento explícito do LCP (imagem principal do quiz e logo)
   React.useEffect(() => {
     // Remove qualquer preload duplicado
     const preloadSelector = `link[rel="preload"][as="image"][href*="${introImageId}"]`;
     const existing = document.querySelectorAll(preloadSelector);
     existing.forEach(el => el.parentNode?.removeChild(el));
     
+    // Remove preloads duplicados para o logo
+    const logoPreloadSelector = `link[rel="preload"][as="image"][href*="${logoImageId}"]`;
+    const existingLogoPreloads = document.querySelectorAll(logoPreloadSelector);
+    existingLogoPreloads.forEach(el => el.parentNode?.removeChild(el));
+    
     // Adiciona preloads para formatos modernos e fallback
     const preloadFormats = [
       { href: introImageUrls.avif.small, type: 'image/avif' },
       { href: introImageUrls.webp.small, type: 'image/webp' },
-      { href: introImageUrls.png, type: 'image/png' }
+      { href: introImageUrls.png, type: 'image/png' },
+      // Adiciona logo para preload com alta prioridade
+      { href: logoImageUrls.webp, type: 'image/webp' }
     ];
     
     const preloadLinks = preloadFormats.map(format => {
@@ -216,17 +240,25 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           {/* Logo e barra dourada alinhadas */}
           <div className="flex flex-col items-center">
             <div className="relative w-28 sm:w-32 md:w-36">
-              <img 
-                src={logoUrl}
-                alt="Logo Gisele Galvão"
-                className="w-full h-auto mx-auto"
-                width={140}
-                height={60}
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                style={{objectFit: 'contain'}}
-              />
+              <picture>
+                {/* Formatos modernos para melhor qualidade e tamanho */}
+                <source srcSet={logoImageUrls.avif} type="image/avif" />
+                <source srcSet={logoImageUrls.webp} type="image/webp" />
+                <img 
+                  src={logoImageUrls.png}
+                  alt="Logo Gisele Galvão"
+                  className="w-full h-auto mx-auto"
+                  width={140}
+                  height={60}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  style={{
+                    objectFit: 'contain',
+                    imageRendering: 'crisp-edges'
+                  }}
+                />
+              </picture>
               {/* Barra dourada com largura exatamente igual ao logo */}
               <div className="h-[2px] w-full bg-[#B89B7A] mt-2 rounded-full"></div>
             </div>
