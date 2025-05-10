@@ -124,10 +124,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   }, []);
 
 
-
-// Novo arquivo otimizado para o useEffect de preload
-// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente de preload
-
   // Pré-carregamento para LCP com estratégia otimizada - MELHORADO
   useEffect(() => {
     // Preconnect para o domínio Cloudinary para acelerar conexões futuras
@@ -159,32 +155,17 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
     };
   }, []); // Dependências vazias = executa uma vez na montagem
-// Novo arquivo otimizado para o useEffect de carregamento base64
-// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente
-
-  // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea - OTIMIZADO
+  // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea
   useEffect(() => {
     // Carrega a versão mais leve possível da imagem como base64 para exibição instantânea
     const loadTinyBase64 = async () => {
       try {
-        // Evita recarregamentos e usa cache quando possível
-        if (!tinyBase64 && !imageLoaded.current) {
-          // Verifica se já existe no sessionStorage para evitar refetch
-          const cachedImage = sessionStorage.getItem('quiz_intro_tiny_base64');
-          if (cachedImage) {
-            setTinyBase64(cachedImage);
-          } else {
-            const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder);
-            if (base64Data) {
-              setTinyBase64(base64Data);
-              // Cache para evitar refetches na mesma sessão
-              try {
-                sessionStorage.setItem('quiz_intro_tiny_base64', base64Data);
-              } catch (e) {
-                // Ignora erros de storage (limite excedido, etc)
-              }
-            }
-          }
+        // Carrega apenas uma vez se tinyBase64 ainda não estiver definido
+        if (!tinyBase64) { // Simplificado: tenta carregar se ainda não tiver o base64.
+                           // A flag imageLoaded.current pode ser desnecessária aqui,
+                           // pois o objetivo é ter o placeholder o mais cedo possível.
+          const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder); 
+          setTinyBase64(base64Data);
         }
       } catch (error) {
         console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
@@ -192,7 +173,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     };
     
     loadTinyBase64();
-  }, []); // Dependências vazias para executar apenas na montagem
+  }, []); // Alterado para array de dependências vazio. A lógica interna previne recarregamentos.
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nome.trim()) {
