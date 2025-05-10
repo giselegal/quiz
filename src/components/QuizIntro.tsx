@@ -651,7 +651,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
           {/* Largura reduzida em 10% para mobile: max-w-[270px] (antes era 300px) */}
           <div 
             ref={mainImageRef}
-            className="w-full max-w-[270px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md contain-content" 
+            className="w-full max-w-[270px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md contain-content group" 
             style={{
               height: 'auto',
               aspectRatio: '450/470', // Aspect ratio fixo para evitar layout shifts
@@ -667,6 +667,13 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             }}
             data-lcp="true" // Facilita identificação de elemento LCP crítico
           >
+            {/* Elementos decorativos nos cantos */}
+            <div className="absolute -top-3 -right-3 w-12 h-12 border-t-2 border-r-2 border-[#B89B7A] opacity-70 z-10 pointer-events-none"></div>
+            <div className="absolute -bottom-3 -left-3 w-12 h-12 border-b-2 border-l-2 border-[#B89B7A] opacity-70 z-10 pointer-events-none"></div>
+            
+            {/* Overlay de gradiente sutil */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#432818]/10 to-transparent z-[1] pointer-events-none"></div>
+            
             <OptimizedImage
               sources={[
                 { 
@@ -684,7 +691,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               alt="Descubra seu estilo predominante"
               width={450}
               height={470}
-              className="w-full h-auto object-contain quiz-intro-image will-change-opacity"
+              className="w-full h-auto object-contain quiz-intro-image will-change-opacity relative z-[2] transform transition-transform duration-700 group-hover:scale-[1.03]"
               priority={true}
               placeholder={tinyBase64}
               onLoad={() => { 
@@ -718,52 +725,66 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             autoComplete="off"
             data-testid="quiz-intro-form"
           >
-            <div>
-              <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1.5">
-                NOME
+            <div className="relative">
+              <label htmlFor="name" className="block text-xs font-semibold text-[#432818]/80 mb-1.5 ml-1">
+                SEU NOME
               </label>
-              <Input 
-                id="name" 
-                placeholder="Digite seu nome" 
-                value={nome} 
-                onChange={(e) => {
-                  // Limitação de caracteres feita diretamente aqui para evitar re-renders extras
-                  if (e.target.value.length <= 32) {
-                    setNome(e.target.value);
-                  }
-                }} 
-                className="w-full p-3 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md shadow-sm hover:shadow-md transition-shadow duration-200" 
-                autoFocus 
-                aria-required="true" 
-                autoComplete="off"
-                inputMode="text"
-                maxLength={32}
-                style={{
-                  fontSize: '1.05rem',
-                  willChange: 'box-shadow', // Preparação para animação
-                  transformStyle: 'preserve-3d', // Melhor qualidade de transformação
-                }}
-              />
+              
+              <div className="relative group">
+                <Input 
+                  id="name" 
+                  placeholder="Digite seu nome para começar" 
+                  value={nome} 
+                  onChange={(e) => {
+                    // Limitação de caracteres feita diretamente aqui para evitar re-renders extras
+                    if (e.target.value.length <= 32) {
+                      setNome(e.target.value);
+                    }
+                  }} 
+                  className="w-full p-3 pl-10 pr-3 border-[#B89B7A]/40 focus:border-[#B89B7A] focus:ring-[#B89B7A]/20 bg-white/95 backdrop-blur-sm rounded-lg shadow-sm hover:shadow transition-shadow duration-200" 
+                  autoFocus 
+                  aria-required="true" 
+                  autoComplete="off"
+                  inputMode="text"
+                  maxLength={32}
+                  style={{
+                    fontSize: '1.05rem',
+                    willChange: 'box-shadow', // Preparação para animação
+                    transformStyle: 'preserve-3d', // Melhor qualidade de transformação
+                  }}
+                />
+                
+                {/* Ícone decorativo */}
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B89B7A]/70 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 opacity-70">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+              </div>
             </div>
             
             <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-[#B89B7A] to-[#A1835D] hover:from-[#A1835D] hover:to-[#927346] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:scale-[1.01] active:scale-[0.98]"
+              type="submit"
+              className="w-full bg-gradient-to-r from-[#B89B7A] to-[#A1835D] hover:from-[#A1835D] hover:to-[#927346] text-white py-3 px-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:scale-[1.02] active:scale-[0.98] group"
               disabled={!nome.trim()}
               style={{
                 textShadow: '0px 1px 1px rgba(0, 0, 0, 0.15)',
-                willChange: 'transform, box-shadow', // Otimiza as transições
-                backfaceVisibility: 'hidden', // Melhora a qualidade visual durante transformações
-                perspective: '1000px', // Adicionado para efeito 3D
-                contain: 'paint', // Isolamento para melhor performance
+                willChange: 'transform, box-shadow',
+                backfaceVisibility: 'hidden',
+                perspective: '1000px',
+                contain: 'paint',
               }}
               aria-label="Iniciar o quiz"
             >
-              Quero Descobrir meu Estilo Agora! <span aria-hidden="true" className="inline-block ml-1">✨</span>
+              <span className="flex items-center justify-center gap-2">
+                Quero Descobrir meu Estilo Agora!
+                <span aria-hidden="true" className="inline-block transition-transform duration-500 transform group-hover:rotate-12">✨</span>
+              </span>
             </Button>
             
-            <p className="text-xs text-center text-gray-600 pt-2 flex items-center justify-center gap-1.5" aria-live="polite"> 
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500" aria-hidden="true">
+            <p className="text-xs text-center text-[#432818]/60 pt-2 flex items-center justify-center gap-1.5" aria-live="polite"> 
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#B89B7A]" aria-hidden="true">
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                 <path d="M8 12h8" />
                 <path d="M12 8v8" />

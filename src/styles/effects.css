@@ -26,6 +26,16 @@
   animation: loading-bar 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Animação de rotação lenta para selo de garantia */
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
 /* Elegant divider */
 .elegant-divider {
   height: 1px;
