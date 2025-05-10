@@ -4,9 +4,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { OptimizedImage } from './ui/optimized-image';
 import { preloadCriticalImages } from '@/utils/imageManager';
-import Logo from './ui/logo';
 import AutoFixedImages from './ui/AutoFixedImages';
 
 /**
@@ -14,12 +12,13 @@ import AutoFixedImages from './ui/AutoFixedImages';
  * 
  * Melhorias implementadas:
  * 1. Layout com espaçamento vertical proporcional e consistente
- * 2. Barra dourada com largura proporcional ao logo
- * 3. Performance de carregamento otimizada
+ * 2. Barra dourada com largura igual a imagem principal para uniformidade visual
+ * 3. Performance de carregamento otimizada 
  * 4. Estrutura de componentes simplificada
  * 5. Responsividade refinada para todos os dispositivos
  * 6. Remoção de transições e animações desnecessárias
  * 7. Carregamento imediato com estratégia de recursos otimizada
+ * 8. Logo otimizada com fundo transparente
  */
 
 interface QuizIntroProps {
@@ -30,6 +29,31 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   onStart
 }) => {
   const [nome, setNome] = useState('');
+  const [mainImageWidth, setMainImageWidth] = useState(0);
+  
+  // Ref para medir a largura da imagem principal
+  const mainImageRef = React.useRef<HTMLDivElement>(null);
+  
+  // Efeito para capturar a largura da imagem principal
+  useEffect(() => {
+    if (mainImageRef.current) {
+      const updateWidth = () => {
+        if (mainImageRef.current) {
+          setMainImageWidth(mainImageRef.current.offsetWidth);
+        }
+      };
+      
+      // Atualiza na montagem
+      updateWidth();
+      
+      // Atualiza no resize
+      window.addEventListener('resize', updateWidth);
+      
+      return () => {
+        window.removeEventListener('resize', updateWidth);
+      };
+    }
+  }, []);
 
   // Efeito único e simplificado para carregamento posterior de recursos
   useEffect(() => {
@@ -49,15 +73,15 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   }, []);
 
-  // Configuração optimizada do logo
+  // Configuração otimizada do logo com fundo transparente
   const logoBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
   const logoImageId = "v1744911572/LOGO_DA_MARCA_GISELE_r14oz2";
   
-  // URLs otimizadas para o logo em diferentes formatos
+  // URLs otimizadas para o logo em diferentes formatos com fundo transparente
   const logoImageUrls = {
-    webp: `${logoBaseUrl}f_webp,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.webp`,
-    png: `${logoBaseUrl}f_png,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.png`,
-    avif: `${logoBaseUrl}f_avif,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100/${logoImageId}.avif`
+    webp: `${logoBaseUrl}f_webp,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100,b_transparent/${logoImageId}.webp`,
+    png: `${logoBaseUrl}f_png,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100,b_transparent/${logoImageId}.png`,
+    avif: `${logoBaseUrl}f_avif,q_100,w_140,h_60,c_fit,dpr_2.0,e_sharpen:100,b_transparent/${logoImageId}.avif`
   };
   
   // Otimização: Adicionando múltiplos tamanhos com formatos modernos e parâmetros de qualidade
@@ -72,14 +96,14 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   // URLs otimizadas para diferentes tamanhos e formatos
   const introImageUrls = {
     avif: {
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 320, 90),
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 384, 90),
-      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 420, 90)
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 345, 90), // Aumentado para melhor visualização no mobile
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 400, 90),
+      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 450, 90)
     },
     webp: {
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 320, 90),
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 384, 90),
-      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 420, 90)
+      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 345, 90), // Aumentado para melhor visualização no mobile
+      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 400, 90),
+      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 450, 90)
     },
     // Inclui versão de baixa qualidade para carregamento progressivo
     placeholder: `${introImageBaseUrl}f_webp,q_20,w_60,c_limit,e_blur:150/${introImageId}.webp`,
@@ -130,7 +154,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-6 sm:space-y-8">
           {/* Logo e barra dourada alinhadas */}
           <div className="flex flex-col items-center">
-            <div className="relative w-28 sm:w-32 md:w-36">
+            <div className="relative">
               <picture>
                 {/* Formatos modernos para melhor qualidade e tamanho */}
                 <source srcSet={logoImageUrls.avif} type="image/avif" />
@@ -138,7 +162,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 <img 
                   src={logoImageUrls.png}
                   alt="Logo Gisele Galvão"
-                  className="w-full h-auto mx-auto"
+                  className="h-auto mx-auto"
                   width={140}
                   height={60}
                   loading="eager"
@@ -146,40 +170,53 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                   decoding="async"
                   style={{
                     objectFit: 'contain',
-                    imageRendering: 'crisp-edges'
+                    imageRendering: 'crisp-edges',
+                    maxWidth: '100%'
                   }}
                 />
               </picture>
-              {/* Barra dourada com largura exatamente igual ao logo */}
-              <div className="h-[2px] w-full bg-[#B89B7A] mt-2 rounded-full"></div>
+              
+              {/* Barra dourada com largura igual à imagem principal para visual mais equilibrado */}
+              <div 
+                className="h-[2px] bg-[#B89B7A] mt-2 rounded-full mx-auto" 
+                style={{ 
+                  width: mainImageWidth > 0 ? `${mainImageWidth}px` : '100%',
+                  maxWidth: '100%',
+                  transition: 'width 0.3s ease-in-out'
+                }}
+              ></div>
             </div>
           </div>
 
           {/* Título principal com espaçamento proporcional */}
-          <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-[#432818] px-2">
+          <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-[#432818] px-1">
             Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
           </h1>
 
           {/* Container de imagem com proporções fixas para evitar layout shift */}
-          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md flex items-center justify-center" style={{minHeight: 320, background: '#f8f6f2'}}>
+          <div 
+            ref={mainImageRef}
+            className="w-full max-w-[345px] sm:max-w-sm md:max-w-md mx-auto relative overflow-hidden rounded-lg shadow-md flex items-center justify-center" 
+            style={{minHeight: 320, background: '#f8f6f2'}}
+          >
             <picture>
               {/* Formatos modernos para browsers que suportam */}
               <source 
-                srcSet={`${introImageUrls.avif.small} 320w, ${introImageUrls.avif.medium} 384w, ${introImageUrls.avif.large} 420w`} 
+                srcSet={`${introImageUrls.avif.small} 345w, ${introImageUrls.avif.medium} 400w, ${introImageUrls.avif.large} 450w`} 
                 type="image/avif" 
-                sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, 420px"
+                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
               <source 
-                srcSet={`${introImageUrls.webp.small} 320w, ${introImageUrls.webp.medium} 384w, ${introImageUrls.webp.large} 420w`} 
+                srcSet={`${introImageUrls.webp.small} 345w, ${introImageUrls.webp.medium} 400w, ${introImageUrls.webp.large} 450w`} 
                 type="image/webp" 
-                sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, 420px"
+                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
               {/* Fallback para navegadores sem suporte a formatos modernos */}
               <img
                 src={introImageUrls.png}
                 alt="Descubra seu estilo predominante"
                 className="w-full h-auto max-h-[340px] object-contain quiz-intro-image"
-                width={320}
+                width={345}
                 height={340}
                 loading="eager"
                 fetchPriority="high"
@@ -192,7 +229,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
-                sizes="(max-width: 640px) 320px, (max-width: 768px) 384px, 420px"
+                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
             </picture>
           </div>
