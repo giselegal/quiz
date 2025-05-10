@@ -171,9 +171,11 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     // Carrega a versão mais leve possível da imagem como base64 para exibição instantânea
     const loadTinyBase64 = async () => {
       try {
-        // Carrega apenas uma vez
-        if (!tinyBase64 && !imageLoaded.current) {
-          const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder); // Usar constante
+        // Carrega apenas uma vez se tinyBase64 ainda não estiver definido
+        if (!tinyBase64) { // Simplificado: tenta carregar se ainda não tiver o base64.
+                           // A flag imageLoaded.current pode ser desnecessária aqui,
+                           // pois o objetivo é ter o placeholder o mais cedo possível.
+          const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder); 
           setTinyBase64(base64Data);
         }
       } catch (error) {
@@ -182,7 +184,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     };
     
     loadTinyBase64();
-  }, [tinyBase64]); // A dependência de STATIC_INTRO_IMAGE_URLS.placeholder foi removida pois é estável
+  }, []); // Alterado para array de dependências vazio. A lógica interna previne recarregamentos.
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
