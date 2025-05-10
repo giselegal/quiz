@@ -26,6 +26,12 @@ const transformations = [
   }
 ];
 
+// Constantes para dimensões consistentes
+const IMAGE_WIDTH = 400;
+const IMAGE_HEIGHT = 533;
+const AUTOPLAY_INTERVAL = 5000; // 5 seconds for auto-play
+const TRANSITION_DURATION = 500; // 500ms para a transição
+
 const BeforeAfterTransformation: React.FC = () => {
   const { globalStyles } = useGlobalStyles();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -33,8 +39,6 @@ const BeforeAfterTransformation: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const slideRef = useRef<HTMLDivElement>(null);
-  const AUTOPLAY_INTERVAL = 5000; // 5 seconds for auto-play
-  const TRANSITION_DURATION = 500; // 500ms para a transição
 
   const currentTransformation = transformations[activeIndex];
 
@@ -85,21 +89,21 @@ const BeforeAfterTransformation: React.FC = () => {
     const baseOptimized = getHighQualityImageUrl(url);
     // Verifica se a URL já tem parâmetros
     return baseOptimized.includes('?') 
-      ? `${baseOptimized}&q=85&f=auto&w=400&e_sharpen:60` 
-      : `${baseOptimized}?q=85&f=auto&w=400&e_sharpen:60`;
+      ? `${baseOptimized}&q=85&f=auto&w=${IMAGE_WIDTH}&e_sharpen:60` 
+      : `${baseOptimized}?q=85&f=auto&w=${IMAGE_WIDTH}&e_sharpen:60`;
   };
 
   return (
-    <div className="my-10 bg-white rounded-lg shadow-md border border-[#B89B7A]/20 p-6">
-      <h2 className="text-2xl font-playfair text-center text-[#aa6b5d] mb-6">
+    <div className="my-6 sm:my-8 md:my-10 bg-white rounded-lg shadow-md border border-[#B89B7A]/20 p-4 sm:p-5 md:p-6">
+      <h2 className="text-xl sm:text-2xl font-playfair text-center text-[#aa6b5d] mb-4 sm:mb-6">
         Transformações Reais com Conhecimento de Estilo
       </h2>
       
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {/* Title e Description */}
-        <div className="text-center mb-6">
-          <h3 className="text-xl font-medium text-[#432818]">{currentTransformation.title}</h3>
-          <p className="text-[#432818]/75">{currentTransformation.description}</p>
+        <div className="text-center mb-4 sm:mb-6">
+          <h3 className="text-lg sm:text-xl font-medium text-[#432818] mb-1 sm:mb-2">{currentTransformation.title}</h3>
+          <p className="text-sm sm:text-base text-[#432818]/75">{currentTransformation.description}</p>
         </div>
         
         {/* Imagens de Antes e Depois */}
@@ -107,15 +111,15 @@ const BeforeAfterTransformation: React.FC = () => {
           <div 
             className={`transition-transform duration-500 ease-in-out ${isTransitioning ? (direction === 'right' ? '-translate-x-full' : 'translate-x-full') : 'translate-x-0'}`}
           >
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <p className="text-center text-sm font-medium text-[#aa6b5d]">ANTES</p>
+            <div className="grid md:grid-cols-2 gap-3 sm:gap-4">
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-center text-xs sm:text-sm font-medium text-[#aa6b5d]">ANTES</p>
                 <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
                   <OptimizedImage
                     src={getOptimizedImageUrl(currentTransformation.beforeImage)}
                     alt={`Antes - ${currentTransformation.title}`}
-                    width={400}
-                    height={533}
+                    width={IMAGE_WIDTH}
+                    height={IMAGE_HEIGHT}
                     className="w-full h-full object-cover"
                     priority={activeIndex === 0}
                     objectFit="cover"
@@ -123,14 +127,14 @@ const BeforeAfterTransformation: React.FC = () => {
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <p className="text-center text-sm font-medium text-[#aa6b5d]">DEPOIS</p>
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-center text-xs sm:text-sm font-medium text-[#aa6b5d]">DEPOIS</p>
                 <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
                   <OptimizedImage
                     src={getOptimizedImageUrl(currentTransformation.afterImage)}
                     alt={`Depois - ${currentTransformation.title}`}
-                    width={400}
-                    height={533}
+                    width={IMAGE_WIDTH}
+                    height={IMAGE_HEIGHT}
                     className="w-full h-full object-cover"
                     priority={activeIndex === 0}
                     objectFit="cover"
@@ -149,29 +153,29 @@ const BeforeAfterTransformation: React.FC = () => {
             }`}
             style={{ opacity: isTransitioning ? 1 : 0 }}
           >
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <p className="text-center text-sm font-medium text-[#aa6b5d]">ANTES</p>
+            <div className="grid md:grid-cols-2 gap-3 sm:gap-4">
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-center text-xs sm:text-sm font-medium text-[#aa6b5d]">ANTES</p>
                 <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
                   <OptimizedImage
                     src={getOptimizedImageUrl(transformations[previousIndex].beforeImage)}
                     alt={`Antes - ${transformations[previousIndex].title}`}
-                    width={400}
-                    height={533}
+                    width={IMAGE_WIDTH}
+                    height={IMAGE_HEIGHT}
                     className="w-full h-full object-cover"
                     objectFit="cover"
                   />
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <p className="text-center text-sm font-medium text-[#aa6b5d]">DEPOIS</p>
+              <div className="space-y-1 sm:space-y-2">
+                <p className="text-center text-xs sm:text-sm font-medium text-[#aa6b5d]">DEPOIS</p>
                 <div className="aspect-[3/4] relative bg-[#f9f4ef] rounded-lg overflow-hidden">
                   <OptimizedImage
                     src={getOptimizedImageUrl(transformations[previousIndex].afterImage)}
                     alt={`Depois - ${transformations[previousIndex].title}`}
-                    width={400}
-                    height={533}
+                    width={IMAGE_WIDTH}
+                    height={IMAGE_HEIGHT}
                     className="w-full h-full object-cover"
                     objectFit="cover"
                   />
@@ -182,7 +186,7 @@ const BeforeAfterTransformation: React.FC = () => {
         </div>
         
         {/* Dots indicator */}
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-1.5 sm:gap-2 mt-3 sm:mt-4">
           {transformations.map((_, index) => (
             <button
               key={index}
@@ -193,7 +197,7 @@ const BeforeAfterTransformation: React.FC = () => {
                 setIsTransitioning(true);
                 setActiveIndex(index);
               }}
-              className={`w-2 h-2 rounded-full transition-colors ${
+              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-colors ${
                 index === activeIndex ? 'bg-[#aa6b5d]' : 'bg-[#B89B7A]/30'
               }`}
               aria-label={`Ver transformação ${index + 1}`}
@@ -203,17 +207,17 @@ const BeforeAfterTransformation: React.FC = () => {
       </div>
 
       {/* Restored Section: Headline, Description List, CTA Button */}
-      <div className="mt-8 text-center">
-        <h3 className="text-3xl font-playfair font-bold text-[#432818] mb-4">
+      <div className="mt-6 sm:mt-8 text-center">
+        <h3 className="text-2xl sm:text-3xl font-playfair font-bold text-[#432818] mb-3 sm:mb-4">
           Descubra Sua Melhor Versão
         </h3>
-        <ul className="list-disc list-inside text-left max-w-md mx-auto text-[#432818]/80 space-y-2 mb-6">
+        <ul className="list-disc list-inside text-left max-w-md mx-auto text-[#432818]/80 space-y-1 sm:space-y-2 mb-4 sm:mb-6 text-sm sm:text-base">
           <li>Eleve sua autoestima e confiança.</li>
           <li>Comunique seu estilo pessoal com clareza.</li>
           <li>Alcance seus objetivos com uma imagem poderosa.</li>
         </ul>
         <button 
-          className={`${globalStyles.primaryButton} py-3 px-8 text-lg w-full sm:w-auto rounded-lg`}
+          className={`${globalStyles.primaryButton} py-2.5 sm:py-3 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto rounded-lg`}
           onClick={() => window.open('https://pay.hotmart.com/N74003734E?checkoutMode=10', '_blank')}
         >
           Quero Minha Transformação!
