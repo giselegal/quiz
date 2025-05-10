@@ -48,9 +48,8 @@ export const preloadImagesByUrls = (
   const tempImages: BankImage[] = urls.map(url => ({
     id: url,
     src: url,
+    alt: 'Preloaded image',
     category: 'external',
-    tags: [],
-    alt: 'Preloaded image' // Add required alt property
   }));
   
   const { generateLowQuality = true, ...restOptions } = options;
@@ -75,7 +74,7 @@ export const preloadImagesByUrls = (
         // Update cache with low quality URL
         updateImageCache(optimizedUrl, {
           url: url,
-          lowQualityUrl: lowQualityUrl
+          lowQualityUrl
         });
         
         // Also preload the low quality version
@@ -162,7 +161,7 @@ export const preloadImages = (
       updateImageCache(optimizedUrl, {
         url: img.src,
         loadStatus: 'loading',
-        lowQualityUrl: lowQualityUrl
+        lowQualityUrl
       });
       
       const imgElement = new Image();
@@ -174,7 +173,7 @@ export const preloadImages = (
           loadStatus: 'loaded',
           element: imgElement,
           optimizedUrl,
-          lowQualityUrl: lowQualityUrl
+          lowQualityUrl
         });
         
         loadedCount++;
@@ -194,7 +193,7 @@ export const preloadImages = (
         updateImageCache(optimizedUrl, {
           url: img.src,
           loadStatus: 'error',
-          lowQualityUrl: lowQualityUrl
+          lowQualityUrl
         });
         
         console.error(`Failed to preload image: ${img.src}`);
@@ -230,7 +229,7 @@ export const getLowQualityImage = (url: string): string => {
   // Check if we already have this in the cache
   const optimizedUrl = optimizeCloudinaryUrl(url, { quality: 90, format: 'auto' });
   
-  // Get cache entry first
+  // Here was the problematic code - fixed by retrieving the cache entry first
   const cacheEntry = imageCache.get(optimizedUrl);
   
   // Then check if the cache entry has a lowQualityUrl
@@ -256,40 +255,35 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
   // Determine which images are critical based on the page
   let minPriority = 4;
   let categoryFilter: string | undefined;
-  let batchSize = 3; // Padrão
   
   switch (page) {
     case 'intro':
       categoryFilter = 'branding';
-      batchSize = 2;
-      // Apenas preload otimizadas do logo e imagens de marca
+      // Aumenta a qualidade das imagens da introdução para evitar embaçamento
       preloadImagesByCategory('branding', { 
         quality: 90, 
         batchSize: 2,
-        width: 160, // Reduzindo para apenas o tamanho visível inicialmente
+        width: 800,
         format: 'auto'
       });
       break;
     case 'quiz':
       categoryFilter = undefined; // All high priority images
-      batchSize = 4; // Mais imagens em paralelo para quiz
       break;
     case 'results':
       minPriority = 3;
-      batchSize = 2;
-      // Otimização específica para imagens de transformação
+      // Also preload transformation images with optimized settings
       preloadImagesByCategory('transformation', { 
         quality: 85, 
         batchSize: 2,
-        width: 640, // Largura reduzida para carregamento mais rápido
-        format: 'webp' // Formato moderno mais eficiente
+        width: 800, // Limit width to improve loading
+        format: 'webp' // Use modern format
       });
       categoryFilter = undefined;
       break;
     case 'strategic':
       categoryFilter = 'strategic';
       minPriority = 3;
-      batchSize = 3;
       break;
   }
   
@@ -301,16 +295,11 @@ export const preloadCriticalImages = (page: 'intro' | 'quiz' | 'results' | 'stra
       : meetsMinPriority;
   });
   
-  // Calcula largura otimizada com base na página
-  const optimalWidth = page === 'intro' ? 300 : 
-                       page === 'results' ? 600 : 
-                       page === 'strategic' ? 400 : 500;
-  
-  // Preload these images with optimized settings - revisados para melhor performance
+  // Preload these images with optimized settings
   preloadImages(highPriorityImages, {
-    quality: page === 'results' ? 85 : 90, // Qualidade adaptada por contexto
-    batchSize: batchSize, // Configuração adaptada por contexto
-    width: optimalWidth, // Largura adaptativa
+    quality: 90, // Increased quality for better visual appearance
+    batchSize: 3,
+    width: page === 'intro' ? 800 : 600, // Limit width based on context
     format: 'auto', // Auto format for best browser compatibility
     onComplete: () => {
       console.log(`Preloaded ${highPriorityImages.length} critical images for ${page}`);

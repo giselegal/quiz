@@ -19,9 +19,6 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
             alt="Logo Gisele Galvão"
             width={112}
             height={56}
-            loading="eager"
-            fetchPriority="high"
-            style={{objectFit: 'contain'}}
           />
         </div>
       )}

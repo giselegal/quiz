@@ -20,40 +20,36 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
   ];
 
   useEffect(() => {
-    // Iniciamos o preload de imagens em paralelo com a animação
-    const preloadPromise = Promise.resolve().then(() => {
-      preloadCriticalImages('results');
-      return true;
-    });
+    // Start preloading critical result page images
+    preloadCriticalImages('results');
     
-    // Fake progress animation - com velocidade aumentada (8ms)
+    // Fake progress animation
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        // Aceleração da progressão para finalizar em ~800ms
-        return prev + (prev < 50 ? 1.3 : 1.5);
+        return prev + 1;
       });
-    }, 8); // Reduzido para 8ms para um total de ~800ms
+    }, 10); // Reduzido de 20ms para 10ms (total 1 segundo)
 
-    // Update step based on progress - mostra passos mais rapidamente
+    // Update step based on progress
     const stepInterval = setInterval(() => {
       setStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 200); // Reduzido para 200ms para mostrar passos mais rapidamente
+    }, 250); // Reduzido de 1000ms para 250ms para mostrar mais etapas
 
     // Cleanup
     return () => {
       clearInterval(interval);
       clearInterval(stepInterval);
     };
-  }, [steps.length]);
+  }, []);
 
   useEffect(() => {
-    // Transição mais rápida quando o progresso atinge 98%
-    if (progress >= 98) {
-      // Navegamos imediatamente quando atingir 98% para eliminar espera
+    // When progress reaches 100, navigate to result page
+    if (progress === 100) {
+      // Removido o setTimeout de 500ms
       if (onShowResult) {
         onShowResult();
       } else {
@@ -68,14 +64,10 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
         {/* Logo */}
         <div className="flex justify-center mb-10">
           <img 
-            src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
             alt="Gisele Galvão"
-            className="h-16 w-auto"
-            width={128}
-            height={64}
-            loading="eager"
+            className="h-16"
             fetchPriority="high"
-            style={{objectFit: 'contain'}}
           />
         </div>
 

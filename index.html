@@ -6,32 +6,40 @@
     <title>Descubra Seu Estilo com Gisele Galvão | Vista-se de Você!</title>
     <meta name="description" content="Cansada do guarda-roupa lotado e nada combina? Faça o quiz da Gisele Galvão e descubra seu estilo com clareza e confiança. Resultado imediato!" />
     <meta name="author" content="Gisele Galvão" />
+
     <meta property="og:title" content="Descubra Seu Estilo com Gisele Galvão | Vista-se de Você!" />
     <meta property="og:description" content="Cansada do guarda-roupa lotado e nada combina? Faça o quiz da Gisele Galvão e descubra seu estilo com clareza e confiança. Resultado imediato!" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://giselegalvao.com.br/" />
+
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Descubra Seu Estilo com Gisele Galvão | Vista-se de Você!" />
     <meta name="twitter:description" content="Cansada do guarda-roupa lotado e nada combina? Faça o quiz da Gisele Galvão e descubra seu estilo com clareza e confiança. Resultado imediato!" />
     <meta name="twitter:image" content="https://giselegalvao.com.br/" />
-    <!-- Favicon e tema de cores -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Removido preload de imagens para evitar avisos de preload não utilizado -->
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="./src/main.jsx" as="script" fetchpriority="high" />
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1746334753/ChatGPT_Image_4_de_mai._de_2025_01_30_01_vbiysd.png" fetchpriority="high" />
+    <link rel="preload" href="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_99,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp" as="image" fetchpriority="high" />
     <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     <link rel="dns-prefetch" href="https://connect.facebook.net" />
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    
+    <!-- Cache control -->
     <meta http-equiv="Cache-Control" content="max-age=86400, must-revalidate" />
+    
     <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" rel="stylesheet">
+    
     <!-- Defer other fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    
     <!-- Critical CSS inline for faster rendering -->
     <style>
+      /* Critical CSS para renderização inicial rápida */
       body {
         margin: 0;
         padding: 0;
@@ -65,12 +73,20 @@
         font-family: 'Playfair Display', serif;
       }
     </style>
+    
+    <!-- Fallback para scripts bloqueados -->
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     </noscript>
+    
+    <!-- Meta tag para correção de MIME types -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <script type="module" src="https://cdn.gpteng.co/gptengineer.js"></script>
+    
+    <!-- Análises e scripts externos (otimizados) -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" defer></script>
     <script src="https://static.cloudflareinsights.com/beacon.min.js" defer></script>
+    
+    <!-- Facebook Pixel Code -->
     <script type="text/javascript">
       !function(f,b,e,v,n,t,s) {
         if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -81,14 +97,35 @@
         s.parentNode.insertBefore(t,s)
       }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
     </script>
+    <!-- End Facebook Pixel Code -->
   </head>
   <body>
     <div id="root">
+      <!-- Fallback de carregamento para SEO e UX -->
       <div class="loading-fallback">
         <div class="loading-spinner"></div>
       </div>
     </div>
-    <!-- Script principal: entrada padrão do Vite, será substituído no build -->
-    <script type="module" src="/src/main.jsx"></script>
+    <!-- Script principal - abordagem tradicional para evitar problemas de MIME type -->
+    <script>
+      // Detectar ambiente de produção vs desenvolvimento
+      if (window.location.hostname === 'giselegalvao.com.br' || 
+          window.location.hostname === 'www.giselegalvao.com.br') {
+        // Em produção, carregamos o script compilado
+        const script = document.createElement('script');
+        script.setAttribute('src', './assets/main.js');
+        script.setAttribute('type', 'text/javascript');
+        script.setAttribute('defer', 'true');
+        document.body.appendChild(script);
+        console.log('Ambiente de produção detectado - carregando script compilado');
+      } else {
+        // Em desenvolvimento, carregamos o script de desenvolvimento
+        const script = document.createElement('script');
+        script.setAttribute('src', './src/main.jsx');
+        script.setAttribute('defer', 'true');
+        document.body.appendChild(script);
+        console.log('Ambiente de desenvolvimento detectado');
+      }
+    </script>
   </body>
 </html>

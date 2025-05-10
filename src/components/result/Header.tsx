@@ -29,17 +29,15 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <Card className="bg-white shadow-sm p-6 mb-6">
       <div className="flex flex-col items-center gap-5">
-        <div className="flex justify-center w-full">
-          <Logo 
-            src={logo} 
-            alt={logoAlt} 
-            className="h-auto mx-auto" 
-            style={{
-              height: `${logoHeight}px`,
-              maxWidth: '100%'
-            }} 
-          />
-        </div>
+        <Logo 
+          src={logo} 
+          alt={logoAlt} 
+          className="h-auto w-auto" 
+          style={{
+            height: `${logoHeight}px`,
+            maxWidth: '100%'
+          }} 
+        />
         
         <div className="text-center">
           <h1 className="text-xl md:text-2xl font-playfair text-[#432818]">

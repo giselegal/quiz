@@ -15,10 +15,9 @@ interface QuizTransitionProps {
 const QuizTransition: React.FC<QuizTransitionProps> = ({ onContinue, onAnswer, currentAnswers }) => {
   const handleFirstStrategicAnswer = (response: UserResponse) => {
     onAnswer(response);
-    // Reduzindo o delay para a transição ser mais rápida
     setTimeout(() => {
       onContinue();
-    }, 250); // Reduzido de 500ms para 250ms
+    }, 500);
   };
 
   return (
