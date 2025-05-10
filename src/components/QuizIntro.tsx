@@ -7,11 +7,53 @@ import { Input } from './ui/input';
 import { preloadCriticalImages } from '@/utils/imageManager';
 import AutoFixedImages from './ui/AutoFixedImages';
 import { 
-  getTinyBase64ImageUrl, 
+  // getTinyBase64ImageUrl, // Parece não ser usado diretamente no JSX, mas loadTinyImageAsBase64 é.
   loadTinyImageAsBase64, 
-  getOptimizedImageUrl,
-  getTinyImageUrl
+  getOptimizedImageUrl, // Importado, mas localmente era sombreado. Manter para outras possíveis utilizações.
+  getTinyImageUrl        // Importado, mas localmente era sombreado. Manter para outras possíveis utilizações.
 } from '@/utils/inlineImageUtils';
+
+// --- Otimizações: Constantes e funções movidas para o escopo do módulo ---
+
+const LOGO_BASE_URL = "https://res.cloudinary.com/dqljyf76t/image/upload/";
+const LOGO_IMAGE_ID = "v1744911572/LOGO_DA_MARCA_GISELE_r14oz2";
+
+const INTRO_IMAGE_BASE_URL = "https://res.cloudinary.com/dqljyf76t/image/upload/";
+const INTRO_IMAGE_ID = "v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up";
+
+// Funções utilitárias renomeadas e movidas para fora do componente
+const buildOptimizedIntroImageUrl = (baseUrl: string, imageId: string, format: string, width: number, quality: number) => {
+  return `${baseUrl}f_${format},q_${quality},w_${width},c_limit,dpr_auto,fl_progressive,fl_lossy${width > 300 ? ',e_sharpen:30' : ''}/${imageId}.${format}`;
+};
+
+const buildTinyIntroImageUrl = (baseUrl: string, imageId: string, format: string, width: number) => {
+  return `${baseUrl}f_${format},q_50,w_${width},c_limit,dpr_1.0/${imageId}.${format}`;
+};
+
+const STATIC_LOGO_IMAGE_URLS = {
+  webp: `${LOGO_BASE_URL}f_webp,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.webp`,
+  png: `${LOGO_BASE_URL}f_png,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.png`,
+  avif: `${LOGO_BASE_URL}f_avif,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.avif`
+};
+
+const STATIC_INTRO_IMAGE_URLS = {
+  avif: {
+    tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 200),
+    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 345, 80),
+    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 400, 85),
+    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 450, 90)
+  },
+  webp: {
+    tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 200),
+    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 345, 75),
+    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 400, 80),
+    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 450, 85)
+  },
+  placeholder: `${INTRO_IMAGE_BASE_URL}f_webp,q_1,w_20,c_limit,e_blur:200/${INTRO_IMAGE_ID}.webp`,
+  png: `${INTRO_IMAGE_BASE_URL}f_png,q_70,w_345,c_limit,fl_progressive/${INTRO_IMAGE_ID}.png`
+};
+
+// --- Fim das otimizações de escopo do módulo ---
 
 /**
  * QuizIntro - Componente da página inicial do quiz com layout melhorado e performance otimizada
@@ -81,60 +123,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     }
   }, []);
 
-  // Configuração otimizada do logo com fundo transparente
-  const logoBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
-  // Certifique-se de que este é o ID público correto da sua imagem de logo no Cloudinary.
-  // O parâmetro `b_transparent` tentará tornar o fundo da imagem transparente.
-  // Para melhores resultados, a imagem original carregada no Cloudinary:
-  // 1. Deve ser um formato que suporte transparência (ex: PNG).
-  // 2. Idealmente, já deve ter um fundo transparente.
-  // 3. Se tiver um fundo sólido, `b_transparent` funciona melhor com fundos simples (ex: branco).
-  const logoImageId = "v1744911572/LOGO_DA_MARCA_GISELE_r14oz2";
-  
-  // URLs otimizadas para o logo em diferentes formatos, incluindo o parâmetro b_transparent
-  // e usando q_auto e dpr_auto para melhor otimização pelo Cloudinary.
-  const logoImageUrls = {
-    webp: `${logoBaseUrl}f_webp,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${logoImageId}.webp`,
-    png: `${logoBaseUrl}f_png,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${logoImageId}.png`,
-    avif: `${logoBaseUrl}f_avif,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${logoImageId}.avif`
-  };
-  
-  // Otimização: Adicionando múltiplos tamanhos com formatos modernos e parâmetros de qualidade
-  const introImageBaseUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/";
-  const introImageId = "v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up";
-  
-  // Função para criar URLs otimizadas com diferentes tamanhos e formatos
-  const getOptimizedImageUrl = (baseUrl: string, imageId: string, format: string, width: number, quality: number) => {
-    // Parâmetros otimizados para acelerar carregamento
-    return `${baseUrl}f_${format},q_${quality},w_${width},c_limit,dpr_auto,fl_progressive,fl_lossy${width > 300 ? ',e_sharpen:30' : ''}/${imageId}.${format}`;
-  };
-  
-  // Versão extremamente leve para preload inicial - garante LCP rápido
-  const getTinyPreloadImageUrl = (baseUrl: string, imageId: string, format: string, width: number) => {
-    // Versão super-otimizada com qualidade mínima aceitável
-    return `${baseUrl}f_${format},q_50,w_${width},c_limit,dpr_1.0/${imageId}.${format}`;
-  };
-  
-  // URLs otimizadas para diferentes tamanhos e formatos
-  const introImageUrls = {
-    avif: {
-      tiny: getTinyPreloadImageUrl(introImageBaseUrl, introImageId, 'avif', 200),
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 345, 80), // Candidato LCP
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 400, 85),
-      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'avif', 450, 90)
-    },
-    webp: {
-      tiny: getTinyPreloadImageUrl(introImageBaseUrl, introImageId, 'webp', 200),
-      small: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 345, 75), // Alternativa LCP
-      medium: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 400, 80),
-      large: getOptimizedImageUrl(introImageBaseUrl, introImageId, 'webp', 450, 85)
-    },
-    // Versão base64 tiny inline para mostrar instantaneamente
-    placeholder: `${introImageBaseUrl}f_webp,q_1,w_20,c_limit,e_blur:200/${introImageId}.webp`,
-    // Fallback PNG otimizado usando o mesmo introImageId
-    png: `${introImageBaseUrl}f_png,q_70,w_345,c_limit,fl_progressive/${introImageId}.png` // Qualidade ajustada e progressivo
-  };
-
   // Pré-carregamento para LCP com estratégia otimizada e priorização de conteúdo mínimo viável
   useEffect(() => {
     const preconnectLink = document.createElement('link');
@@ -152,7 +140,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     const placeholderPreload = document.createElement('link');
     placeholderPreload.rel = 'preload';
     placeholderPreload.as = 'image';
-    placeholderPreload.href = introImageUrls.placeholder;
+    placeholderPreload.href = STATIC_INTRO_IMAGE_URLS.placeholder; // Usar constante
     placeholderPreload.type = 'image/webp';
     placeholderPreload.setAttribute('fetchpriority', 'high');
     document.head.appendChild(placeholderPreload);
@@ -161,7 +149,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     const lcpCandidatePreload = document.createElement('link');
     lcpCandidatePreload.rel = 'preload';
     lcpCandidatePreload.as = 'image';
-    lcpCandidatePreload.href = introImageUrls.avif.small; // Usando a versão 'small' como LCP principal
+    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.small; // Usar constante
     lcpCandidatePreload.type = 'image/avif';
     lcpCandidatePreload.setAttribute('fetchpriority', 'high');
     document.head.appendChild(lcpCandidatePreload);
@@ -176,7 +164,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       if (placeholderPreload.parentNode) placeholderPreload.parentNode.removeChild(placeholderPreload);
       if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
     };
-  }, [introImageUrls.placeholder, introImageUrls.avif.small]); // Dependências atualizadas
+  }, []); // As dependências foram removidas pois as URLs agora são constantes de módulo estáveis
 
   // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea
   useEffect(() => {
@@ -185,7 +173,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
       try {
         // Carrega apenas uma vez
         if (!tinyBase64 && !imageLoaded.current) {
-          const base64Data = await loadTinyImageAsBase64(introImageUrls.placeholder);
+          const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder); // Usar constante
           setTinyBase64(base64Data);
         }
       } catch (error) {
@@ -194,7 +182,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     };
     
     loadTinyBase64();
-  }, [introImageUrls.placeholder, tinyBase64]);
+  }, [tinyBase64]); // A dependência de STATIC_INTRO_IMAGE_URLS.placeholder foi removida pois é estável
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,10 +207,10 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             <div className="relative">
               <picture>
                 {/* Formatos modernos para melhor qualidade e tamanho */}
-                <source srcSet={logoImageUrls.avif} type="image/avif" />
-                <source srcSet={logoImageUrls.webp} type="image/webp" />
+                <source srcSet={STATIC_LOGO_IMAGE_URLS.avif} type="image/avif" />
+                <source srcSet={STATIC_LOGO_IMAGE_URLS.webp} type="image/webp" />
                 <img 
-                  src={logoImageUrls.png}
+                  src={STATIC_LOGO_IMAGE_URLS.png}
                   alt="Logo Gisele Galvão"
                   className="h-auto mx-auto"
                   width={140}
@@ -271,7 +259,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundImage: tinyBase64 ? `url('${tinyBase64}')` : `url('${introImageUrls.placeholder}')`,
+              backgroundImage: tinyBase64 ? `url('${tinyBase64}')` : `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
@@ -279,19 +267,19 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             <picture>
               {/* Formatos modernos para browsers que suportam, com preload da versão tiny primeiro */}
               <source 
-                srcSet={`${introImageUrls.avif.tiny} 200w, ${introImageUrls.avif.small} 345w, ${introImageUrls.avif.medium} 400w, ${introImageUrls.avif.large} 450w`} 
+                srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`} 
                 type="image/avif" 
                 sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
               <source 
-                srcSet={`${introImageUrls.webp.tiny} 200w, ${introImageUrls.webp.small} 345w, ${introImageUrls.webp.medium} 400w, ${introImageUrls.webp.large} 450w`} 
+                srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`} 
                 type="image/webp" 
                 sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
               />
               {/* Fallback para navegadores sem suporte a formatos modernos */}
               {/* O src agora usa uma URL otimizada do mesmo introImageId */}
               <img
-                src={introImageUrls.png} // Alterado para usar a URL PNG otimizada do introImageId correto
+                src={STATIC_INTRO_IMAGE_URLS.png} // Alterado para usar a URL PNG otimizada do introImageId correto
                 alt="Descubra seu estilo predominante"
                 className="w-full h-auto object-contain quiz-intro-image"
                 width={345}
@@ -306,7 +294,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                   margin: '0 auto',
                   objectFit: 'contain',
                   aspectRatio: '345/360',
-                  backgroundImage: `url('${introImageUrls.placeholder}')`,
+                  backgroundImage: `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   imageRendering: 'auto',
