@@ -1,9 +1,10 @@
-name: Construir e implantar
+name: [DESATIVADO] Construir e implantar
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:  # Gatilho manual para execução do workflow
+  # Desativando os gatilhos para evitar execuções
+  # push:
+  #   branches: [ main ]
+  workflow_dispatch:  # Mantendo apenas o gatilho manual para testes
 
 jobs:
   build:

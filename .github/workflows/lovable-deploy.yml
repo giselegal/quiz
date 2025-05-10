@@ -1,32 +1,53 @@
-name: Lovable Deployment
+name: Implantação Lovable
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'src/components/lovable/**'
-      - 'public/lovable-uploads/**'
+    branches: [ main ]
+  workflow_dispatch:  # Gatilho manual para execução do workflow
 
 jobs:
-  build_and_deploy:
+  build:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
         
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
           
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
         
-      - name: Build Project
+      - name: Build project
         run: npm run build
         
-      - name: Deploy to Server
-        # Adicione aqui os comandos para deploy ao seu servidor
-        run: echo "Deployment would happen here"
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          
+      - name: Deploy to Hostinger
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          dangerous-clean-slate: true
