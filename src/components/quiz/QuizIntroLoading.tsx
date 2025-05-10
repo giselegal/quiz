@@ -11,16 +11,8 @@ export const QuizIntroLoading: React.FC = () => {
   
   return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FBF8F4]">
-      {/* Spinner único e elegante */}
-      <LoadingSpinner 
-        size="lg" 
-        color="#B89B7A" 
-        thickness="normal"
-        className="mb-6" 
-      />
-      
-      {/* Logo após o spinner (sem duplicação de elementos de carregamento) */}
-      <div className="w-36 h-auto">
+      {/* Apenas o logo, sem spinner */}
+      <div className="w-36 h-auto mb-6">
         <img 
           src={logoUrl}
           alt="Logo Gisele Galvão"
@@ -38,7 +30,7 @@ export const QuizIntroLoading: React.FC = () => {
         />
       </div>
       
-      <p className="text-[#432818] font-medium mt-4">Preparando sua experiência...</p>
+      <p className="text-[#432818] font-medium">Preparando sua experiência...</p>
     </div>
   );
 };
