@@ -41,7 +41,8 @@ export const initFacebookPixel = () => {
   if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'development') {
     // Importar dinamicamente para evitar carregamento desnecessário em desenvolvimento
     import('./facebookPixel').then(module => {
-      module.loadFacebookPixel();
+      // module.loadFacebookPixel(); // Comentado para teste
+      console.log('[Analytics] Carregamento do Facebook Pixel desabilitado para teste.');
     });
   }
 };
