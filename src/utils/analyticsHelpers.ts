@@ -42,7 +42,7 @@ export const getUserProgressData = () => {
 export const resetMetricsCache = (): boolean => {
   console.log("Metrics cache reset");
   // Implementation for resetting metrics cache
-  return true;
+  return true; // Changed from void return to boolean
 };
 
 // Get cached metrics

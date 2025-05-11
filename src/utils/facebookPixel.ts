@@ -6,9 +6,18 @@
 // Configuração do ID do Pixel
 const FACEBOOK_PIXEL_ID = '1234567890123456'; // Substitua pelo seu ID real do Facebook Pixel
 
+// Interface for window augmentation
+interface CustomWindow extends Window {
+  fbq: (event: string, eventName: string, params?: any, eventId?: { eventID: string }) => void;
+  _fbq?: any;
+}
+
+// Typeguard for window object
+const isBrowser = (): boolean => typeof window !== 'undefined';
+
 // Inicialização do Facebook Pixel
 export const initFacebookPixel = (pixelId: string): void => {
-  if (typeof window !== 'undefined') {
+  if (isBrowser()) {
     try {
       // Inicialização do código do pixel
       !function(f,b,e,v,n,t,s)
@@ -43,20 +52,12 @@ export const loadFacebookPixel = (): void => {
 
 // Função para rastrear eventos
 export const trackPixelEvent = (eventName: string, params?: object): void => {
-  if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
+  if (isBrowser() && typeof (window as any).fbq === 'function') {
     (window as any).fbq('track', eventName, params);
   } else {
     console.log(`Facebook Pixel Event (simulado): ${eventName}`, params);
   }
 };
-
-// Types para o Pixel
-declare global {
-  interface Window {
-    fbq: (event: string, eventName: string, params?: any, eventId?: { eventID: string }) => void;
-    _fbq?: any;
-  }
-}
 
 // Outras funções de utilidade para o pixel podem ser adicionadas aqui
 export const trackLead = (value?: number, currency?: string): void => {

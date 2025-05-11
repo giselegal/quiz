@@ -26,7 +26,7 @@ const ABTestPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('variant-a');
   
   // Sample data for A/B test variants
-  const variantAData: ABTestVariantProps = {
+  const variantAData = {
     primaryStyle: {
       category: 'Natural',
       percentage: 65,
@@ -45,9 +45,9 @@ const ABTestPage: React.FC = () => {
       }
     ],
     userName: 'Ana Silva'
-  };
+  } as ABTestVariantProps;
   
-  const variantBData: ABTestVariantProps = {
+  const variantBData = {
     primaryStyle: {
       category: 'Natural',
       percentage: 58,
@@ -66,7 +66,7 @@ const ABTestPage: React.FC = () => {
       }
     ],
     userName: 'Ana Silva'
-  };
+  } as ABTestVariantProps;
   
   return (
     <AdminLayout>

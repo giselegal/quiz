@@ -35,7 +35,7 @@ export interface PreloadImageDefinition {
 // Image Settings type needed by optimization files
 export type ImageSettings = {
   quality?: number;
-  format?: 'auto' | 'webp' | 'avif';
+  format?: 'auto' | 'webp' | 'avif' | string; // Updated to allow string
   width?: number;
   height?: number;
   crop?: 'fill' | 'limit' | 'fit';

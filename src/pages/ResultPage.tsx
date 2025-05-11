@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useQuizContext } from '../context/QuizContext';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 import ResultStyleCard from '../components/result/ResultStyleCard';
 import ResultActionButtons from '../components/result/ResultActionButtons';
 import { trackButtonClick } from '../utils/analytics';
@@ -20,7 +20,7 @@ interface ResultPageProps {
 
 const ResultPage: React.FC<ResultPageProps> = () => {
   const { quizState } = useQuizContext();
-  const router = useRouter();
+  const navigate = useNavigate();
   
   // Example style result data
   const styleResults: StyleResult[] = [
@@ -64,13 +64,13 @@ const ResultPage: React.FC<ResultPageProps> = () => {
   // Handle restart quiz
   const handleRestartQuiz = () => {
     trackButtonClick('restart-quiz', 'Refazer o Quiz', 'result-page');
-    router.push('/');
+    navigate('/');
   };
   
   // Handle view style guide
   const handleViewStyleGuide = () => {
     trackButtonClick('view-style-guide', 'Ver Guia de Estilo', 'result-page');
-    router.push('/style-guide');
+    navigate('/style-guide');
   };
 
   // Handle share result

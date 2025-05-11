@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { captureUTMParameters, trackPageView } from '@/utils/analytics';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 import QuizOfferHero from '@/components/quiz-offer/QuizOfferHero';
 import QuizOfferCTA from '@/components/quiz-offer/QuizOfferCTA';
 import QuizOfferTestimonials from '@/components/quiz-offer/QuizOfferTestimonials';
@@ -15,7 +15,7 @@ interface QuizOfferPageProps {
 }
 
 export const QuizOfferPage: React.FC<QuizOfferPageProps> = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   
   // Capture UTM parameters and track page view on component mount
@@ -30,13 +30,13 @@ export const QuizOfferPage: React.FC<QuizOfferPageProps> = () => {
   const handleStartMainQuiz = () => {
     setLoading(true);
     // Navigate to the main quiz
-    router.push('/');
+    navigate('/');
   };
   
   const handlePurchase = () => {
     setLoading(true);
     // Navigate to purchase page
-    router.push('/checkout');
+    navigate('/checkout');
   };
 
   return (
