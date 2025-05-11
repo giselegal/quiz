@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { getLowQualityImage } from '@/utils/imageManager';
 import { AspectRatioContainer } from './aspect-ratio-container';
-import cn from 'classnames';
 
 interface OptimizedImageProps {
   src: string;
@@ -16,8 +14,6 @@ interface OptimizedImageProps {
   placeholderColor?: string;
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   onLoad?: () => void;
-  style?: React.CSSProperties;
-  containerRef?: React.RefObject<HTMLDivElement>;
 }
 
 /**
@@ -40,10 +36,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   quality = 80,
   placeholderColor = '#f5f5f5',
   objectFit = 'cover',
-  onLoad,
-  style,
-  containerRef,
-  ...props
+  onLoad
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lowQualitySrc, setLowQualitySrc] = useState<string>('');
@@ -145,16 +138,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const heightStr = String(height);
   
   return (
-    <div
-      className={cn("relative overflow-hidden", className)}
-      style={{
-        width: width,
-        height: height,
-        ...(aspectRatio && { aspectRatio: String(aspectRatio) }), // Convert to string for proper type
-        ...(style || {})
-      }}
-      ref={containerRef}
-      {...props}
+    <AspectRatioContainer 
+      ratio={aspectRatio} 
+      className={`${containerClassName} relative overflow-hidden`}
+      bgColor={placeholderColor}
     >
       {/* Placeholder de baixa qualidade - visível enquanto a imagem principal carrega */}
       {lowQualitySrc && !imageLoaded && !hasError && (
@@ -180,8 +167,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onLoad={handleImageLoad}
           onError={handleImageError}
           loading={priority ? 'eager' : 'lazy'}
-          // Remove non-standard attributes
-          // fetchPriority={priority ? 'high' : 'auto'}
+          fetchPriority={priority ? 'high' : 'auto'}
           decoding={priority ? 'sync' : 'async'}
         />
       )}
@@ -192,8 +178,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           Não foi possível carregar a imagem
         </div>
       )}
-    </div>
+    </AspectRatioContainer>
   );
 };
-
-export default OptimizedImage;

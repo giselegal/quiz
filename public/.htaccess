@@ -16,13 +16,6 @@
   ExpiresByType application/font-woff2 "access plus 1 year"
   ExpiresByType image/svg+xml "access plus 1 year"
   ExpiresByType application/json "access plus 0 seconds"
-  # Adicionar tipos de fonte adicionais
-  ExpiresByType font/ttf "access plus 1 year"
-  ExpiresByType font/otf "access plus 1 year"
-  ExpiresByType font/woff "access plus 1 year"
-  ExpiresByType font/woff2 "access plus 1 year"
-  # Cache padrão
-  ExpiresDefault "access plus 2 days"
 </IfModule>
 
 # Compressão GZIP
@@ -37,49 +30,4 @@
   AddOutputFilterByType DEFLATE application/javascript
   AddOutputFilterByType DEFLATE application/x-javascript
   AddOutputFilterByType DEFLATE application/json
-  # Adicionar compressão para fontes
-  AddOutputFilterByType DEFLATE font/ttf font/otf image/svg+xml
-</IfModule>
-
-# Ativar compressão Brotli se disponível (maior compressão que GZIP)
-<IfModule mod_brotli.c>
-  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml
-</IfModule>
-
-# Configurações para melhorar a segurança e performance
-<IfModule mod_headers.c>
-  # Cabeçalhos de segurança
-  Header set X-Content-Type-Options "nosniff"
-  Header set X-XSS-Protection "1; mode=block"
-  Header set X-Frame-Options "SAMEORIGIN"
-  
-  # Configurar cabeçalhos para cache eficiente
-  <FilesMatch "\.(ico|pdf|jpg|jpeg|png|webp|avif|gif|svg|js|css|swf|woff|woff2|ttf|otf)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
-  
-  # Para arquivos HTML e dados, usar cache mais curto
-  <FilesMatch "\.(html|htm|xml|json|txt)$">
-    Header set Cache-Control "public, max-age=7200"
-  </FilesMatch>
-</IfModule>
-
-# Suporte a URL amigáveis para SPA
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  
-  # Não redirecionar arquivos ou diretórios existentes
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  
-  # Redirecionar tudo para index.html
-  RewriteRule ^(.*)$ index.html [L]
-</IfModule>
-
-# Configurações de desempenho do servidor (se aplicável)
-<IfModule mod_php7.c>
-  php_value memory_limit 256M
-  php_value max_execution_time 300
-  php_flag display_errors Off
 </IfModule>

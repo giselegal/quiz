@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 
 /**
@@ -10,12 +9,10 @@ export const usePerformanceMonitoring = () => {
     // Importar web-vitals apenas quando necessário
     const reportWebVitals = async () => {
       try {
-        // Web-vitals tem uma API diferente nas versões mais recentes
-        const webVitals = await import('web-vitals');
+        const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
         
         // Função para enviar métricas
-        const sendMetric = (metric: any) => {
-          const { name, value, id } = metric;
+        const sendMetric = ({ name, value, id }) => {
           // Log para desenvolvimento (remova em produção)
           if (process.env.NODE_ENV === 'development') {
             console.log(`[Web Vitals] ${name}: ${value} (ID: ${id})`);
@@ -27,20 +24,11 @@ export const usePerformanceMonitoring = () => {
         };
         
         // Registrar callbacks para cada métrica
-        if (webVitals.onCLS) webVitals.onCLS(sendMetric);
-        if (webVitals.onFCP) webVitals.onFCP(sendMetric);
-        if (webVitals.onLCP) webVitals.onLCP(sendMetric);
-        if (webVitals.onTTFB) webVitals.onTTFB(sendMetric);
-        
-        // Verificar se onFID ou onINP existe (API versão 3.x)
-        // Nas versões mais recentes, onINP pode substituir onFID
-        if ('onINP' in webVitals) {
-          webVitals.onINP(sendMetric);
-        } else if ('onFID' in webVitals) {
-          // @ts-ignore - Handle older web-vitals versions
-          webVitals.onFID?.(sendMetric);
-        }
-        
+        getCLS(sendMetric);
+        getFID(sendMetric);
+        getFCP(sendMetric);
+        getLCP(sendMetric);
+        getTTFB(sendMetric);
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);
       }

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
-import { trackButtonClick } from '@/utils/analytics';
+import { trackButtonClick, trackSaleConversion } from '@/utils/analytics';
 import { getCtaUrl } from '@/services/pixelManager';
 import SecurePurchaseElement from '@/components/result/SecurePurchaseElement';
 
@@ -20,7 +20,9 @@ export const QuizOfferCTA: React.FC<QuizOfferCTAProps> = ({
   
   const handleCTAClick = () => {
     trackButtonClick('main-cta', 'Comprar Quiz Completo', 'cta-section', 'purchase');
-    // Redirect to checkout
+    // Registrar início de checkout
+    trackSaleConversion(39.0, 'Quiz de Estilo Completo');
+    // Redirecionar para checkout
     window.location.href = getCtaUrl();
   };
   

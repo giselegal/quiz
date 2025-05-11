@@ -14,7 +14,7 @@ export const preloadCriticalImages = (
   const {
     quality = 90,
     format = 'auto',
-    timeout = 3000,
+    timeout = 3000, // Now properly typed in PreloadOptions
     onProgress,
     onComplete,
     batchSize = 4,
@@ -105,7 +105,7 @@ export const preloadLCPImage = (
   const lcpOptions: PreloadOptions = {
     quality: 95,
     format: 'auto',
-    timeout: 2000,
+    timeout: 2000, // Now properly defined in PreloadOptions
     ...options
   };
   

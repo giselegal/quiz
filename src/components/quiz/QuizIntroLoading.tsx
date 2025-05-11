@@ -1,9 +1,9 @@
-
 import React from 'react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 /**
  * Componente especializado para o carregamento da página QuizIntro
- * Simplificado para evitar dependências circulares e otimizar performance
+ * Usa o spinner padronizado para manter a consistência visual
  */
 export const QuizIntroLoading: React.FC = () => {
   // Logo otimizada
@@ -19,6 +19,7 @@ export const QuizIntroLoading: React.FC = () => {
           width={140}
           height={60}
           loading="eager"
+          fetchPriority="high"
           decoding="async"
           style={{
             objectFit: 'contain',

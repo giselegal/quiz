@@ -1,81 +1,99 @@
 
-export type PreloadOptions = {
+// Type definitions for image utility functions
+
+// Options for preloading images
+export interface PreloadOptions {
   quality?: number;
-  format?: 'auto' | 'webp' | 'avif' | string; // Allow string for flexibility
-  width?: number;
-  height?: number;
-  timeout?: number;
+  format?: 'auto' | 'webp' | 'jpg' | 'png';
   onProgress?: (loaded: number, total: number) => void;
   onComplete?: () => void;
   batchSize?: number;
   generateLowQuality?: boolean;
-  crop?: 'fill' | 'limit' | 'fit';
-  responsive?: boolean;
-};
-
-export type LoadStatus = 'idle' | 'loading' | 'loaded' | 'error';
-
-export type ImageCacheEntry = {
-  url: string;
-  loadStatus?: LoadStatus;
-  element?: HTMLImageElement;
-  optimizedUrl?: string;
-  lowQualityUrl?: string;
-  lastAccessed?: number; // This property is valid
-};
-
-export interface PreloadImageDefinition {
-  url: string;
+  timeout?: number;
   width?: number;
   height?: number;
-  quality?: number;
-  priority?: number;
 }
 
-// Image Settings type needed by optimization files
-export type ImageSettings = {
-  quality?: number;
-  format?: 'auto' | 'webp' | 'avif' | string; // Updated to allow string
+// Image definition for preloading
+export interface PreloadImageDefinition {
+  src: string;
+  priority?: number;
   width?: number;
   height?: number;
-  crop?: 'fill' | 'limit' | 'fit';
-};
+  quality?: number;
+}
 
-// Image Analysis types
+// Type for image metadata cache
+export interface ImageMetadata {
+  width: number;
+  height: number;
+  format?: string;
+  aspectRatio?: number;
+  dominantColor?: string;
+  lastAccessed: number;
+}
+
+// Type for comprehensive image analysis
 export interface ImageAnalysis {
   url: string;
-  size?: number;
-  dimensions?: { width: number; height: number };
-  format?: string;
-  optimized?: boolean;
-  recommendations?: string[];
-  quality?: number | string; // Support both number and string
-  isResponsive?: boolean;
-  suggestedImprovements?: string[];
+  format: string;
+  quality: string | number;
+  width: string | number;
+  height: string | number;
+  isOptimized: boolean;
+  isResponsive: boolean;
+  suggestedImprovements: string[];
   estimatedSizeReduction?: number;
 }
 
+// Type for image diagnostic result
 export interface ImageDiagnosticResult {
-  status?: 'success' | 'error';
-  analysis?: ImageAnalysis;
-  error?: string;
-  summary?: {
-    totalImages?: number;
-    optimizedImages?: number;
-    totalSize?: number;
-    potentialSavings?: number;
-    totalImagesRendered?: number;
-    totalImagesWithIssues?: number;
-    totalDownloadedBytes?: number;
-    estimatedPerformanceImpact?: string;
+  summary: {
+    totalImagesRendered: number;
+    totalImagesWithIssues: number;
+    totalDownloadedBytes: number;
+    estimatedPerformanceImpact: string;
   };
-  detailedIssues?: Array<{
+  detailedIssues: {
     url: string;
     element: HTMLImageElement;
     issues: string[];
     dimensions?: {
-      natural: { width: number; height: number };
-      display: { width: number; height: number };
-    };
-  }>;
+      natural: { width: number, height: number };
+      display: { width: number, height: number };
+    }
+  }[];
+}
+
+// Add ImageSettings type with proper format values
+export interface ImageSettings {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'auto' | 'webp' | 'avif' | 'jpg' | 'png';
+  crop?: 'fill' | 'fit' | 'limit';
+}
+
+// Add ImageCacheEntry type with loadStatus and lowQualityUrl
+export interface ImageCacheEntry {
+  url: string;
+  metadata?: ImageMetadata;
+  lastAccessed: number;
+  loadStatus?: 'idle' | 'loading' | 'loaded' | 'error';
+  element?: HTMLImageElement;
+  optimizedUrl?: string;
+  lowQualityUrl?: string;
+}
+
+// Update BankImage to include priority and make alt optional
+export interface BankImage {
+  id: string;
+  src: string;
+  category: string;
+  tags: string[];
+  width?: number;
+  height?: number;
+  priority?: number;
+  preloadPriority?: number;
+  alt?: string;
 }

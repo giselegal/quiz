@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 
 interface TrackingScript {
@@ -33,7 +32,7 @@ export const OptimizedTracking: React.FC<{
       }
       
       // Configuramos um novo timeout para o carregamento dos scripts
-      const timeoutId = setTimeout(() => {
+      window._scriptLoadTimeout = setTimeout(() => {
         scripts.forEach(script => {
           // Verificar se já existe
           if (document.getElementById(script.id)) {
@@ -61,9 +60,6 @@ export const OptimizedTracking: React.FC<{
           document.body.appendChild(scriptEl);
         });
       }, delay);
-      
-      // Armazenar o ID do timeout para gerenciamento
-      window._scriptLoadTimeout = timeoutId as any;
     };
     
     // Se waitForInteraction é verdadeiro, espera pela primeira interação
@@ -117,7 +113,7 @@ export const OptimizedTracking: React.FC<{
 // Adicionar a definição para _scriptLoadTimeout global
 declare global {
   interface Window {
-    _scriptLoadTimeout: number | NodeJS.Timeout;
+    _scriptLoadTimeout: number;
   }
 }
 
