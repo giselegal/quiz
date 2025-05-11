@@ -1,4 +1,4 @@
-sim'use client';
+'use client';
 
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
