@@ -311,7 +311,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     // AVIF para navegadores modernos
     const avifPreload = createResourceHint('preload', STATIC_INTRO_IMAGE_URLS.avif.large, { 
       as: 'image', 
-      type: 'image/avif'
+      type: 'image/avif',
+      fetchPriority: 'high'
     });
     avifPreload.setAttribute('fetchpriority', 'high');
     hints.push(avifPreload);
@@ -319,7 +320,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     // 4. Fallback para WebP (navegadores sem suporte a AVIF)
     const webpPreload = createResourceHint('preload', STATIC_INTRO_IMAGE_URLS.webp.large, {
       as: 'image',
-      type: 'image/webp'
+      type: 'image/webp',
+      fetchPriority: 'high'
     });
     webpPreload.setAttribute('fetchpriority', 'high');
     hints.push(webpPreload);
@@ -677,14 +679,16 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             <OptimizedImage
               sources={[
                 { 
-                  srcSet: `${STATIC_INTRO_IMAGE_URLS.avif.small} 270w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`, 
-                  type: 'image/avif', 
-                  sizes: '(max-width: 640px) 270px, (max-width: 768px) 345px, 450px' 
+                  srcSet: `${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`,
+                  type: 'image/avif',
+                  sizes: '(max-width: 640px) 345px, (max-width: 768px) 400px, 450px',
+                  fetchPriority: 'high'
                 },
                 { 
-                  srcSet: `${STATIC_INTRO_IMAGE_URLS.webp.small} 270w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`, 
-                  type: 'image/webp', 
-                  sizes: '(max-width: 640px) 270px, (max-width: 768px) 345px, 450px' 
+                  srcSet: `${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`,
+                  type: 'image/webp',
+                  sizes: '(max-width: 640px) 345px, (max-width: 768px) 400px, 450px',
+                  fetchPriority: 'high'
                 }
               ]}
               src={STATIC_INTRO_IMAGE_URLS.webp.medium} // Versão média como fallback
@@ -705,9 +709,9 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 background: 'none', 
                 display: 'block', 
                 margin: '0 auto',
-                objectFit: 'contain',
-                aspectRatio: '450/470',
-                imageRendering: 'auto',
+                objectFit: "cover",
+                imageRendering: "crisp-edges",
+                backgroundPosition: 'center',
                 opacity: imageLoaded.current ? 1 : 0.01, // Começa quase invisível para permitir transição suave
                 transition: 'opacity 0.2s ease-in', // Transição suave quando carregada
               }}

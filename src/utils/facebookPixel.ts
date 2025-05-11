@@ -1,3 +1,4 @@
+
 /**
  * Utility para gerenciar Facebook Pixel
  */

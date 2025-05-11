@@ -183,11 +183,11 @@ const ResultPage: React.FC = () => {
               <AnimatedWrapper animation={isLowPerformance ? 'none' : 'scale'} show={true} duration={500} delay={100} className="order-1 md:order-2">
                 <div className="max-w-[220px] md:max-w-[300px] mx-auto relative">
                   <OptimizedImage 
-                    src={image}
-                    alt={`Estilo ${category}`}
-                    width={300}
-                    height={Math.round(300 * 1.3)}
-                    className="w-full h-auto rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
+                    src={primaryStyle.imageUrl}
+                    alt={primaryStyle.category || "Estilo predominante"}
+                    width={450}
+                    height={600}
+                    className="rounded-lg shadow-lg"
                     priority={true}
                   />
                   <div className="absolute -top-3 -right-3 w-14 h-14 border-t-2 border-r-2 border-[#B89B7A] dark:border-[#E0C9B1]"></div>

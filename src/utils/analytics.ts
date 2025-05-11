@@ -1,3 +1,4 @@
+
 /**
  * Utility para funções de analytics e tracking
  */
@@ -65,14 +66,10 @@ export const trackLeadGeneration = (email: string) => {
 
 /**
  * Rastreia uma resposta no quiz
- * @param questionId ID da pergunta
- * @param selectedOptions IDs das opções selecionadas
- * @param currentQuestionIndex Índice da pergunta atual
- * @param totalQuestions Número total de perguntas
  */
 export const trackQuizAnswer = (questionId: string, selectedOptions: string[], currentQuestionIndex: number, totalQuestions: number) => {
   if (window.fbq) {
-    const eventData = { // Idealmente, adicionar UTMs aqui também se necessário
+    const eventData = {
       question_id: questionId,
       selected_options: selectedOptions.join(', '),
       current_question_index: currentQuestionIndex,
@@ -102,7 +99,7 @@ export const trackQuizComplete = () => {
   const duration = startTime ? (endTime - parseInt(startTime, 10)) / 1000 : 0; // em segundos
   
   if (window.fbq) {
-    const eventData = { quiz_duration: duration }; // Adicionar UTMs se necessário
+    const eventData = { quiz_duration: duration };
     window.fbq('trackCustom', 'QuizComplete', eventData);
     console.log('[Analytics] QuizComplete tracked');
   }
@@ -117,11 +114,10 @@ export const trackQuizComplete = () => {
 
 /**
  * Rastreia a visualização do resultado
- * @param styleCategory Categoria do estilo predominante
  */
 export const trackResultView = (styleCategory: string) => {
   if (window.fbq) {
-    const eventData = { style_category: styleCategory }; // Adicionar UTMs se necessário
+    const eventData = { style_category: styleCategory };
     window.fbq('trackCustom', 'ResultView', eventData);
     console.log('[Analytics] ResultView tracked for style:', styleCategory);
   }
@@ -144,12 +140,11 @@ export const trackButtonClick = (
   actionType?: string
 ) => {
   if (window.fbq) {
-    const eventData = { // Adicionar UTMs se necessário
+    const eventData = {
       button_id: buttonId || 'unknown',
       button_text: buttonText || 'unknown',
       button_location: buttonLocation || 'unknown',
-      action_type: actionType || 'click',
-      // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida neste escopo
+      action_type: actionType || 'click'
     };
     
     window.fbq('trackCustom', 'ButtonClick', eventData);
@@ -160,8 +155,7 @@ export const trackButtonClick = (
     window.gtag('event', 'button_click', {
       event_category: 'interaction',
       event_label: buttonText || buttonId,
-      button_location: buttonLocation,
-      // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida
+      button_location: buttonLocation
     });
   }
 };
@@ -171,12 +165,11 @@ export const trackButtonClick = (
  */
 export const trackSaleConversion = (value: number, productName?: string) => {
   if (window.fbq) {
-    const eventData = { // Adicionar UTMs se necessário
+    const eventData = {
       value: value,
       currency: 'BRL',
       content_name: productName || 'Guia de Estilo',
-      content_type: 'product',
-      // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida
+      content_type: 'product'
     };
     
     window.fbq('track', 'Purchase', eventData);
@@ -190,68 +183,8 @@ export const trackSaleConversion = (value: number, productName?: string) => {
       currency: 'BRL',
       items: [{
         name: productName || 'Guia de Estilo',
-        price: value,
-        // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida
+        price: value
       }]
     });
   }
 };
-
-/**
- * Obtém todos os eventos analytics armazenados
- */
-export const getAnalyticsEvents = () => {
-  try {
-    const eventsJson = localStorage.getItem('analytics_events');
-    return eventsJson ? JSON.parse(eventsJson) : [];
-  } catch (error) {
-    console.error('Error getting analytics events:', error);
-    return [];
-  }
-};
-
-/**
- * Limpa todos os dados de analytics armazenados
- */
-export const clearAnalyticsData = () => {
-  try {
-    localStorage.removeItem('analytics_events');
-    localStorage.removeItem('fb_pixel_event_log');
-    localStorage.removeItem('analytics_metrics_cache');
-    console.log('Analytics data cleared');
-    return true;
-  } catch (error) {
-    console.error('Error clearing analytics data:', error);
-    return false;
-  }
-};
-
-/**
- * Testa a funcionalidade do Facebook Pixel
- */
-export const testFacebookPixel = () => {
-  if (window.fbq) {
-    window.fbq('trackCustom', 'TestEvent', { test_value: 'test' });
-    console.log('Test event sent to Facebook Pixel');
-    return true;
-  } else {
-    console.error('Facebook Pixel not initialized');
-    return false;
-  }
-};
-
-// Exportações padrão podem não ser necessárias se todas as funções são exportadas nomeadamente
-// export default {
-//   captureUTMParameters,
-//   initFacebookPixel,
-//   trackQuizStart,
-//   trackLeadGeneration,
-//   getAnalyticsEvents,
-//   clearAnalyticsData,
-//   testFacebookPixel
-// };
-
-// Funções que estavam na versão local e podem precisar ser reintegradas ou foram substituídas:
-// - addUtmParamsToEvent (a lógica de UTM agora está em captureUTMParameters e precisa ser aplicada aos eventos)
-// - A inicialização manual do script do FB pixel (agora em ./facebookPixel, presumivelmente)
-// - As chamadas para trackFunnelEvent e getCurrentFunnelConfig (precisam ser verificadas/reintegradas se necessário)

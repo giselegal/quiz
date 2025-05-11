@@ -1,5 +1,5 @@
+
 import React from 'react';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 /**
  * Componente especializado para o carregamento da página QuizIntro
