@@ -46,9 +46,9 @@ jobs:
       - name: Deploy to Hostinger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
+          server: ftp.giselegalvao.com.br
+          username: u116045488.giselegalvao
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}/
+          server-dir: /u116045488/domains/giselegalvao.com.br/public_html/
           dangerous-clean-slate: true
