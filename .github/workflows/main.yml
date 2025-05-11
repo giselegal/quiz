@@ -1,54 +1,49 @@
-name: DESATIVADO Construir e implantar
-
-on:
-  # Desativando os gatilhos para evitar execuções
-  # push:
-  #   branches: [ main ]
-  workflow_dispatch:  # Mantendo apenas o gatilho manual para testes
+on: push
+name: 🚀 Deploy website on push
 
 jobs:
   build:
+    name: 🛠️ Build Project
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
+      - name: 🚚 Get latest code
         uses: actions/checkout@v4
-        
-      - name: Setup Node.js
+      
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '18' # Ou a versão que seu projeto requer
           cache: 'npm'
           
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm ci
         
-      - name: Build project
-        run: npm run build
+      - name: 🏗️ Build project
+        run: npm run build # Ou o comando de build do seu projeto
         
-      - name: Upload build artifacts
+      - name: ⬆️ Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-files
-          path: dist/
-          
-  deploy:
+          path: dist/ # Certifique-se que este é o seu diretório de build
+
+  web-deploy:
+    name: 🎉 Deploy to Hostinger
     needs: build
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Download build artifacts
+      - name: ⬇️ Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-files
           path: dist/
           
-      - name: Deploy to Hostinger
+      - name: 📂 Sync files to Hostinger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ftp.giselegalvao.com.br
-          username: u116045488.giselegalvao
+          server: 147.93.39.155
+          username: u116045488
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: /u116045488/domains/giselegalvao.com.br/public_html/
+          server-dir: public_html/
           dangerous-clean-slate: true
