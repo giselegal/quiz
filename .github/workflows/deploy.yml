@@ -47,7 +47,7 @@ jobs:
         with:
           server: ftp.giselegalvao.com.br
           username: u116045488.giselegalvao
-          password: GiseleG@l0809  # <--- ATENÇÃO AQUI
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /u116045488/domains/giselegalvao.com.br/public_html/
           dangerous-clean-slate: true
