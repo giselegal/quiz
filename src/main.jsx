@@ -19,14 +19,13 @@ if (process.env.NODE_ENV !== 'production') {
   console.time('App Render');
 }
 
-// Inicializar lazy loading de scripts
-initLazyLoading();
-
 // Renderizar aplicativo com tratamento de erro
 try {
   const rootElement = document.getElementById('root');
   if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
+    // Inicializar lazy loading de scripts
+    initLazyLoading();
       <React.StrictMode>
         <App />
       </React.StrictMode>
@@ -42,6 +41,8 @@ try {
       bodyElement.appendChild(fallbackRoot);
       // Tentar renderizar novamente
       ReactDOM.createRoot(fallbackRoot).render(
+// Inicializar carregamento lazy de scripts
+initLazyLoading();
         <React.StrictMode>
           <App />
         </React.StrictMode>
