@@ -125,6 +125,78 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
 
 
 
+// Novo arquivo otimizado para o useEffect de preload
+// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente de preload
+
+  // Pré-carregamento para LCP com estratégia otimizada - MELHORADO
+  useEffect(() => {
+    // Preconnect para o domínio Cloudinary para acelerar conexões futuras
+    const preconnectLink = document.createElement('link');
+    preconnectLink.rel = 'preconnect';
+    preconnectLink.href = 'https://res.cloudinary.com';
+    preconnectLink.crossOrigin = 'anonymous';
+    document.head.appendChild(preconnectLink);
+
+    // DNS Prefetch para melhorar resolução de nome
+    const dnsPrefetchLink = document.createElement('link');
+    dnsPrefetchLink.rel = 'dns-prefetch';
+    dnsPrefetchLink.href = 'https://res.cloudinary.com';
+    document.head.appendChild(dnsPrefetchLink);
+
+    // Preload APENAS a imagem principal - LCP crítico
+    const lcpCandidatePreload = document.createElement('link');
+    lcpCandidatePreload.rel = 'preload';
+    lcpCandidatePreload.as = 'image';
+    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.large;
+    lcpCandidatePreload.type = 'image/avif';
+    lcpCandidatePreload.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(lcpCandidatePreload);
+    
+    // Limpeza ao desmontar
+    return () => {
+      if (preconnectLink.parentNode) preconnectLink.parentNode.removeChild(preconnectLink);
+      if (dnsPrefetchLink.parentNode) dnsPrefetchLink.parentNode.removeChild(dnsPrefetchLink);
+      if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
+    };
+  }, []); // Dependências vazias = executa uma vez na montagem
+// Novo arquivo otimizado para o useEffect de carregamento base64
+// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente
+
+  // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea - OTIMIZADO
+  useEffect(() => {
+    // Carrega a versão mais leve possível da imagem como base64 para exibição instantânea
+    const loadTinyBase64 = async () => {
+      try {
+        // Evita recarregamentos e usa cache quando possível
+        if (!tinyBase64 && !imageLoaded.current) {
+          // Verifica se já existe no sessionStorage para evitar refetch
+          const cachedImage = sessionStorage.getItem('quiz_intro_tiny_base64');
+          if (cachedImage) {
+            setTinyBase64(cachedImage);
+          } else {
+            const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder);
+            if (base64Data) {
+              setTinyBase64(base64Data);
+              // Cache para evitar refetches na mesma sessão
+              try {
+                sessionStorage.setItem('quiz_intro_tiny_base64', base64Data);
+              } catch (e) {
+                // Ignora erros de storage (limite excedido, etc)
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
+      }
+    };
+    
+    loadTinyBase64();
+  }, []); // Dependências vazias para executar apenas na montagem
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (nome.trim()) {
+      onStart(nome);
     }
   };
 

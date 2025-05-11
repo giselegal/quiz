@@ -23,12 +23,14 @@ if (process.env.NODE_ENV !== 'production') {
 try {
   const rootElement = document.getElementById('root');
   if (rootElement) {
-    ReactDOM.createRoot(rootElement).render(
     // Inicializar lazy loading de scripts
     initLazyLoading();
+    
+    ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
         <App />
       </React.StrictMode>
+    );
     );
     console.log('Aplicativo renderizado com sucesso!');
   } else {
