@@ -3,7 +3,7 @@
 export const register = () => {
   if ('serviceWorker' in navigator) {
     // Registrar o mais cedo possível, sem esperar pelo evento load
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    navigator.serviceWorker.register('/quiz-de-estilo/sw.js', { scope: '/quiz-de-estilo/' })
       .then(registration => {
         console.log('ServiceWorker registration successful:', registration.scope);
         

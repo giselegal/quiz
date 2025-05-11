@@ -36,6 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -44,8 +47,58 @@ jobs:
           
       - name: Update .htaccess for subdirectory
         run: |
-          cp /workspaces/quiz-sell-genius-66/.htaccess dist/.htaccess
-          sed -i 's|RewriteBase /|RewriteBase /quiz-de-estilo/|g' dist/.htaccess
+          echo '# Configurações otimizadas para Hostinger (Apache)
+
+# Habilitar reescrita de URL para SPA (crucial para React Router)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /quiz-de-estilo/
+
+    # Se o arquivo solicitado não existir fisicamente, redirecionar para index.html
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.html [L,QSA]
+</IfModule>
+
+# Definir tipos MIME corretos (crucial para resolver problemas de script loading)
+<IfModule mod_mime.c>
+    # JavaScript
+    AddType application/javascript .js
+    AddType application/javascript .jsx
+    AddType application/javascript .mjs
+    AddType application/javascript .ts
+    AddType application/javascript .tsx
+    
+    # JSON
+    AddType application/json .json
+    
+    # Imagens modernas
+    AddType image/webp .webp
+    AddType image/avif .avif
+    AddType image/svg+xml .svg
+    AddType image/png .png
+    AddType image/jpeg .jpg .jpeg
+</IfModule>
+
+# Desabilitar sniffing de MIME types (resolver erro de import.meta)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Cabeçalhos específicos para JavaScript
+    <FilesMatch "\.(js|jsx|mjs|ts|tsx)$">
+        Header set Content-Type "application/javascript; charset=UTF-8"
+    </FilesMatch>
+    
+    # Cabeçalhos específicos para JSON
+    <FilesMatch "\.json$">
+        Header set Content-Type "application/json; charset=UTF-8"
+    </FilesMatch>
+    
+    # Cabeçalhos específicos para CSS
+    <FilesMatch "\.css$">
+        Header set Content-Type "text/css; charset=UTF-8"
+    </FilesMatch>
+</IfModule>' > dist/.htaccess
           
       - name: Deploy to Hostinger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4

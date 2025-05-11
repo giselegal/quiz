@@ -4,7 +4,9 @@
 export const registerServiceWorker = () => {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
+      // Usar o caminho correto para o subdiretório
+      const basePath = import.meta.env.BASE_URL || '/quiz-de-estilo/';
+      navigator.serviceWorker.register(`${basePath}sw.js`, { scope: basePath })
         .then(registration => {
           console.log('ServiceWorker registrado com sucesso:', registration.scope);
         })
