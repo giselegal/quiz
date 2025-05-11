@@ -1,25 +1,16 @@
-// filepath: /workspaces/quiz-sell-genius-66/src/components/QuizIntro.tsx
-'use client';
-
-import React from 'react';
-import { useState, useEffect, useRef, memo, useCallback } from 'react';
-import { Button } from './ui/button';
+// NOTE: Users of the `experimental` builds of React should add a reference
+// to 'react/experimental' in their project. See experimental.d.ts's top comment
+// for reference and documentation on how exactly to do it.
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Input } from './ui/input';
-import { preloadCriticalImages } from '@/utils/imageManager';
-import AutoFixedImages from './ui/AutoFixedImages';
-import { 
-  loadTinyImageAsBase64, 
-  getOptimizedImageUrl,
-  getTinyImageUrl
-} from '@/utils/inlineImageUtils';
+import { Button } from './ui/button';
+import { AutoFixedImages } from './AutoFixedImages';
 
-// --- Constantes e URLs otimizadas (computadas apenas uma vez) ---
-
-const LOGO_BASE_URL = "https://res.cloudinary.com/dqljyf76t/image/upload/";
-const LOGO_IMAGE_ID = "v1744911572/LOGO_DA_MARCA_GISELE_r14oz2";
-
-const INTRO_IMAGE_BASE_URL = "https://res.cloudinary.com/dqljyf76t/image/upload/";
-const INTRO_IMAGE_ID = "v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up";
+// Defina estas constantes no início do arquivo ou importe-as de outro lugar
+const LOGO_BASE_URL = 'https://res.cloudinary.com/yourcloud/image/upload/';
+const LOGO_IMAGE_ID = 'logo123';
+const INTRO_IMAGE_BASE_URL = 'https://res.cloudinary.com/yourcloud/image/upload/';
+const INTRO_IMAGE_ID = 'intro456';
 
 // URLs pré-computadas para evitar recálculos durante renderização
 const STATIC_LOGO_IMAGE_URLS = {
@@ -46,8 +37,30 @@ const STATIC_INTRO_IMAGE_URLS = {
   png: `${INTRO_IMAGE_BASE_URL}f_png,q_75,w_345,c_limit/${INTRO_IMAGE_ID}.png`
 };
 
-// --- Pré-carregamento de imagens críticas ---
-// Anexa links de preload no head para imagens críticas para LCP
+// Função auxiliar para carregar imagem tiny como base64
+const loadTinyImageAsBase64 = async (url: string): Promise<string> => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Erro ao carregar imagem como base64:', error);
+    return '';
+  }
+};
+
+// Função para pré-carregar imagens críticas
+const preloadCriticalImages = (type: string): void => {
+  // Implemente conforme necessário
+  console.log(`Pré-carregando imagens para: ${type}`);
+};
+
+// Pré-carregamento de imagens críticas
 if (typeof document !== 'undefined' && typeof window !== 'undefined') {
   const preloadLink = (url: string, as: string = 'image') => {
     const link = document.createElement('link');
@@ -56,54 +69,41 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
     link.as = as;
     document.head.appendChild(link);
   };
-  
-  // Apenas preload de recursos críticos iniciais (LCP)
   preloadLink(STATIC_LOGO_IMAGE_URLS.avif);
-  preloadLink(STATIC_INTRO_IMAGE_URLS.avif.small); // <--- Esta linha
+  preloadLink(STATIC_INTRO_IMAGE_URLS.avif.small);
 }
 
 interface QuizIntroProps {
   onStart: (nome: string) => void;
 }
 
-export function QuizIntro({ onStart }) {
+export function QuizIntro({ onStart }: QuizIntroProps) {
   const [nome, setNome] = useState('');
   const [mainImageWidth, setMainImageWidth] = useState(0);
   const [tinyBase64, setTinyBase64] = useState<string>('');
+  const [isMainImageLoaded, setIsMainImageLoaded] = useState(false);
 
-  // Refs para medir e otimizar
   const mainImageRef = useRef<HTMLDivElement>(null);
   const imageLoaded = useRef<boolean>(false);
   const preloadInitiated = useRef<boolean>(false);
 
-  // Efeito para capturar a largura da imagem principal - usando ResizeObserver
   useEffect(() => {
     if (!mainImageRef.current) return;
-  
     const updateWidth = () => {
       if (mainImageRef.current) {
         setMainImageWidth(mainImageRef.current.offsetWidth);
       }
     };
-
-    // Inicialização única
     updateWidth();
-  
-    // Usando ResizeObserver em vez de eventos de janela para melhor performance
     const resizeObserver = new ResizeObserver(updateWidth);
     resizeObserver.observe(mainImageRef.current);
-  
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Efeito para carregar a versão tiny da imagem como base64 - otimizado
   useEffect(() => {
     let isMounted = true;
-    
-    const loadTinyBase64 = async () => {
-      // Evita carregamentos desnecessários
+    const loadBase64 = async () => {
       if (tinyBase64 || imageLoaded.current) return;
-      
       try {
         const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder);
         if (isMounted && base64Data) {
@@ -113,23 +113,18 @@ export function QuizIntro({ onStart }) {
         console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
       }
     };
-
-    loadTinyBase64();
-    
+    loadBase64();
     return () => { isMounted = false; };
-  }, []);
+  }, [tinyBase64]);
 
-  // Efeito otimizado para preload de recursos secundários
   useEffect(() => {
-    if (preloadInitiated.current) return;
+    if (preloadInitiated.current || typeof window === 'undefined') return;
     preloadInitiated.current = true;
-    
-    // Função que detecta visibilidade e inatividade
+
     const preloadWhenIdle = () => {
-      // Usa Intersection Observer para detectar visibilidade
+      if (!mainImageRef.current) return;
       const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
-          // Elemento está visível, agendar carregamento em momento ocioso
           if (typeof requestIdleCallback === 'function') {
             requestIdleCallback(() => preloadCriticalImages('quiz'), { timeout: 1500 });
           } else {
@@ -138,13 +133,8 @@ export function QuizIntro({ onStart }) {
           observer.disconnect();
         }
       });
-      
-      // Observe o contêiner principal
-      if (mainImageRef.current) {
-        observer.observe(mainImageRef.current);
-      }
+      observer.observe(mainImageRef.current);
     };
-    
     preloadWhenIdle();
   }, []);
 
@@ -167,7 +157,6 @@ export function QuizIntro({ onStart }) {
         data-section="intro"
       >
         <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-5 sm:space-y-8">
-          {/* Logo e separador - componente otimizado */}
           <div className="flex flex-col items-center">
             <div className="relative">
               <picture>
@@ -187,10 +176,9 @@ export function QuizIntro({ onStart }) {
                     maxWidth: '100%',
                     aspectRatio: '140/60',
                     width: '140px',
-                    height: '60px'
+                    height: '60px',
                   }} />
               </picture>
-
               <div
                 className="h-[2px] bg-[#B89B7A] mt-2 rounded-full mx-auto"
                 style={{
@@ -206,7 +194,6 @@ export function QuizIntro({ onStart }) {
             Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
           </h1>
 
-          {/* Imagem otimizada com lazy loading adequado */}
           <div
             ref={mainImageRef}
             className="w-full max-w-[300px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md"
@@ -218,7 +205,7 @@ export function QuizIntro({ onStart }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundImage: tinyBase64 ? `url('${tinyBase64}')` : `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
+              backgroundImage: isMainImageLoaded ? 'none' : (tinyBase64 ? `url('${tinyBase64}')` : `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`),
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
@@ -241,7 +228,10 @@ export function QuizIntro({ onStart }) {
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                onLoad={() => { imageLoaded.current = true; }}
+                onLoad={() => { 
+                  imageLoaded.current = true; 
+                  setIsMainImageLoaded(true);
+                }}
                 style={{
                   display: 'block',
                   margin: '0 auto',
@@ -251,7 +241,6 @@ export function QuizIntro({ onStart }) {
                 sizes="(max-width: 640px) 300px, (max-width: 768px) 345px, 400px" />
             </picture>
           </div>
-
           <p className="text-sm md:text-base text-[#433830] text-center leading-relaxed max-w-md mx-auto px-2">
             Em poucos minutos, descubra seu <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
             looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com
@@ -267,7 +256,7 @@ export function QuizIntro({ onStart }) {
                 id="name"
                 placeholder="Digite seu nome"
                 value={nome}
-                onChange={e => setNome(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNome(e.target.value)}
                 className="w-full p-2.5 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md"
                 autoFocus
                 aria-required="true"
@@ -275,7 +264,6 @@ export function QuizIntro({ onStart }) {
                 inputMode="text"
                 maxLength={32} />
             </div>
-
             <Button
               type="submit"
               className="w-full bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2"
@@ -283,9 +271,8 @@ export function QuizIntro({ onStart }) {
             >
               Quero Descobrir meu Estilo Agora!
             </Button>
-
             <p className="text-xs text-center text-gray-500 pt-1">
-              Ao clicar, você concorda com nossa política de privacidade
+              Ao clicar, você concorda com nossa política de privacidade.
             </p>
           </form>
         </div>
@@ -294,5 +281,4 @@ export function QuizIntro({ onStart }) {
   );
 }
 
-// Memoização do componente para evitar re-renderizações desnecessárias
 export default memo(QuizIntro);

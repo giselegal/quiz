@@ -1,4 +1,4 @@
-name: [DESATIVADO] Construir e implantar
+name: DESATIVADO Construir e implantar
 
 on:
   # Desativando os gatilhos para evitar execuções
