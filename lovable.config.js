@@ -5,7 +5,7 @@ module.exports = {
   buildCommand: 'npm run build',
   previewCommand: 'npm run preview',
   development: {
-    port: 5173,
+    port: 8080,
     startCommand: 'npm run dev'
   }
 };

@@ -1,3 +1,4 @@
+// @lovable
 
 import React from 'react';
 import { defineLovable } from "../../../lovable";

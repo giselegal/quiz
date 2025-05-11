@@ -10,8 +10,7 @@
     "build:hostinger": "vite build && cp public/.htaccess dist/.htaccess",
     "build:funnel": "vite build && cp public/.htaccess dist/.htaccess && cp public/_redirects dist/_redirects",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "lovable:prepare": "lovable-tagger"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -95,7 +94,6 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "lightningcss": "^1.29.3",
-    "lovable-tagger": "^1.1.8",
     "postcss": "^8.4.47",
     "rollup-plugin-visualizer": "^5.14.0",
     "source-map-explorer": "^2.5.3",

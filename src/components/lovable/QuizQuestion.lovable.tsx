@@ -1,3 +1,4 @@
+// @lovable
 import React, { useState } from 'react';
 import { defineLovable } from "../../../lovable";
 
