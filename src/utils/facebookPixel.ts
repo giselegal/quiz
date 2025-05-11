@@ -20,11 +20,11 @@ export const initFacebookPixel = (pixelId: string): void => {
       if(s && s.parentNode){
         s.parentNode.insertBefore(t,s);
       }
-      }(window, document,'script',
+      }(window as any, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
       
-      window.fbq('init', pixelId);
-      window.fbq('track', 'PageView');
+      (window as any).fbq('init', pixelId);
+      (window as any).fbq('track', 'PageView');
     } catch (error) {
       console.error('Error initializing pixel:', error);
     }
@@ -43,8 +43,8 @@ export const loadFacebookPixel = (): void => {
 
 // Função para rastrear eventos
 export const trackPixelEvent = (eventName: string, params?: object): void => {
-  if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-    window.fbq('track', eventName, params);
+  if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
+    (window as any).fbq('track', eventName, params);
   } else {
     console.log(`Facebook Pixel Event (simulado): ${eventName}`, params);
   }
@@ -53,7 +53,7 @@ export const trackPixelEvent = (eventName: string, params?: object): void => {
 // Types para o Pixel
 declare global {
   interface Window {
-    fbq: any;
+    fbq: (event: string, eventName: string, params?: any, eventId?: { eventID: string }) => void;
     _fbq?: any;
   }
 }

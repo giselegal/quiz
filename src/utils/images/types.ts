@@ -21,7 +21,7 @@ export type ImageCacheEntry = {
   element?: HTMLImageElement;
   optimizedUrl?: string;
   lowQualityUrl?: string;
-  lastAccessed?: number; // Adding missing property
+  lastAccessed?: number; // This property is valid
 };
 
 export interface PreloadImageDefinition {

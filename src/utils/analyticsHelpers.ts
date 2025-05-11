@@ -28,7 +28,7 @@ export const getEventsSummary = () => {
 
 // Get user progress data - Ensure this returns an array
 export const getUserProgressData = () => {
-  // Modified to return an array for ProgressTab compatibility
+  // Return an array for ProgressTab compatibility
   return [
     { questionId: 1, uniqueUsers: 1250, totalAnswers: 1200, retentionFromStart: 100, dropoffRate: 5 },
     { questionId: 2, uniqueUsers: 1180, totalAnswers: 1150, retentionFromStart: 94, dropoffRate: 7 },
@@ -38,11 +38,11 @@ export const getUserProgressData = () => {
   ];
 };
 
-// Reset metrics cache
-export const resetMetricsCache = () => {
+// Reset metrics cache - ensure it returns a boolean
+export const resetMetricsCache = (): boolean => {
   console.log("Metrics cache reset");
   // Implementation for resetting metrics cache
-  return true; // Return boolean for AnalyticsPage.tsx
+  return true;
 };
 
 // Get cached metrics

@@ -130,6 +130,7 @@ export const getAnalyticsEvents = () => {
 export const clearAnalyticsData = () => {
   console.log('Analytics data cleared');
   // Implement your analytics clearing logic here
+  return true; // Return boolean for AnalyticsPage.tsx
 };
 
 /**
@@ -140,12 +141,11 @@ export const initFacebookPixel = (pixelId?: string) => {
   const id = pixelId || defaultPixelId;
   
   console.log(`Initializing Facebook Pixel: ${id}`);
-  // Implement Facebook Pixel initialization
   
   try {
     if (typeof window !== 'undefined') {
       // Check if fbq is already defined before initializing
-      if (!window.fbq) {
+      if (!(window as any).fbq) {
         // Standard Facebook Pixel initialization code
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -156,15 +156,17 @@ export const initFacebookPixel = (pixelId?: string) => {
         if(s && s.parentNode){
           s.parentNode.insertBefore(t,s);
         }
-        }(window, document,'script',
+        }(window as any, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         
-        window.fbq('init', id);
-        window.fbq('track', 'PageView');
+        (window as any).fbq('init', id);
+        (window as any).fbq('track', 'PageView');
       }
     }
+    return true; // Return successful initialization
   } catch (error) {
     console.error('Error initializing Facebook Pixel:', error);
+    return false;
   }
 };
 
@@ -174,6 +176,7 @@ export const initFacebookPixel = (pixelId?: string) => {
 export const testFacebookPixel = () => {
   console.log('Testing Facebook Pixel');
   // Implement Facebook Pixel test
+  return true;
 };
 
 /**
@@ -181,21 +184,23 @@ export const testFacebookPixel = () => {
  */
 export const trackPixelEvent = (eventName: string, params?: Record<string, any>) => {
   console.log(`Tracking pixel event: ${eventName}`);
-  // Implement Facebook Pixel event tracking
   
   try {
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-      window.fbq('track', eventName, params);
+    if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
+      (window as any).fbq('track', eventName, params);
+      return true;
     }
+    return false;
   } catch (error) {
     console.error(`Error tracking pixel event ${eventName}:`, error);
+    return false;
   }
 };
 
-// Add global type definition for fbq
+// Add global type definition for fbq - use the same type as in facebookPixel.ts
 declare global {
   interface Window {
-    fbq: any;
+    fbq: (event: string, eventName: string, params?: any, eventId?: { eventID: string }) => void;
     _fbq?: any;
   }
 }

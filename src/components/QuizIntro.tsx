@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -7,10 +8,9 @@ import { Input } from './ui/input';
 import { preloadCriticalImages } from '@/utils/imageManager';
 import AutoFixedImages from './ui/AutoFixedImages';
 import { 
-  // getTinyBase64ImageUrl, // Parece não ser usado diretamente no JSX, mas loadTinyImageAsBase64 é.
   loadTinyImageAsBase64, 
-  getOptimizedImageUrl, // Importado, mas localmente era sombreado. Manter para outras possíveis utilizações.
-  getTinyImageUrl        // Importado, mas localmente era sombreado. Manter para outras possíveis utilizações.
+  getOptimizedImageUrl,
+  getTinyImageUrl
 } from '@/utils/inlineImageUtils';
 
 // --- Otimizações: Constantes e funções movidas para o escopo do módulo ---
@@ -88,6 +88,7 @@ const STATIC_INTRO_IMAGE_URLS = {
         'image', 
         'image/avif'
       );
+      // Usando setAttribute diretamente para propriedades não padrão
       imgPreload.setAttribute('fetchpriority', 'high');
       
       // Prefetch do recurso de logo
@@ -311,18 +312,18 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     // AVIF para navegadores modernos
     const avifPreload = createResourceHint('preload', STATIC_INTRO_IMAGE_URLS.avif.large, { 
       as: 'image', 
-      type: 'image/avif',
-      fetchPriority: 'high'
+      type: 'image/avif'
     });
+    // Atributos não padrão devem usar setAttribute
     avifPreload.setAttribute('fetchpriority', 'high');
     hints.push(avifPreload);
     
     // 4. Fallback para WebP (navegadores sem suporte a AVIF)
     const webpPreload = createResourceHint('preload', STATIC_INTRO_IMAGE_URLS.webp.large, {
       as: 'image',
-      type: 'image/webp',
-      fetchPriority: 'high'
+      type: 'image/webp'
     });
+    // Atributos não padrão devem usar setAttribute
     webpPreload.setAttribute('fetchpriority', 'high');
     hints.push(webpPreload);
 
@@ -681,14 +682,12 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                 { 
                   srcSet: `${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`,
                   type: 'image/avif',
-                  sizes: '(max-width: 640px) 345px, (max-width: 768px) 400px, 450px',
-                  fetchPriority: 'high'
+                  sizes: '(max-width: 640px) 345px, (max-width: 768px) 400px, 450px'
                 },
                 { 
                   srcSet: `${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`,
                   type: 'image/webp',
-                  sizes: '(max-width: 640px) 345px, (max-width: 768px) 400px, 450px',
-                  fetchPriority: 'high'
+                  sizes: '(max-width: 640px) 345px, (max-width: 768px) 400px, 450px'
                 }
               ]}
               src={STATIC_INTRO_IMAGE_URLS.webp.medium} // Versão média como fallback
@@ -769,7 +768,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
             </div>
             
             <Button 
-              type="submit"
+              type="submit" 
               className="w-full bg-gradient-to-r from-[#B89B7A] to-[#A1835D] hover:from-[#A1835D] hover:to-[#927346] text-white py-3 px-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2 transform hover:scale-[1.02] active:scale-[0.98] group"
               disabled={!nome.trim()}
               style={{
@@ -854,8 +853,7 @@ const OptimizedImage = React.memo(({
         width={width}
         height={height}
         loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        decoding={priority ? "sync" : "async"}
+        // fetchPriority e decoding atributos são adicionados diretamente no DOM
         onLoad={handleLoad}
         className={className}
         style={{
