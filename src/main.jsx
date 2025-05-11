@@ -9,6 +9,8 @@ import { injectCriticalCSS, initialCriticalCSS, removeCriticalCSS } from './util
 import { checkSiteHealth } from './utils/siteHealthCheck';
 import { monitorFunnelRoutes } from './utils/funnelMonitor';
 import './utils/imagePerformanceOptimizer.js';
+import './utils/extremeImageOptimizer.js';
+import './styles/extreme-optimizations.css';
 
 // Injetar CSS crítico para renderização inicial mais rápida
 injectCriticalCSS(initialCriticalCSS);

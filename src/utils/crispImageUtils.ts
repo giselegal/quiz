@@ -25,13 +25,13 @@ export const optimizeForCrispImage = (url: string): string => {
     cleanedPath = cleanedPath.replace(/,e_blur:[0-9]+/g, '');
   }
   
-  // Substituir qualidade baixa por alta qualidade
+  // Substituir qualidade baixa por média qualidade (reduzida para melhorar performance)
   if (cleanedPath.includes('q_')) {
-    cleanedPath = cleanedPath.replace(/q_[0-9]+/g, 'q_95');
+    cleanedPath = cleanedPath.replace(/q_[0-9]+/g, 'q_70');
   }
   
-  // Adicionar parâmetros otimizados
-  return `${baseUrl}/upload/f_auto,q_95,dpr_auto,e_sharpen:60/${cleanedPath}`;
+  // Adicionar parâmetros otimizados com qualidade reduzida para melhorar performance
+  return `${baseUrl}/upload/f_auto,q_70,dpr_1.0,e_sharpen:40/${cleanedPath}`;
 };
 
 /**
@@ -44,11 +44,11 @@ export const isBlurredPlaceholder = (url: string): boolean => {
   
   return (
     url.includes('e_blur') ||
-    url.includes('q_1') ||
-    url.includes('q_5') ||
-    url.includes('q_10') ||
-    url.includes('q_20') ||
-    url.includes('q_30') ||
+    url.includes('q_70') ||
+    url.includes('q_70') ||
+    url.includes('q_70') ||
+    url.includes('q_70') ||
+    url.includes('q_70') ||
     url.includes('q_auto') ||
     url.includes('w_20') ||
     url.includes('w_30') ||

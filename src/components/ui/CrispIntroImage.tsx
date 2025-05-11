@@ -52,15 +52,15 @@ const CrispIntroImage: React.FC<CrispIntroImageProps> = ({
     const baseUrl = urlParts[0];
     const pathPart = urlParts[1];
     
-    // Remover parâmetros de blur e melhorar qualidade
+    // Remover parâmetros de blur e melhorar qualidade (reduzida para melhor performance)
     let cleanedPath = pathPart
       .replace(/,e_blur:[0-9]+/g, '')
       .replace(/e_blur:[0-9]+,/g, '')
       .replace(/e_blur:[0-9]+/g, '')
-      .replace(/q_[0-9]+/g, 'q_95');
+      .replace(/q_[0-9]+/g, 'q_70');
     
-    // Garantir parâmetros de alta qualidade
-    return `${baseUrl}/upload/f_auto,q_95,dpr_auto,e_sharpen:60/${cleanedPath}`;
+    // Garantir parâmetros de qualidade média-alta para balancear desempenho e qualidade
+    return `${baseUrl}/upload/f_auto,q_70,dpr_1.0,e_sharpen:40/${cleanedPath}`;
   }, [sourceUrl]);
   
   // Preload da imagem de forma mais eficiente para o LCP

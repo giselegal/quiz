@@ -1,0 +1,60 @@
+/* Otimizações extremas para evitar qualquer oscilação no carregamento de imagens */
+img {
+  image-rendering: auto !important;
+  filter: none !important;
+  transform: none !important;
+  transition: none !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  content-visibility: auto;
+  will-change: contents;
+  display: block;
+  opacity: 1 !important;
+}
+
+/* Força carregamento imediato de imagens críticas */
+img.quiz-intro-image, 
+.quiz-intro img {
+  filter: none !important;
+  image-rendering: auto !important;
+  transform: none !important;
+  transition: none !important;
+  -webkit-font-smoothing: subpixel-antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  will-change: auto !important;
+  content-visibility: visible !important;
+  display: block !important;
+  
+  /* Desabilita qualquer animação/efeito */
+  animation: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Remove qualquer efeito de fade/blur durante carregamento */
+img[loading],
+img[loading="lazy"],
+img.lazy-load,
+img.lazyload {
+  opacity: 1 !important;
+  filter: none !important;
+  transition: none !important;
+}
+
+/* Evita problemas com imagens de fundo */
+[style*="background-image"] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Hack para forçar renderização de imagens sem oscilação */
+body::after {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  z-index: -1;
+  content: url(https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_70,dpr_1.0,e_sharpen:40,fl_strip_profile/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up);
+}

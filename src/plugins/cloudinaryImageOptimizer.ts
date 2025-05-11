@@ -18,8 +18,8 @@ export default function cloudinaryImageOptimizer(): Plugin {
         
         // Função para otimizar URLs encontradas
         const optimizedCode = code.replace(cloudinaryUrlRegex, (match, params) => {
-          // Verificar se já contém parâmetros de alta qualidade
-          if (params.includes('q_95') && params.includes('e_sharpen:60')) {
+          // Verificar se já contém parâmetros de qualidade média-alta
+          if (params.includes('q_70') && params.includes('e_sharpen:40')) {
             return match;
           }
           
@@ -28,12 +28,12 @@ export default function cloudinaryImageOptimizer(): Plugin {
             .replace(/,e_blur:[0-9]+/g, '')
             .replace(/e_blur:[0-9]+,/g, '')
             .replace(/e_blur:[0-9]+/g, '')
-            .replace(/q_[0-9]+/g, 'q_95')
+            .replace(/q_[0-9]+/g, 'q_70')
             .replace(/w_20/g, 'w_auto');
           
           // Se não houver transformações, adicionar parâmetros padrão
           const baseUrl = match.split('/upload/')[0];
-          return `${baseUrl}/upload/f_auto,q_95,dpr_auto,e_sharpen:60/${optimizedParams}`;
+          return `${baseUrl}/upload/f_auto,q_70,dpr_1.0,e_sharpen:40/${optimizedParams}`;
         });
         
         return optimizedCode;
@@ -76,7 +76,7 @@ export default function cloudinaryImageOptimizer(): Plugin {
                       function fixCloudinaryImages() {
                         document.querySelectorAll('img[src*="cloudinary.com"]').forEach(img => {
                           const src = img.src;
-                          if (src.includes('e_blur') || src.includes('q_10') || src.includes('q_20')) {
+                          if (src.includes('e_blur') || src.includes('q_70') || src.includes('q_70')) {
                             const urlParts = src.split('/upload/');
                             if (urlParts.length === 2) {
                               const baseUrl = urlParts[0];
@@ -84,9 +84,9 @@ export default function cloudinaryImageOptimizer(): Plugin {
                                 .replace(/,e_blur:[0-9]+/g, '')
                                 .replace(/e_blur:[0-9]+,/g, '')
                                 .replace(/e_blur:[0-9]+/g, '')
-                                .replace(/q_[0-9]+/g, 'q_95');
+                                .replace(/q_[0-9]+/g, 'q_70');
                               
-                              img.src = \`\${baseUrl}/upload/f_auto,q_95,dpr_auto,e_sharpen:60/\${pathPart}\`;
+                              img.src = \`\${baseUrl}/upload/f_auto,q_70,dpr_1.0,e_sharpen:40/\${pathPart}\`;
                               img.style.imageRendering = 'crisp-edges';
                             }
                           }

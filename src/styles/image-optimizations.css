@@ -6,23 +6,25 @@
 
 /* Reset global para imagens */
 img {
-  image-rendering: crisp-edges !important;
+  image-rendering: auto !important; /* Alterado para auto para melhor performance */
   filter: none !important;
   transform: none !important;
   transition: none !important;
   backface-visibility: visible !important;
   -webkit-backface-visibility: visible !important;
+  content-visibility: auto; /* Melhora performance de renderização */
 }
 
 /* Desativa efeitos de blur para imagens críticas */
 img.quiz-intro-image {
   filter: none !important;
-  image-rendering: crisp-edges !important;
+  image-rendering: auto !important; /* Alterado para auto para melhor performance */
   transform: none !important;
   transition: none !important;
   -webkit-font-smoothing: subpixel-antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
   will-change: auto !important;
+  content-visibility: auto; /* Melhora performance de renderização */
 }
 
 /* Remove animações e efeitos de fade */
