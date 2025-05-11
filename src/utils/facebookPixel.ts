@@ -3,12 +3,6 @@
  * Utility para gerenciar Facebook Pixel
  */
 
-declare global {
-  interface Window {
-    fbq: any;
-  }
-}
-
 // Configuração do ID do Pixel
 const FACEBOOK_PIXEL_ID = '1234567890123456'; // Substitua pelo seu ID real do Facebook Pixel
 
@@ -48,6 +42,14 @@ export const trackPixelEvent = (eventName: string, params?: object): void => {
     console.log(`Facebook Pixel Event (simulado): ${eventName}`, params);
   }
 };
+
+// Types para o Pixel
+declare global {
+  interface Window {
+    fbq?: any;
+    _fbq?: any;
+  }
+}
 
 // Outras funções de utilidade para o pixel podem ser adicionadas aqui
 export const trackLead = (value?: number, currency?: string): void => {

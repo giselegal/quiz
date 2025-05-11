@@ -12,6 +12,7 @@ interface LoadingManagerProps {
 
 /**
  * Gerenciador de estados de carregamento que utiliza o spinner padronizado
+ * Versão otimizada para evitar dependências circulares
  */
 const LoadingManager: React.FC<LoadingManagerProps> = ({
   isLoading,

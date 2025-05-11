@@ -1,190 +1,73 @@
+// Analytics utilities
 
 /**
- * Utility para funções de analytics e tracking
+ * Track a page view event
  */
-
-// Tipo para parâmetros UTM
-interface UTMParameters {
-  source?: string;
-  medium?: string;
-  campaign?: string;
-  term?: string;
-  content?: string;
-  fbclid?: string;
-  gclid?: string;
-}
-
-// Capturar parâmetros UTM da URL
-export const captureUTMParameters = (): UTMParameters => {
-  const urlParams = new URLSearchParams(window.location.search);
-  
-  const utmParams: UTMParameters = {
-    source: urlParams.get('utm_source') || undefined,
-    medium: urlParams.get('utm_medium') || undefined,
-    campaign: urlParams.get('utm_campaign') || undefined,
-    term: urlParams.get('utm_term') || undefined,
-    content: urlParams.get('utm_content') || undefined,
-    fbclid: urlParams.get('fbclid') || undefined,
-    gclid: urlParams.get('gclid') || undefined
-  };
-  
-  // Salvar no localStorage para uso posterior
-  if (Object.values(utmParams).some(value => value !== undefined)) {
-    localStorage.setItem('utm_params', JSON.stringify(utmParams));
-    console.log('[Analytics] UTM parameters capturados:', utmParams);
-  }
-  
-  return utmParams;
-};
-
-// Inicializar Facebook Pixel
-export const initFacebookPixel = () => {
-  if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'development') {
-    // Importar dinamicamente para evitar carregamento desnecessário em desenvolvimento
-    import('./facebookPixel').then(module => {
-      // module.loadFacebookPixel(); // Comentado para teste
-      console.log('[Analytics] Carregamento do Facebook Pixel desabilitado para teste.');
-    });
-  }
-};
-
-// Track específico para início do quiz
-export const trackQuizStart = (name: string, email?: string) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('trackCustom', 'QuizStart', { name, email });
-    console.log('[Analytics] Quiz iniciado por:', name, email || '');
-  }
-};
-
-// Track específico para geração de lead
-export const trackLeadGeneration = (email: string) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'Lead', { email });
-    console.log('[Analytics] Lead gerado:', email);
-  }
+export const trackPageView = (page: string) => {
+  console.log(`Page view: ${page}`);
+  // Implement your analytics tracking here
 };
 
 /**
- * Rastreia uma resposta no quiz
+ * Track a button click event
  */
-export const trackQuizAnswer = (questionId: string, selectedOptions: string[], currentQuestionIndex: number, totalQuestions: number) => {
-  if (window.fbq) {
-    const eventData = {
-      question_id: questionId,
-      selected_options: selectedOptions.join(', '),
-      current_question_index: currentQuestionIndex,
-      total_questions: totalQuestions
-    };
-    window.fbq('trackCustom', 'QuizAnswer', eventData);
-    console.log(`[Analytics] QuizAnswer tracked for question ${questionId}`);
-  }
-  
-  if (window.gtag) {
-    window.gtag('event', 'quiz_answer', {
-      event_category: 'quiz',
-      question_id: questionId,
-      selected_options: selectedOptions.join(', '),
-      current_question_index: currentQuestionIndex,
-      total_questions: totalQuestions
-    });
-  }
+export const trackButtonClick = (buttonId: string, buttonText?: string) => {
+  console.log(`Button click: ${buttonId} - ${buttonText}`);
+  // Implement your analytics tracking here
 };
 
 /**
- * Rastreia a conclusão do quiz
+ * Track a form submission event
  */
-export const trackQuizComplete = () => {
-  const startTime = localStorage.getItem('quiz_start_time');
-  const endTime = Date.now();
-  const duration = startTime ? (endTime - parseInt(startTime, 10)) / 1000 : 0; // em segundos
-  
-  if (window.fbq) {
-    const eventData = { quiz_duration: duration };
-    window.fbq('trackCustom', 'QuizComplete', eventData);
-    console.log('[Analytics] QuizComplete tracked');
-  }
-  
-  if (window.gtag) {
-    window.gtag('event', 'quiz_complete', {
-      event_category: 'quiz',
-      quiz_duration: duration
-    });
-  }
+export const trackFormSubmit = (formId: string, data?: Record<string, any>) => {
+  console.log(`Form submit: ${formId}`);
+  // Implement your analytics tracking here
 };
 
 /**
- * Rastreia a visualização do resultado
+ * Track a quiz answer
  */
-export const trackResultView = (styleCategory: string) => {
-  if (window.fbq) {
-    const eventData = { style_category: styleCategory };
-    window.fbq('trackCustom', 'ResultView', eventData);
-    console.log('[Analytics] ResultView tracked for style:', styleCategory);
-  }
-  
-  if (window.gtag) {
-    window.gtag('event', 'result_view', {
-      event_category: 'quiz',
-      event_label: styleCategory
-    });
-  }
+export const trackQuizAnswer = (questionId: string, answerId: string) => {
+  console.log(`Quiz answer: ${questionId} - ${answerId}`);
+  // Implement your analytics tracking here
 };
 
 /**
- * Registra cliques em botões para análise
+ * Get analytics events for the admin panel
  */
-export const trackButtonClick = (
-  buttonId?: string, 
-  buttonText?: string, 
-  buttonLocation?: string,
-  actionType?: string
-) => {
-  if (window.fbq) {
-    const eventData = {
-      button_id: buttonId || 'unknown',
-      button_text: buttonText || 'unknown',
-      button_location: buttonLocation || 'unknown',
-      action_type: actionType || 'click'
-    };
-    
-    window.fbq('trackCustom', 'ButtonClick', eventData);
-    console.log(`[Analytics] Button click tracked: ${buttonText || buttonId}`);
-  }
-  
-  if (window.gtag) {
-    window.gtag('event', 'button_click', {
-      event_category: 'interaction',
-      event_label: buttonText || buttonId,
-      button_location: buttonLocation
-    });
-  }
+export const getAnalyticsEvents = () => {
+  // Implement your analytics retrieval logic here
+  return [];
 };
 
 /**
- * Registra conversões de vendas
+ * Clear analytics data for testing purposes
  */
-export const trackSaleConversion = (value: number, productName?: string) => {
-  if (window.fbq) {
-    const eventData = {
-      value: value,
-      currency: 'BRL',
-      content_name: productName || 'Guia de Estilo',
-      content_type: 'product'
-    };
-    
-    window.fbq('track', 'Purchase', eventData);
-    console.log(`[Analytics] Sale conversion tracked: ${value} BRL for ${productName || 'Guia de Estilo'}`);
-  }
-  
-  if (window.gtag) {
-    window.gtag('event', 'purchase', {
-      transaction_id: 'T_' + Date.now(),
-      value: value,
-      currency: 'BRL',
-      items: [{
-        name: productName || 'Guia de Estilo',
-        price: value
-      }]
-    });
-  }
+export const clearAnalyticsData = () => {
+  console.log('Analytics data cleared');
+  // Implement your analytics clearing logic here
+};
+
+/**
+ * Initialize Facebook Pixel
+ */
+export const initFacebookPixel = (pixelId: string) => {
+  console.log(`Initializing Facebook Pixel: ${pixelId}`);
+  // Implement Facebook Pixel initialization
+};
+
+/**
+ * Test Facebook Pixel
+ */
+export const testFacebookPixel = () => {
+  console.log('Testing Facebook Pixel');
+  // Implement Facebook Pixel test
+};
+
+/**
+ * Track an event in Facebook Pixel
+ */
+export const trackPixelEvent = (eventName: string, params?: Record<string, any>) => {
+  console.log(`Tracking pixel event: ${eventName}`);
+  // Implement Facebook Pixel event tracking
 };

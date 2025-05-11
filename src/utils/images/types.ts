@@ -9,6 +9,7 @@ export type PreloadOptions = {
   onComplete?: () => void;
   batchSize?: number;
   generateLowQuality?: boolean;
+  crop?: 'fill' | 'limit' | 'fit';
 };
 
 export type LoadStatus = 'idle' | 'loading' | 'loaded' | 'error';
@@ -27,4 +28,20 @@ export interface PreloadImageDefinition {
   height?: number;
   quality?: number;
   priority?: number;
+}
+
+// Add missing types needed by ImageDiagnosticDebugger
+export interface ImageAnalysis {
+  url: string;
+  size?: number;
+  dimensions?: { width: number; height: number };
+  format?: string;
+  optimized?: boolean;
+  recommendations?: string[];
+}
+
+export interface ImageDiagnosticResult {
+  status: 'success' | 'error';
+  analysis?: ImageAnalysis;
+  error?: string;
 }

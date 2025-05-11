@@ -3,7 +3,7 @@ import React from 'react';
 
 /**
  * Componente especializado para o carregamento da página QuizIntro
- * Usa o spinner padronizado para manter a consistência visual
+ * Simplificado para evitar dependências circulares e otimizar performance
  */
 export const QuizIntroLoading: React.FC = () => {
   // Logo otimizada
@@ -19,7 +19,6 @@ export const QuizIntroLoading: React.FC = () => {
           width={140}
           height={60}
           loading="eager"
-          fetchPriority="high"
           decoding="async"
           style={{
             objectFit: 'contain',

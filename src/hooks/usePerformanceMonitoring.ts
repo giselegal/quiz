@@ -10,10 +10,12 @@ export const usePerformanceMonitoring = () => {
     // Importar web-vitals apenas quando necessário
     const reportWebVitals = async () => {
       try {
+        // Web-vitals tem uma API diferente nas versões mais recentes
         const webVitals = await import('web-vitals');
         
         // Função para enviar métricas
-        const sendMetric = ({ name, value, id }) => {
+        const sendMetric = (metric) => {
+          const { name, value, id } = metric;
           // Log para desenvolvimento (remova em produção)
           if (process.env.NODE_ENV === 'development') {
             console.log(`[Web Vitals] ${name}: ${value} (ID: ${id})`);
@@ -25,11 +27,13 @@ export const usePerformanceMonitoring = () => {
         };
         
         // Registrar callbacks para cada métrica
-        webVitals.getCLS(sendMetric);
-        webVitals.getFID(sendMetric);
-        webVitals.getFCP(sendMetric);
-        webVitals.getLCP(sendMetric);
-        webVitals.getTTFB(sendMetric);
+        // Utilize a nova API do web-vitals v5+
+        webVitals.onCLS(sendMetric);
+        webVitals.onFID(sendMetric);
+        webVitals.onFCP(sendMetric);
+        webVitals.onLCP(sendMetric);
+        webVitals.onTTFB(sendMetric);
+        
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);
       }
