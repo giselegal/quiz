@@ -11,6 +11,9 @@
 /* Remover transições globais de imagens para otimizar performance */
 img {
   transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  image-rendering: crisp-edges;
 }
 
 /* Permitir transições apenas para elementos interativos específicos */

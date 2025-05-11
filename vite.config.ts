@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 import compression from "vite-plugin-compression";
+import cloudinaryImageOptimizer from "./src/plugins/cloudinaryImageOptimizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -27,6 +28,7 @@ export default defineConfig(({ mode }) => ({
   
   plugins: [
     react(),
+    cloudinaryImageOptimizer(),
     
     // Compressão GZIP
     compression({
@@ -55,9 +57,9 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: process.env.NODE_ENV === 'production' ? true : false,
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug']
+        pure_funcs: process.env.NODE_ENV === 'production' ? ['console.log', 'console.info', 'console.debug'] : []
       }
     },
     rollupOptions: {

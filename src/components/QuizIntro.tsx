@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { preloadCriticalImages } from '@/utils/imageManager';
 import AutoFixedImages from './ui/AutoFixedImages';
+import CrispIntroImage from './ui/CrispIntroImage'; // Importar o novo componente
 import { 
   // getTinyBase64ImageUrl, // Parece não ser usado diretamente no JSX, mas loadTinyImageAsBase64 é.
   loadTinyImageAsBase64, 
@@ -270,45 +271,31 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               backgroundPosition: 'center'
             }}
           >
-            <picture>
-              {/* Formatos modernos para browsers que suportam, com preload da versão tiny primeiro */}
-              <source 
-                srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`} 
-                type="image/avif" 
-                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
-              />
-              <source 
-                srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`} 
-                type="image/webp" 
-                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
-              />
-              {/* Fallback para navegadores sem suporte a formatos modernos */}
-              {/* O src agora usa uma URL otimizada do mesmo introImageId */}
-              <img
-                src={STATIC_INTRO_IMAGE_URLS.png} // Alterado para usar a URL PNG otimizada do introImageId correto
-                alt="Descubra seu estilo predominante"
-                className="w-full h-auto object-contain quiz-intro-image"
-                width={345}
-                height={360}
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                onLoad={() => { imageLoaded.current = true; }}
-                style={{
-                  background: '#f8f6f2', 
-                  display: 'block', 
-                  margin: '0 auto',
-                  objectFit: 'contain',
-                  aspectRatio: '345/360',
-                  backgroundImage: `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  imageRendering: 'auto',
-                  contain: 'paint'
-                }}
-                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
-              />
-            </picture>
+            <CrispIntroImage
+              srcSetAvif={`${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`}
+              srcSetWebp={`${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`}
+              srcPng={STATIC_INTRO_IMAGE_URLS.png}
+              sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
+              alt="Descubra seu estilo predominante"
+              width={345}
+              height={360}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              onLoad={() => { imageLoaded.current = true; }}
+              style={{
+                background: '#f8f6f2', 
+                display: 'block', 
+                margin: '0 auto',
+                objectFit: 'contain',
+                aspectRatio: '345/360',
+                backgroundImage: `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                imageRendering: 'auto',
+                contain: 'paint'
+              }}
+            />
           </div>
 
           {/* Texto descritivo com espaçamento consistente */}
