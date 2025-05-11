@@ -42,20 +42,10 @@ jobs:
           name: build-files
           path: dist/
           
-      - name: Ensure .htaccess is in dist directory
+      - name: Update .htaccess for subdirectory
         run: |
-          echo "# Configurações otimizadas para Hostinger (Apache)
-          
-          # Habilitar reescrita de URL para SPA (crucial para React Router)
-          <IfModule mod_rewrite.c>
-              RewriteEngine On
-              RewriteBase /quiz-de-estilo/
-          
-              # Se o arquivo solicitado não existir fisicamente, redirecionar para index.html
-              RewriteCond %{REQUEST_FILENAME} !-f
-              RewriteCond %{REQUEST_FILENAME} !-d
-              RewriteRule ^(.*)$ index.html [L,QSA]
-          </IfModule>" > dist/.htaccess
+          cp /workspaces/quiz-sell-genius-66/.htaccess dist/.htaccess
+          sed -i 's|RewriteBase /|RewriteBase /quiz-de-estilo/|g' dist/.htaccess
           
       - name: Deploy to Hostinger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
