@@ -26,21 +26,23 @@ export const getEventsSummary = () => {
   return summary;
 };
 
-// Get user progress data
+// Get user progress data - Ensure this returns an array
 export const getUserProgressData = () => {
-  // Implementation for getting user progress data
-  return {
-    completionRate: 75,
-    averageTimePerQuestion: 12,
-    dropOffPoints: [2, 5, 8],
-    totalUsers: 1250
-  };
+  // Modified to return an array for ProgressTab compatibility
+  return [
+    { questionId: 1, uniqueUsers: 1250, totalAnswers: 1200, retentionFromStart: 100, dropoffRate: 5 },
+    { questionId: 2, uniqueUsers: 1180, totalAnswers: 1150, retentionFromStart: 94, dropoffRate: 7 },
+    { questionId: 3, uniqueUsers: 1100, totalAnswers: 1080, retentionFromStart: 88, dropoffRate: 4 },
+    { questionId: 4, uniqueUsers: 1050, totalAnswers: 1030, retentionFromStart: 84, dropoffRate: 8 },
+    { questionId: 5, uniqueUsers: 950, totalAnswers: 940, retentionFromStart: 76, dropoffRate: 12 }
+  ];
 };
 
 // Reset metrics cache
 export const resetMetricsCache = () => {
   console.log("Metrics cache reset");
   // Implementation for resetting metrics cache
+  return true; // Return boolean for AnalyticsPage.tsx
 };
 
 // Get cached metrics

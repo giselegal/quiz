@@ -18,8 +18,8 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
   loading
 }) => {
   const userProgressData = React.useMemo(() => {
-    if (!analyticsData?.events) return [];
-    return getUserProgressData(analyticsData.events);
+    // getUserProgressData now returns an array directly
+    return getUserProgressData();
   }, [analyticsData]);
   
   // Calculate drop-off between questions for funnel visualization

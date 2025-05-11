@@ -64,7 +64,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
 
   const analyzeImage = async (url: string): Promise<ImageAnalysis> => {
     const isCloudinary = url.includes('cloudinary.com');
-    const options: PreloadOptions = {
+    const options = {
       quality: optimizationSettings.quality,
       format: optimizationSettings.format,
     };
@@ -77,7 +77,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
     if (isCloudinary && optimizationSettings.quality < 80) {
       suggestedImprovements.push('Aumentar a qualidade da imagem para pelo menos 80.');
     }
-    if (isCloudinary && optimizationSettings.format === 'jpg') {
+    if (isCloudinary && optimizationSettings.format !== 'webp') {
       suggestedImprovements.push('Usar formato automático ou WebP para melhor compressão.');
     }
     if (!url.includes('w_auto') && !url.includes('dpr_auto')) {
@@ -153,7 +153,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
       } else {
         const isCloudinary = url.includes('cloudinary.com');
         if (isCloudinary) {
-          const options: PreloadOptions = {
+          const options = {
             quality: optimizationSettings.quality,
             format: optimizationSettings.format,
           };
@@ -167,7 +167,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
             totalImagesWithIssues++;
             issues.push('Qualidade da imagem abaixo do recomendado (80).');
           }
-          if (optimizationSettings.format === 'jpg') {
+          if (optimizationSettings.format !== 'webp') {
             totalImagesWithIssues++;
             issues.push('Formato da imagem não é otimizado (usar auto ou webp).');
           }
@@ -200,6 +200,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
     const estimatedPerformanceImpact = totalImagesWithIssues > 0 ? 'Alto' : 'Baixo';
 
     setDiagnosticResult({
+      status: 'success',
       summary: {
         totalImages: totalImagesRendered,
         optimizedImages: totalImagesRendered - totalImagesWithIssues,
@@ -230,7 +231,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
     }
 
     try {
-      const options: PreloadOptions = {
+      const options = {
         quality: optimizationSettings.quality,
         format: optimizationSettings.format,
       };

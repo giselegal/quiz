@@ -45,11 +45,11 @@ export const trackPageView = (page: string) => {
  */
 export const trackButtonClick = (
   buttonId: string, 
-  buttonText?: string,
-  section?: string,
-  category?: string
+  buttonText: string = 'No text',
+  section: string = 'unknown section',
+  category: string = 'unknown category'
 ) => {
-  console.log(`Button click: ${buttonId} - ${buttonText || 'No text'} (${section || 'unknown section'}, ${category || 'unknown category'})`);
+  console.log(`Button click: ${buttonId} - ${buttonText} (${section}, ${category})`);
   // Full implementation would go here
 };
 
@@ -67,8 +67,8 @@ export const trackFormSubmit = (formId: string, data?: Record<string, any>) => {
 export const trackQuizAnswer = (
   questionId: string, 
   selectedOptions: string[],
-  currentQuestionIndex?: number,
-  totalQuestions?: number
+  currentQuestionIndex: number = 0,
+  totalQuestions: number = 0
 ) => {
   console.log(`Quiz answer: ${questionId} - ${selectedOptions.join(", ")}${
     currentQuestionIndex !== undefined ? ` (Q${currentQuestionIndex + 1}/${totalQuestions})` : ""
@@ -103,8 +103,8 @@ export const trackResultView = (resultType: string) => {
 /**
  * Track lead generation
  */
-export const trackLeadGeneration = (email: string, source?: string) => {
-  console.log(`Lead generated: ${email} from ${source || 'direct'}`);
+export const trackLeadGeneration = (email: string, source: string = 'direct') => {
+  console.log(`Lead generated: ${email} from ${source}`);
   // Implement lead generation tracking
 };
 
@@ -143,19 +143,25 @@ export const initFacebookPixel = (pixelId?: string) => {
   // Implement Facebook Pixel initialization
   
   try {
-    if (typeof window !== 'undefined' && !window.fbq) {
-      // Standard Facebook Pixel initialization code
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode?.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      
-      window.fbq('init', id);
-      window.fbq('track', 'PageView');
+    if (typeof window !== 'undefined') {
+      // Check if fbq is already defined before initializing
+      if (!window.fbq) {
+        // Standard Facebook Pixel initialization code
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        if(s && s.parentNode){
+          s.parentNode.insertBefore(t,s);
+        }
+        }(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        
+        window.fbq('init', id);
+        window.fbq('track', 'PageView');
+      }
     }
   } catch (error) {
     console.error('Error initializing Facebook Pixel:', error);
@@ -178,7 +184,7 @@ export const trackPixelEvent = (eventName: string, params?: Record<string, any>)
   // Implement Facebook Pixel event tracking
   
   try {
-    if (typeof window !== 'undefined' && window.fbq) {
+    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
       window.fbq('track', eventName, params);
     }
   } catch (error) {
@@ -189,7 +195,7 @@ export const trackPixelEvent = (eventName: string, params?: Record<string, any>)
 // Add global type definition for fbq
 declare global {
   interface Window {
-    fbq?: any;
+    fbq: any;
     _fbq?: any;
   }
 }

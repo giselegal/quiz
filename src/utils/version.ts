@@ -5,6 +5,7 @@ export const VERSION = {
   buildNumber: "2023.05.11",
   buildDate: "2023-05-11",
   environment: process.env.NODE_ENV || "development",
+  lastUpdated: "2023-05-11T00:00:00Z", // Adding the missing lastUpdated property
 };
 
 // Display version info in the console
@@ -20,6 +21,7 @@ export const getVersionInfo = () => {
     build: VERSION.buildNumber,
     date: VERSION.buildDate,
     environment: VERSION.environment,
+    lastUpdated: VERSION.lastUpdated,
     userAgent: navigator.userAgent,
     platform: navigator.platform
   };

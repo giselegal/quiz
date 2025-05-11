@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getLowQualityImage } from '@/utils/imageManager';
 import { AspectRatioContainer } from './aspect-ratio-container';
@@ -15,6 +16,8 @@ interface OptimizedImageProps {
   placeholderColor?: string;
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   onLoad?: () => void;
+  style?: React.CSSProperties;
+  containerRef?: React.RefObject<HTMLDivElement>;
 }
 
 /**
@@ -38,6 +41,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   placeholderColor = '#f5f5f5',
   objectFit = 'cover',
   onLoad,
+  style,
+  containerRef,
   ...props
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -146,7 +151,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         width: width,
         height: height,
         ...(aspectRatio && { aspectRatio: String(aspectRatio) }), // Convert to string for proper type
-        ...style,
+        ...(style || {})
       }}
       ref={containerRef}
       {...props}
@@ -175,7 +180,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onLoad={handleImageLoad}
           onError={handleImageError}
           loading={priority ? 'eager' : 'lazy'}
-          fetchPriority={priority ? 'high' : 'auto'}
+          // Remove non-standard attributes
+          // fetchPriority={priority ? 'high' : 'auto'}
           decoding={priority ? 'sync' : 'async'}
         />
       )}

@@ -10,7 +10,7 @@ export type PreloadOptions = {
   batchSize?: number;
   generateLowQuality?: boolean;
   crop?: 'fill' | 'limit' | 'fit';
-  responsive?: boolean; // Added for ImageDiagnosticDebugger
+  responsive?: boolean;
 };
 
 export type LoadStatus = 'idle' | 'loading' | 'loaded' | 'error';
@@ -21,6 +21,7 @@ export type ImageCacheEntry = {
   element?: HTMLImageElement;
   optimizedUrl?: string;
   lowQualityUrl?: string;
+  lastAccessed?: number; // Adding missing property
 };
 
 export interface PreloadImageDefinition {
@@ -30,6 +31,15 @@ export interface PreloadImageDefinition {
   quality?: number;
   priority?: number;
 }
+
+// Image Settings type needed by optimization files
+export type ImageSettings = {
+  quality?: number;
+  format?: 'auto' | 'webp' | 'avif';
+  width?: number;
+  height?: number;
+  crop?: 'fill' | 'limit' | 'fit';
+};
 
 // Image Analysis types
 export interface ImageAnalysis {

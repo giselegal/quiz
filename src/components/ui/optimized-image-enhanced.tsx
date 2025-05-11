@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getLowQualityImage } from '@/utils/imageManager';
 import { AspectRatioContainer } from './aspect-ratio-container';
@@ -15,6 +16,8 @@ interface OptimizedImageProps {
   placeholderColor?: string;
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   onLoad?: () => void;
+  style?: React.CSSProperties; // Add missing property
+  containerRef?: React.RefObject<HTMLDivElement>; // Add missing property
 }
 
 /**
@@ -163,7 +166,8 @@ export const OptimizedImageEnhanced: React.FC<OptimizedImageProps> = ({
           onLoad={handleImageLoad}
           onError={handleImageError}
           loading={priority ? 'eager' : 'lazy'}
-          fetchPriority={priority ? 'high' : 'auto'}
+          // These attributes are not in the HTML specification for images, so we need to remove them
+          // fetchPriority={priority ? 'high' : 'auto'}
           decoding={priority ? 'sync' : 'async'}
         />
       )}
