@@ -44,7 +44,7 @@ export const resetMetricsCache = () => {
 };
 
 // Get cached metrics
-export const getCachedMetrics = () => {
+export const getCachedMetrics = (timeRange?: '7d' | '30d' | 'all') => {
   // Implementation for getting cached metrics
   return {
     lastUpdated: new Date().toISOString(),
@@ -56,10 +56,28 @@ export const getCachedMetrics = () => {
   };
 };
 
+// Filter events by time range
+export const filterEventsByTimeRange = (events: any[], timeRange: '7d' | '30d' | 'all') => {
+  if (timeRange === 'all' || !events || !events.length) {
+    return events || [];
+  }
+
+  const now = new Date();
+  const daysToFilter = timeRange === '7d' ? 7 : 30;
+  const cutoffDate = new Date(now.setDate(now.getDate() - daysToFilter));
+
+  return events.filter(event => {
+    if (!event.timestamp) return true;
+    const eventDate = new Date(event.timestamp);
+    return eventDate >= cutoffDate;
+  });
+};
+
 export default { 
   formatAnalyticsData, 
   getEventsSummary,
   getUserProgressData,
   resetMetricsCache,
-  getCachedMetrics
+  getCachedMetrics,
+  filterEventsByTimeRange
 };

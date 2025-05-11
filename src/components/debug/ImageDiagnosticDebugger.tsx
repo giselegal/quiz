@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { getAllImages } from '@/data/imageBank';
 import { optimizeCloudinaryUrl, getResponsiveImageSources } from '@/utils/imageUtils';
-import { ImageAnalysis, ImageDiagnosticResult } from '@/utils/images/types';
+import { ImageAnalysis, ImageDiagnosticResult, PreloadOptions } from '@/utils/images/types';
 import { Button } from '@/components/ui/button';
 import { Copy, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -14,12 +15,28 @@ interface ImageDiagnosticDebuggerProps {
   isVisible: boolean;
 }
 
+type OptimizationSettings = {
+  quality: number;
+  format: 'auto' | 'webp' | 'avif';
+  responsive: boolean;
+};
+
+interface DetailedIssue {
+  url: string;
+  element: HTMLImageElement;
+  issues: string[];
+  dimensions: {
+    natural: { width: number; height: number };
+    display: { width: number; height: number };
+  };
+}
+
 const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVisible }) => {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [analysisResults, setAnalysisResults] = useState<ImageAnalysis[]>([]);
   const [diagnosticResult, setDiagnosticResult] = useState<ImageDiagnosticResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [optimizationSettings, setOptimizationSettings] = useState({
+  const [optimizationSettings, setOptimizationSettings] = useState<OptimizationSettings>({
     quality: 80,
     format: 'auto',
     responsive: true,
@@ -47,7 +64,12 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
 
   const analyzeImage = async (url: string): Promise<ImageAnalysis> => {
     const isCloudinary = url.includes('cloudinary.com');
-    const optimizedUrl = isCloudinary ? optimizeCloudinaryUrl(url, optimizationSettings) : url;
+    const options: PreloadOptions = {
+      quality: optimizationSettings.quality,
+      format: optimizationSettings.format,
+    };
+    
+    const optimizedUrl = isCloudinary ? optimizeCloudinaryUrl(url, options) : url;
     const originalSize = await getImageSize(url);
     const optimizedSize = await getImageSize(optimizedUrl);
 
@@ -65,10 +87,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
     const analysis: ImageAnalysis = {
       url,
       format: 'desconhecido',
-      quality: 'desconhecida',
-      width: 'desconhecida',
-      height: 'desconhecida',
-      isOptimized: optimizedSize < originalSize,
+      optimized: optimizedSize < originalSize,
       isResponsive: url.includes('w_auto') || url.includes('dpr_auto'),
       suggestedImprovements,
       estimatedSizeReduction: originalSize - optimizedSize,
@@ -110,10 +129,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
         results.push({
           url: imageEl.src,
           format: 'desconhecido',
-          quality: 'desconhecida',
-          width: 'desconhecida',
-          height: 'desconhecida',
-          isOptimized: false,
+          optimized: false,
           isResponsive: false,
           suggestedImprovements: ['Erro ao analisar a imagem.'],
         });
@@ -125,7 +141,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
     const totalImagesRendered = images.length;
     let totalImagesWithIssues = 0;
     let totalDownloadedBytes = 0;
-    let detailedIssues: ImageDiagnosticResult['detailedIssues'] = [];
+    let detailedIssues: DetailedIssue[] = [];
 
     for (const imageEl of images) {
       const url = imageEl.src;
@@ -137,7 +153,12 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
       } else {
         const isCloudinary = url.includes('cloudinary.com');
         if (isCloudinary) {
-          const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettings);
+          const options: PreloadOptions = {
+            quality: optimizationSettings.quality,
+            format: optimizationSettings.format,
+          };
+          
+          const optimizedUrl = optimizeCloudinaryUrl(url, options);
           const originalSize = await getImageSize(url);
           const optimizedSize = await getImageSize(optimizedUrl);
           totalDownloadedBytes += optimizedSize;
@@ -180,6 +201,10 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
 
     setDiagnosticResult({
       summary: {
+        totalImages: totalImagesRendered,
+        optimizedImages: totalImagesRendered - totalImagesWithIssues,
+        totalSize: totalDownloadedBytes,
+        potentialSavings: 0, // This could be calculated more precisely
         totalImagesRendered,
         totalImagesWithIssues,
         totalDownloadedBytes,
@@ -205,7 +230,12 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
     }
 
     try {
-      const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettings);
+      const options: PreloadOptions = {
+        quality: optimizationSettings.quality,
+        format: optimizationSettings.format,
+      };
+      
+      const optimizedUrl = optimizeCloudinaryUrl(url, options);
       const responsiveSources = getResponsiveImageSources(url, [320, 640, 960, 1280]);
       
       // Create a temporary image element to apply the optimized URL
@@ -255,11 +285,14 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
                   id="format"
                   className="w-full p-2 border rounded"
                   value={optimizationSettings.format}
-                  onChange={(e) => setOptimizationSettings({ ...optimizationSettings, format: e.target.value })}
+                  onChange={(e) => setOptimizationSettings({ 
+                    ...optimizationSettings, 
+                    format: e.target.value as 'auto' | 'webp' | 'avif'
+                  })}
                 >
                   <option value="auto">Auto</option>
                   <option value="webp">WebP</option>
-                  <option value="jpg">JPG</option>
+                  <option value="avif">AVIF</option>
                 </select>
               </div>
               <div className="flex items-center space-x-2">
@@ -302,7 +335,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
           </Button>
 
           {/* Diagnostic Summary */}
-          {diagnosticResult && (
+          {diagnosticResult && diagnosticResult.summary && (
             <div className="mt-4 p-4 bg-white rounded shadow-md">
               <h3 className="text-lg font-semibold mb-2">Diagnostic Summary</h3>
               <p>Total Images Rendered: {diagnosticResult.summary.totalImagesRendered}</p>
@@ -313,7 +346,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
           )}
 
           {/* Detailed Issues */}
-          {diagnosticResult && diagnosticResult.detailedIssues.length > 0 && (
+          {diagnosticResult && diagnosticResult.detailedIssues && diagnosticResult.detailedIssues.length > 0 && (
             <div className="mt-4 p-4 bg-white rounded shadow-md">
               <h3 className="text-lg font-semibold mb-2">Detailed Issues</h3>
               {diagnosticResult.detailedIssues.map((issue, index) => (
@@ -327,10 +360,10 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
                   <p>
                     <strong>Display Dimensions:</strong> {issue.dimensions?.display.width}x{issue.dimensions?.display.height}
                   </p>
-                  {issue.issues.map((error, i) => (
+                  {issue.issues.map((errorText, i) => (
                     <p key={i} className="text-red-500">
                       <AlertTriangle className="inline-block h-4 w-4 mr-1" />
-                      {error}
+                      {errorText}
                     </p>
                   ))}
                 </div>
@@ -354,12 +387,12 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
                     {analysisResults[index] && (
                       <>
                         <p className="text-sm">
-                          <strong>Optimized:</strong> {analysisResults[index].isOptimized ? <CheckCircle className="inline-block h-4 w-4 text-green-500" /> : <AlertTriangle className="inline-block h-4 w-4 text-red-500" />}
+                          <strong>Optimized:</strong> {analysisResults[index].optimized ? <CheckCircle className="inline-block h-4 w-4 text-green-500" /> : <AlertTriangle className="inline-block h-4 w-4 text-red-500" />}
                         </p>
                         <p className="text-sm">
                           <strong>Responsive:</strong> {analysisResults[index].isResponsive ? <CheckCircle className="inline-block h-4 w-4 text-green-500" /> : <AlertTriangle className="inline-block h-4 w-4 text-red-500" />}
                         </p>
-                        {analysisResults[index].suggestedImprovements.length > 0 && (
+                        {analysisResults[index].suggestedImprovements && analysisResults[index].suggestedImprovements.length > 0 && (
                           <>
                             <p className="text-sm font-medium">Suggested Improvements:</p>
                             <ul className="list-disc list-inside text-sm text-red-500">

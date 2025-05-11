@@ -1,137 +1,141 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useQuizContext } from '@/context/QuizContext';
 import { QuizOfferHero } from '@/components/quiz-offer/QuizOfferHero';
-import { EmbeddedQuizPreview } from '@/components/quiz-offer/EmbeddedQuizPreview';
-import { QuizOfferCTA } from '@/components/quiz-offer/QuizOfferCTA';
-import QuizPage from '@/components/QuizPage';
-import Testimonials from '@/components/quiz-result/sales/Testimonials';
-import Guarantee from '@/components/quiz-result/sales/Guarantee';
-import BenefitList from '@/components/quiz-result/sales/BenefitList';
-import BuildInfo from '@/components/BuildInfo';
-import { initFacebookPixel, trackButtonClick } from '@/utils/analytics';
-import { useUtmParameters } from '@/hooks/useUtmParameters';
+import QuizOfferCTA from '@/components/quiz-offer/QuizOfferCTA';
+import EmbeddedQuizPreview from '@/components/quiz-offer/EmbeddedQuizPreview';
+import { trackButtonClick, captureUTMParameters } from '@/utils/analytics';
+import usePerformanceMonitoring from '@/hooks/usePerformanceMonitoring';
 
-const QuizOfferPage = () => {
+const QuizOfferPage: React.FC = () => {
   const [showQuiz, setShowQuiz] = useState(false);
-  const [hasScrolledToQuiz, setHasScrolledToQuiz] = useState(false);
-  const { captureUtmParameters } = useUtmParameters();
-
-  // Inicializa o Facebook Pixel e capturar UTM parameters quando a página carregar
+  const { resetQuiz } = useQuizContext();
+  
+  // Use web vitals monitoring
+  usePerformanceMonitoring();
+  
   useEffect(() => {
-    // Inicializar o Facebook Pixel
-    initFacebookPixel();
+    // Reset quiz state when visiting this page
+    resetQuiz();
     
-    // Capturar UTM parameters
-    captureUtmParameters();
+    // Capture UTM parameters
+    captureUTMParameters();
     
-    // Registrar o tempo de início para cálculos de métricas
-    localStorage.setItem('offer_page_load_time', Date.now().toString());
-  }, [captureUtmParameters]);
-
-  // Função para iniciar o quiz
-  const handleStartQuiz = () => {
+    // Record page view
+    console.log('Quiz Offer Page loaded');
+    
+    // Any additional initialization
+  }, [resetQuiz]);
+  
+  const handleStartQuizClick = () => {
     setShowQuiz(true);
-    trackButtonClick('start-embedded-quiz', 'Iniciar Quiz Embutido', 'quiz-offer-page', 'start-quiz');
-    
-    // Scroll para a seção do quiz se ainda não tiver feito isso
-    if (!hasScrolledToQuiz) {
-      setTimeout(() => {
-        const quizSection = document.getElementById('quiz-section');
-        if (quizSection) {
-          quizSection.scrollIntoView({ behavior: 'smooth' });
-          setHasScrolledToQuiz(true);
-        }
-      }, 100);
-    }
+    trackButtonClick('start-quiz', 'Começar Quiz', 'quiz-offer', 'engagement');
+    // Smooth scroll to quiz section
+    setTimeout(() => {
+      document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
-
+  
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="container mx-auto px-4">
-        {/* Seção Hero */}
-        <section className="py-8">
-          <QuizOfferHero onStartQuizClick={handleStartQuiz} />
-        </section>
-
-        {/* Previsualização ou Quiz Completo */}
-        <section id="quiz-section" className="py-8">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-playfair text-center text-[#432818] mb-6">
-              {showQuiz ? 'Descubra Seu Estilo Pessoal' : 'Experimente o Quiz'}
-            </h2>
-            
-            {showQuiz ? (
-              <div className="border border-[#EAE4DA] rounded-lg overflow-hidden shadow-md bg-[#F9F7F4] p-4">
-                <QuizPage />
-              </div>
-            ) : (
-              <EmbeddedQuizPreview onStartQuiz={handleStartQuiz} />
-            )}
-          </div>
-        </section>
+    <div className="min-h-screen bg-[#FFFFFF]">
+      {/* Hero Section */}
+      <header className="container mx-auto pt-8 pb-4 px-4">
+        <div className="flex justify-center mb-8">
+          <img 
+            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
+            alt="Logo Gisele Galvão"
+            width={140}
+            height={60}
+            className="h-auto w-36"
+          />
+        </div>
         
-        {/* CTA Principal */}
-        <section className="py-8">
-          <div className="max-w-3xl mx-auto">
-            <QuizOfferCTA />
-          </div>
-        </section>
+        <QuizOfferHero onStartQuizClick={handleStartQuizClick} />
+      </header>
+      
+      {/* Main Content */}
+      <main className="container mx-auto py-8 px-4">
+        {/* Quiz Section */}
+        <div id="quiz-section" className="mb-16">
+          {showQuiz ? (
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-playfair text-[#432818] mb-6 text-center">
+                Seu Quiz de Estilo Pessoal
+              </h2>
+              <EmbeddedQuizPreview />
+            </div>
+          ) : (
+            <div className="max-w-3xl mx-auto bg-[#F9F7F4] p-8 rounded-lg text-center">
+              <h2 className="text-2xl md:text-3xl font-playfair text-[#432818] mb-4">
+                Pronta para descobrir seu estilo autêntico?
+              </h2>
+              <p className="text-lg text-[#432818]/80 mb-6">
+                Responda algumas perguntas sobre suas preferências e descubra seu estilo pessoal único.
+              </p>
+              <button 
+                onClick={handleStartQuizClick}
+                className="bg-[#aa6b5d] hover:bg-[#9d5d50] text-white py-3 px-6 rounded-md text-lg font-medium"
+              >
+                Começar o Quiz Gratuito
+              </button>
+            </div>
+          )}
+        </div>
         
-        {/* Imagens demonstrativas do produto */}
-        <section className="py-8">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-playfair text-center text-[#432818] mb-6">
-              O Que Você Vai Descobrir
-            </h2>
+        {/* CTA Section */}
+        <div className="max-w-xl mx-auto mb-16">
+          <QuizOfferCTA />
+        </div>
+        
+        {/* FAQ Section */}
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-playfair text-[#432818] mb-6 text-center">
+            Perguntas Frequentes
+          </h2>
+          
+          <div className="space-y-4">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-[#EAE4DA]">
+              <h3 className="font-medium text-lg text-[#432818] mb-2">
+                O que vou descobrir com este quiz?
+              </h3>
+              <p className="text-[#432818]/80">
+                Você descobrirá seu estilo pessoal dominante e como ele reflete sua personalidade. 
+                A versão completa inclui uma análise detalhada e recomendações personalizadas.
+              </p>
+            </div>
             
-            <div className="grid md:grid-cols-2 gap-6">
-              <img
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911677/C%C3%B3pia_de_MOCKUPS_15_-_Copia_grstwl.webp"
-                alt="Mockup celular peças-chave por dentro"
-                className="w-full rounded-lg shadow-md"
-              />
-              <img
-                src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911667/WhatsApp_Image_2025-04-02_at_09.40.53_cv8p5y.jpg"
-                alt="Foto Gisele Galvão"
-                className="w-full rounded-lg shadow-md"
-              />
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-[#EAE4DA]">
+              <h3 className="font-medium text-lg text-[#432818] mb-2">
+                Quanto tempo leva para completar o quiz?
+              </h3>
+              <p className="text-[#432818]/80">
+                O quiz gratuito leva aproximadamente 3-5 minutos para ser concluído. 
+                A versão completa oferece uma análise mais profunda com aproximadamente 15 questões.
+              </p>
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-[#EAE4DA]">
+              <h3 className="font-medium text-lg text-[#432818] mb-2">
+                O que está incluído no guia completo?
+              </h3>
+              <p className="text-[#432818]/80">
+                O guia completo inclui: análise detalhada de estilo, paleta de cores personalizada, 
+                lista de peças essenciais para seu guarda-roupa, dicas de visagismo e combinações 
+                ideais para seu biotipo.
+              </p>
             </div>
           </div>
-        </section>
-        
-        {/* Lista de Benefícios */}
-        <section className="py-8">
-          <div className="max-w-4xl mx-auto">
-            <BenefitList />
-          </div>
-        </section>
-        
-        {/* Depoimentos */}
-        <section className="py-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-playfair text-center text-[#432818] mb-6">
-              O Que Dizem Sobre o Guia
-            </h2>
-            <Testimonials />
-          </div>
-        </section>
-        
-        {/* Garantia */}
-        <section className="py-8">
-          <div className="max-w-3xl mx-auto">
-            <Guarantee />
-          </div>
-        </section>
-        
-        {/* CTA Final */}
-        <section className="py-8">
-          <div className="max-w-3xl mx-auto">
-            <QuizOfferCTA />
-          </div>
-        </section>
-        
-        <BuildInfo />
-      </div>
+        </div>
+      </main>
+      
+      {/* Footer */}
+      <footer className="bg-[#F9F7F4] py-8 px-4 mt-16">
+        <div className="container mx-auto text-center">
+          <p className="text-[#432818]/70 text-sm">
+            © {new Date().getFullYear()} Gisele Galvão | Todos os direitos reservados
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };

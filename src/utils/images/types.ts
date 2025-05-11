@@ -39,20 +39,33 @@ export interface ImageAnalysis {
   format?: string;
   optimized?: boolean;
   recommendations?: string[];
-  quality?: number; // Added for ImageDiagnosticDebugger
-  isResponsive?: boolean; // Added for ImageDiagnosticDebugger
-  suggestedImprovements?: string[]; // Added for ImageDiagnosticDebugger
+  quality?: number | string; // Support both number and string
+  isResponsive?: boolean;
+  suggestedImprovements?: string[];
+  estimatedSizeReduction?: number;
 }
 
 export interface ImageDiagnosticResult {
-  status: 'success' | 'error';
+  status?: 'success' | 'error';
   analysis?: ImageAnalysis;
   error?: string;
-  summary?: { // Added for ImageDiagnosticDebugger
+  summary?: {
     totalImages?: number;
     optimizedImages?: number;
     totalSize?: number;
     potentialSavings?: number;
+    totalImagesRendered?: number;
+    totalImagesWithIssues?: number;
+    totalDownloadedBytes?: number;
+    estimatedPerformanceImpact?: string;
   };
-  detailedIssues?: string[]; // Added for ImageDiagnosticDebugger
+  detailedIssues?: Array<{
+    url: string;
+    element: HTMLImageElement;
+    issues: string[];
+    dimensions?: {
+      natural: { width: number; height: number };
+      display: { width: number; height: number };
+    };
+  }>;
 }

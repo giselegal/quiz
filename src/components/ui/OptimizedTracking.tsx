@@ -63,7 +63,7 @@ export const OptimizedTracking: React.FC<{
       }, delay);
       
       // Armazenar o ID do timeout para gerenciamento
-      window._scriptLoadTimeout = timeoutId;
+      window._scriptLoadTimeout = timeoutId as any;
     };
     
     // Se waitForInteraction é verdadeiro, espera pela primeira interação
@@ -117,7 +117,7 @@ export const OptimizedTracking: React.FC<{
 // Adicionar a definição para _scriptLoadTimeout global
 declare global {
   interface Window {
-    _scriptLoadTimeout: ReturnType<typeof setTimeout>;
+    _scriptLoadTimeout: number | NodeJS.Timeout;
   }
 }
 

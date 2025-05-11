@@ -42,8 +42,6 @@ export const trackPageView = (page: string) => {
  * Track a button click event
  * @param buttonId Identifier for the button
  * @param buttonText Optional button text
- * @param section Optional section where the button is located
- * @param category Optional category for the button
  */
 export const trackButtonClick = (
   buttonId: string, 
@@ -65,10 +63,6 @@ export const trackFormSubmit = (formId: string, data?: Record<string, any>) => {
 
 /**
  * Track a quiz answer
- * @param questionId ID of the question
- * @param answerId Selected answer(s)
- * @param currentQuestionIndex Optional current question index
- * @param totalQuestions Optional total questions count
  */
 export const trackQuizAnswer = (
   questionId: string, 

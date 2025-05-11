@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getLowQualityImage } from '@/utils/imageManager';
 import { AspectRatioContainer } from './aspect-ratio-container';
+import cn from 'classnames';
 
 interface OptimizedImageProps {
   src: string;
@@ -24,7 +25,7 @@ interface OptimizedImageProps {
  * - Suporta lazy loading e priority loading
  * - Adicionado melhor tratamento de erro e estados de transição
  */
-export const OptimizedImage: React.FC<OptimizedImageProps> = ({
+export const OptimizedImageEnhanced: React.FC<OptimizedImageProps> = ({
   src,
   alt,
   width,
@@ -35,7 +36,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   quality = 80,
   placeholderColor = '#f5f5f5',
   objectFit = 'cover',
-  onLoad
+  onLoad,
+  style,
+  containerRef,
+  ...props
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lowQualitySrc, setLowQualitySrc] = useState<string>('');
@@ -124,10 +128,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const heightStr = String(height);
   
   return (
-    <AspectRatioContainer 
-      ratio={aspectRatio} 
-      className={`${containerClassName} relative overflow-hidden`}
-      bgColor={placeholderColor}
+    <div
+      className={cn("relative overflow-hidden", className)}
+      style={{
+        width: width,
+        height: height,
+        ...(aspectRatio && { aspectRatio: String(aspectRatio) }), // Convert to string for proper type
+        ...style,
+      }}
+      ref={containerRef}
+      {...props}
     >
       {/* Placeholder de baixa qualidade - visível enquanto a imagem principal carrega */}
       {lowQualitySrc && !imageLoaded && !hasError && (
@@ -164,6 +174,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           Não foi possível carregar a imagem
         </div>
       )}
-    </AspectRatioContainer>
+    </div>
   );
 };
+
+export default OptimizedImageEnhanced;
