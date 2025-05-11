@@ -1,5 +1,58 @@
-'use client';
+'use client';'use client';
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}, []); // Removendo dependência de mainImageWidth para evitar loops  }    }      return () => window.removeEventListener('resize', updateWidth);      window.addEventListener('resize', updateWidth);      updateWidth();    } else {      };        resizeObserver.disconnect();        }          resizeObserver.unobserve(mainImageRef.current);        if (mainImageRef.current) {      return () => {      updateWidth();      resizeObserver.observe(mainImageRef.current);      });        });          }            }              }                setMainImageWidth(width);              if (width > 0) {              const width = entry.contentRect.width;            if (entry.target === mainImageRef.current) {          for (const entry of entries) {        window.requestAnimationFrame(() => {      const resizeObserver = new ResizeObserver((entries) => {    if (typeof ResizeObserver === 'function') {    // Usar ResizeObserver para performance superior (evita reflows)    };      }        setMainImageWidth(mainImageRef.current.offsetWidth);      if (mainImageRef.current) {    const updateWidth = () => {    // Função para atualizar a largura usando dados do ResizeObserver (mais eficiente)  if (mainImageRef.current) {useEffect(() => {// Removida a dependência de mainImageWidth para evitar loop infinito// Efeito para capturar a largura da imagem principal - otimizado com ResizeObserverimport { Sparkles, ShieldCheck, UserCircle2 } from 'lucide-react';} from '@/utils/inlineImageUtils';  getTinyImageUrl  getOptimizedImageUrl,   loadTinyImageAsBase64, import { import AutoFixedImages from './ui/AutoFixedImages';import { preloadCriticalImages } from '@/utils/imageManager';import { Input } from './ui/input';import { Button } from './ui/button';import { useState, useEffect, useRef } from 'react';import React from 'react';
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
