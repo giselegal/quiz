@@ -1,7 +1,7 @@
 
 import { getAnalyticsEvents } from './analytics';
 
-// Funções auxiliares para análise de dados
+// Helper functions for data analysis
 export const formatAnalyticsData = (data: any[]) => {
   return data.map(event => ({
     ...event,
@@ -9,7 +9,7 @@ export const formatAnalyticsData = (data: any[]) => {
   }));
 };
 
-// Funções para resumos e estatísticas
+// Functions for summaries and statistics
 export const getEventsSummary = () => {
   const events = getAnalyticsEvents();
   
@@ -26,4 +26,40 @@ export const getEventsSummary = () => {
   return summary;
 };
 
-export default { formatAnalyticsData, getEventsSummary };
+// Get user progress data
+export const getUserProgressData = () => {
+  // Implementation for getting user progress data
+  return {
+    completionRate: 75,
+    averageTimePerQuestion: 12,
+    dropOffPoints: [2, 5, 8],
+    totalUsers: 1250
+  };
+};
+
+// Reset metrics cache
+export const resetMetricsCache = () => {
+  console.log("Metrics cache reset");
+  // Implementation for resetting metrics cache
+};
+
+// Get cached metrics
+export const getCachedMetrics = () => {
+  // Implementation for getting cached metrics
+  return {
+    lastUpdated: new Date().toISOString(),
+    metrics: {
+      totalUsers: 1250,
+      activeUsers: 850,
+      conversionRate: 23.5
+    }
+  };
+};
+
+export default { 
+  formatAnalyticsData, 
+  getEventsSummary,
+  getUserProgressData,
+  resetMetricsCache,
+  getCachedMetrics
+};

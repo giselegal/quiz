@@ -14,7 +14,7 @@ export const usePerformanceMonitoring = () => {
         const webVitals = await import('web-vitals');
         
         // Função para enviar métricas
-        const sendMetric = (metric) => {
+        const sendMetric = (metric: any) => {
           const { name, value, id } = metric;
           // Log para desenvolvimento (remova em produção)
           if (process.env.NODE_ENV === 'development') {
@@ -27,12 +27,19 @@ export const usePerformanceMonitoring = () => {
         };
         
         // Registrar callbacks para cada métrica
-        // Utilize a nova API do web-vitals v5+
-        webVitals.onCLS(sendMetric);
-        webVitals.onFID(sendMetric);
-        webVitals.onFCP(sendMetric);
-        webVitals.onLCP(sendMetric);
-        webVitals.onTTFB(sendMetric);
+        // Verificar se os métodos existem antes de chamá-los
+        if (webVitals.onCLS) webVitals.onCLS(sendMetric);
+        if (webVitals.onFCP) webVitals.onFCP(sendMetric);
+        if (webVitals.onLCP) webVitals.onLCP(sendMetric);
+        if (webVitals.onTTFB) webVitals.onTTFB(sendMetric);
+        
+        // Verificar se onFID existe (pode ser diferente em versões do web-vitals)
+        if (webVitals.onFID) {
+          webVitals.onFID(sendMetric);
+        } else if (webVitals.onINP) {
+          // Nas versões mais recentes, onINP pode substituir onFID
+          webVitals.onINP(sendMetric);
+        }
         
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);

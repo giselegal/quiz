@@ -1,3 +1,4 @@
+
 import { initLazyLoading } from './utils/lazyScript';
 import { initFontOptimization } from './utils/fontPreload';
 import { initImageOptimizations } from './utils/imageOptimization';
@@ -6,7 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { displayVersion } from './utils/version';
+import { VERSION, getVersionInfo } from './utils/version';
 import { injectCriticalCSS, initialCriticalCSS, removeCriticalCSS } from './utils/critical-css';
 import { checkSiteHealth } from './utils/siteHealthCheck';
 import { monitorFunnelRoutes } from './utils/funnelMonitor';
@@ -22,7 +23,8 @@ initImageOptimizations();
 
 // Exibir informações de versão no console apenas em desenvolvimento
 if (process.env.NODE_ENV !== 'production') {
-  displayVersion();
+  console.log(`App Version: ${VERSION.number} (Build ${VERSION.buildNumber})`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.time('App Render');
 }
 
