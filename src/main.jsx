@@ -31,7 +31,7 @@ try {
         <App />
       </React.StrictMode>
     );
-    );
+    // NÃO DEIXE UM PARENTESE EXTRA AQUI!
     console.log('Aplicativo renderizado com sucesso!');
   } else {
     console.error('Elemento root não encontrado!');
@@ -43,8 +43,6 @@ try {
       bodyElement.appendChild(fallbackRoot);
       // Tentar renderizar novamente
       ReactDOM.createRoot(fallbackRoot).render(
-// Inicializar carregamento lazy de scripts
-initLazyLoading();
         <React.StrictMode>
           <App />
         </React.StrictMode>
