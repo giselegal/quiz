@@ -1,5 +1,14 @@
 
 // Global type declarations
+import React from 'react';
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      [elemName: string]: any;
+    }
+  }
+}
 
 interface Window {
   // Analytics tracking functions

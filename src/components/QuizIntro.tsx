@@ -4,7 +4,7 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { AutoFixedImages } from './AutoFixedImages';
+import AutoFixedImages from './ui/AutoFixedImages';
 
 // Defina estas constantes no início do arquivo ou importe-as de outro lugar
 const LOGO_BASE_URL = 'https://res.cloudinary.com/yourcloud/image/upload/';
@@ -146,138 +146,136 @@ export function QuizIntro({ onStart }: QuizIntroProps) {
   }, [nome, onStart]);
 
   return (
-    <AutoFixedImages>
-      <div
-        className="quiz-intro flex flex-col items-center w-full"
-        style={{
-          background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
-          minHeight: '100vh',
-          contain: 'layout'
-        }}
-        data-section="intro"
-      >
-        <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-5 sm:space-y-8">
-          <div className="flex flex-col items-center">
-            <div className="relative">
-              <picture>
-                <source srcSet={STATIC_LOGO_IMAGE_URLS.avif} type="image/avif" />
-                <source srcSet={STATIC_LOGO_IMAGE_URLS.webp} type="image/webp" />
-                <img
-                  src={STATIC_LOGO_IMAGE_URLS.png}
-                  alt="Logo Gisele Galvão"
-                  className="h-auto mx-auto"
-                  width={140}
-                  height={60}
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  style={{
-                    objectFit: 'contain',
-                    maxWidth: '100%',
-                    aspectRatio: '140/60',
-                    width: '140px',
-                    height: '60px',
-                  }} />
-              </picture>
-              <div
-                className="h-[2px] bg-[#B89B7A] mt-2 rounded-full mx-auto"
-                style={{
-                  width: mainImageWidth > 0 ? `${mainImageWidth}px` : '100%',
-                  maxWidth: '100%',
-                  transition: 'width 0.3s ease-in-out'
-                }}
-              ></div>
-            </div>
-          </div>
-
-          <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-[#432818] px-1">
-            Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
-          </h1>
-
-          <div
-            ref={mainImageRef}
-            className="w-full max-w-[300px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md"
-            style={{
-              height: 'auto',
-              aspectRatio: '1 / 1.05',
-              background: '#f8f6f2',
-              contain: 'content',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundImage: isMainImageLoaded ? 'none' : (tinyBase64 ? `url('${tinyBase64}')` : `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`),
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
+    <div
+      className="quiz-intro flex flex-col items-center w-full"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%)',
+        minHeight: '100vh',
+        contain: 'layout'
+      }}
+      data-section="intro"
+    >
+      <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-5 sm:space-y-8">
+        <div className="flex flex-col items-center">
+          <div className="relative">
             <picture>
-              <source
-                srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`}
-                type="image/avif"
-                sizes="(max-width: 640px) 300px, (max-width: 768px) 345px, 400px" />
-              <source
-                srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`}
-                type="image/webp"
-                sizes="(max-width: 640px) 300px, (max-width: 768px) 345px, 400px" />
+              <source srcSet={STATIC_LOGO_IMAGE_URLS.avif} type="image/avif" />
+              <source srcSet={STATIC_LOGO_IMAGE_URLS.webp} type="image/webp" />
               <img
-                src={STATIC_INTRO_IMAGE_URLS.png}
-                alt="Descubra seu estilo predominante"
-                className="w-full h-auto object-contain quiz-intro-image"
-                width={345}
-                height={360}
+                src={STATIC_LOGO_IMAGE_URLS.png}
+                alt="Logo Gisele Galvão"
+                className="h-auto mx-auto"
+                width={140}
+                height={60}
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                onLoad={() => { 
-                  imageLoaded.current = true; 
-                  setIsMainImageLoaded(true);
-                }}
                 style={{
-                  display: 'block',
-                  margin: '0 auto',
                   objectFit: 'contain',
-                  aspectRatio: '345/360'
-                }}
-                sizes="(max-width: 640px) 300px, (max-width: 768px) 345px, 400px" />
+                  maxWidth: '100%',
+                  aspectRatio: '140/60',
+                  width: '140px',
+                  height: '60px',
+                }} />
             </picture>
+            <div
+              className="h-[2px] bg-[#B89B7A] mt-2 rounded-full mx-auto"
+              style={{
+                width: mainImageWidth > 0 ? `${mainImageWidth}px` : '100%',
+                maxWidth: '100%',
+                transition: 'width 0.3s ease-in-out'
+              }}
+            ></div>
           </div>
-          <p className="text-sm md:text-base text-[#433830] text-center leading-relaxed max-w-md mx-auto px-2">
-            Em poucos minutos, descubra seu <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
-            looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com
-            praticidade e <span className="font-semibold text-[#432818]">confiança</span>.
-          </p>
-
-          <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-4" aria-live="polite" autoComplete="off">
-            <div>
-              <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1.5">
-                NOME
-              </label>
-              <Input
-                id="name"
-                placeholder="Digite seu nome"
-                value={nome}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNome(e.target.value)}
-                className="w-full p-2.5 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md"
-                autoFocus
-                aria-required="true"
-                autoComplete="off"
-                inputMode="text"
-                maxLength={32} />
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2"
-              disabled={!nome.trim()}
-            >
-              Quero Descobrir meu Estilo Agora!
-            </Button>
-            <p className="text-xs text-center text-gray-500 pt-1">
-              Ao clicar, você concorda com nossa política de privacidade.
-            </p>
-          </form>
         </div>
+
+        <h1 className="font-playfair text-xl sm:text-2xl md:text-3xl font-bold text-center leading-tight text-[#432818] px-1">
+          Chega de um guarda-roupa lotado e da sensação de que nada combina com você.
+        </h1>
+
+        <div
+          ref={mainImageRef}
+          className="w-full max-w-[300px] sm:max-w-[345px] md:max-w-sm mx-auto relative overflow-hidden rounded-lg shadow-md"
+          style={{
+            height: 'auto',
+            aspectRatio: '1 / 1.05',
+            background: '#f8f6f2',
+            contain: 'content',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundImage: isMainImageLoaded ? 'none' : (tinyBase64 ? `url('${tinyBase64}')` : `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`),
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <picture>
+            <source
+              srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`}
+              type="image/avif"
+              sizes="(max-width: 640px) 300px, (max-width: 768px) 345px, 400px" />
+            <source
+              srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`}
+              type="image/webp"
+              sizes="(max-width: 640px) 300px, (max-width: 768px) 345px, 400px" />
+            <img
+              src={STATIC_INTRO_IMAGE_URLS.png}
+              alt="Descubra seu estilo predominante"
+              className="w-full h-auto object-contain quiz-intro-image"
+              width={345}
+              height={360}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              onLoad={() => { 
+                imageLoaded.current = true; 
+                setIsMainImageLoaded(true);
+              }}
+              style={{
+                display: 'block',
+                margin: '0 auto',
+                objectFit: 'contain',
+                aspectRatio: '345/360'
+              }}
+              sizes="(max-width: 640px) 300px, (max-width: 768px) 345px, 400px" />
+          </picture>
+        </div>
+        <p className="text-sm md:text-base text-[#433830] text-center leading-relaxed max-w-md mx-auto px-2">
+          Em poucos minutos, descubra seu <span className="font-semibold text-[#B89B7A]">Estilo Predominante</span> — e aprenda a montar
+          looks que realmente refletem sua <span className="font-semibold text-[#432818]">essência</span>, com
+          praticidade e <span className="font-semibold text-[#432818]">confiança</span>.
+        </p>
+
+        <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto space-y-4" aria-live="polite" autoComplete="off">
+          <div>
+            <label htmlFor="name" className="block text-xs font-semibold text-[#432818] mb-1.5">
+              NOME
+            </label>
+            <Input
+              id="name"
+              placeholder="Digite seu nome"
+              value={nome}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNome(e.target.value)}
+              className="w-full p-2.5 border-[#B89B7A] focus:border-[#A1835D] focus:ring-[#A1835D] bg-[#FEFEFE] rounded-md"
+              autoFocus
+              aria-required="true"
+              autoComplete="off"
+              inputMode="text"
+              maxLength={32} />
+          </div>
+          <Button
+            type="submit"
+            className="w-full bg-[#B89B7A] hover:bg-[#A1835D] text-white py-2.5 sm:py-3 px-4 text-base sm:text-lg font-semibold rounded-md shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-offset-2"
+            disabled={!nome.trim()}
+          >
+            Quero Descobrir meu Estilo Agora!
+          </Button>
+          <p className="text-xs text-center text-gray-500 pt-1">
+            Ao clicar, você concorda com nossa política de privacidade.
+          </p>
+        </form>
       </div>
-    </AutoFixedImages>
+    </div>
   );
 }
 
