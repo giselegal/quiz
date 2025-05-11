@@ -59,7 +59,7 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
   
   // Apenas preload de recursos críticos iniciais (LCP)
   preloadLink(STATIC_LOGO_IMAGE_URLS.avif);
-  preloadLink(STATIC_INTRO_IMAGE_URLS.avif.small);
+  preloadLink(STATIC_INTRO_IMAGE_URLS.avif.small); // <--- Esta linha
 }
 
 interface QuizIntroProps {
