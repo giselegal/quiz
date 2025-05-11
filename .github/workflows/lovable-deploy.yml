@@ -42,12 +42,27 @@ jobs:
           name: build-files
           path: dist/
           
+      - name: Ensure .htaccess is in dist directory
+        run: |
+          echo "# Configurações otimizadas para Hostinger (Apache)
+          
+          # Habilitar reescrita de URL para SPA (crucial para React Router)
+          <IfModule mod_rewrite.c>
+              RewriteEngine On
+              RewriteBase /quiz-de-estilo/
+          
+              # Se o arquivo solicitado não existir fisicamente, redirecionar para index.html
+              RewriteCond %{REQUEST_FILENAME} !-f
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteRule ^(.*)$ index.html [L,QSA]
+          </IfModule>" > dist/.htaccess
+          
       - name: Deploy to Hostinger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ftp.giselegalvao.com.br
           username: u116045488.giselegalvao
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./public/
+          local-dir: ./dist/
           server-dir: /u116045488/domains/giselegalvao.com.br/public_html/quiz-de-estilo/
           dangerous-clean-slate: true

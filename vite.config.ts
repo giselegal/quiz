@@ -8,7 +8,7 @@ import cloudinaryImageOptimizer from "./src/plugins/cloudinaryImageOptimizer";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   root: '.',
-  base: './',
+  base: '/quiz-de-estilo/',
   
   server: {
     host: "::",
