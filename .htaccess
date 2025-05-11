@@ -3,8 +3,8 @@
 # Habilitar reescrita de URL para SPA (crucial para React Router)
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
-    
+    RewriteBase /quiz-de-estilo/
+
     # Se o arquivo solicitado não existir fisicamente, redirecionar para index.html
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
