@@ -23,7 +23,7 @@ export const OptimizedTracking: React.FC<OptimizedTrackingProps> = ({
   children
 }) => {
   const tracked = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Correct type for setTimeout
+  const timerRef = useRef<NodeJS.Timeout | null>(null); // Use NodeJS.Timeout for setTimeout
 
   useEffect(() => {
     // Only track once

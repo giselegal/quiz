@@ -12,7 +12,7 @@ interface MetricCardProps {
   className?: string;
   trend?: 'up' | 'down' | 'flat';
   change?: string;
-  icon?: keyof typeof LucideIcons;
+  icon?: string;
   compact?: boolean;
 }
 
@@ -26,8 +26,18 @@ export const MetricCard = ({
   icon,
   compact = false,
 }: MetricCardProps) => {
-  // Safely get the icon component
-  const IconComponent = icon ? LucideIcons[icon] : null;
+  // Get icon dynamically if provided
+  let IconComponent: React.ElementType | null = null;
+  if (icon) {
+    const formattedIconName = icon
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join('');
+      
+    if (formattedIconName in LucideIcons) {
+      IconComponent = LucideIcons[formattedIconName as keyof typeof LucideIcons];
+    }
+  }
   
   return (
     <Card className={cn('shadow-sm border-border/40', className)}>

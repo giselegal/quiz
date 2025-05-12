@@ -3,10 +3,23 @@
  * Utility para gerenciar Facebook Pixel
  */
 
+// Define proper types for Facebook Pixel
+interface FacebookPixel {
+  (event: string, eventName: string, params?: object): void;
+  (event: 'init', pixelId: string): void;
+  (event: 'track', eventName: string, params?: object): void;
+  (event: 'trackCustom', eventName: string, params?: object): void;
+  push: (args: any[]) => void;
+  loaded: boolean;
+  version: string;
+  queue: any[];
+}
+
+// Extend Window interface correctly
 declare global {
   interface Window {
-    fbq: any; // Use any type to avoid conflicts with existing declarations
-    _fbq: any;
+    fbq?: FacebookPixel;
+    _fbq?: any;
   }
 }
 
@@ -17,17 +30,37 @@ const FACEBOOK_PIXEL_ID = '1234567890123456'; // Substitua pelo seu ID real do F
 export const initFacebookPixel = (pixelId: string): void => {
   if (typeof window !== 'undefined') {
     // Inicialização do código do pixel
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    if(s && s.parentNode) s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
+    // Add separate functions to avoid type errors with if conditions
+    const loadFbPixelScript = () => {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+      const firstScript = document.getElementsByTagName('script')[0];
+      if (firstScript?.parentNode) {
+        firstScript.parentNode.insertBefore(script, firstScript);
+      }
+    };
     
-    window.fbq('init', pixelId);
-    window.fbq('track', 'PageView');
+    const setupFbPixel = () => {
+      window._fbq = window._fbq || [];
+      window.fbq = function() {
+        if (window._fbq) window._fbq.push(arguments);
+      } as any;
+      window.fbq.push = window.fbq;
+      window.fbq.loaded = true;
+      window.fbq.version = '2.0';
+      window.fbq.queue = [];
+    };
+    
+    if (!window.fbq) {
+      setupFbPixel();
+      loadFbPixelScript();
+    }
+    
+    if (window.fbq) {
+      window.fbq('init', pixelId);
+      window.fbq('track', 'PageView');
+    }
   }
 };
 

@@ -13,14 +13,19 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
   const { iconName, size, color, alignment } = content;
   
   // Safely get the icon component or use a default
-  const getIconComponent = () => {
+  const getIconComponent = (): React.ElementType => {
     if (!iconName || typeof iconName !== 'string') {
       return LucideIcons.Star; // Default icon
     }
     
-    // Try to get the icon from Lucide icons
-    const iconKey = iconName.charAt(0).toUpperCase() + iconName.slice(1);
-    return LucideIcons[iconKey as keyof typeof LucideIcons] || LucideIcons.Star;
+    // Format the icon name to PascalCase for Lucide
+    const formattedName = iconName
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join('');
+    
+    // Return the icon component or default to Star if not found
+    return (LucideIcons[formattedName as keyof typeof LucideIcons] || LucideIcons.Star) as React.ElementType;
   };
   
   // Get the icon component
@@ -45,13 +50,11 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
       )}
       style={style}
     >
-      {IconComponent && (
-        <IconComponent 
-          size={iconSize} 
-          color={iconColor} 
-          strokeWidth={1.5}
-        />
-      )}
+      <IconComponent 
+        size={iconSize} 
+        color={iconColor} 
+        strokeWidth={1.5}
+      />
     </div>
   );
 };

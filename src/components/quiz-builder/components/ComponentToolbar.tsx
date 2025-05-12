@@ -47,7 +47,6 @@ export const ComponentToolbar: React.FC<ComponentToolbarProps> = ({
       <div className="flex items-center space-x-2">
         <TooltipProvider>
           {!isPreviewing && componentTypes.map((component) => {
-            // Create an instance of the icon component
             const IconComponent = component.icon;
             
             return (

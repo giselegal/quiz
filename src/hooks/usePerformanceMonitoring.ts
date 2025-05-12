@@ -10,11 +10,13 @@ export const usePerformanceMonitoring = () => {
     // Importar web-vitals apenas quando necessário
     const reportWebVitals = async () => {
       try {
-        // Import the correct named exports from web-vitals
-        const webVitals = await import('web-vitals');
+        // Import dynamically to work with newer web-vitals API
+        const {
+          onCLS, onFCP, onLCP, onTTFB, onINP 
+        } = await import('web-vitals');
         
         // Função para enviar métricas
-        const sendMetric = ({ name, value, id }) => {
+        const sendMetric = ({ name, value, id }: { name: string, value: number, id: string }) => {
           // Log para desenvolvimento (remova em produção)
           if (process.env.NODE_ENV === 'development') {
             console.log(`[Web Vitals] ${name}: ${value} (ID: ${id})`);
@@ -25,12 +27,12 @@ export const usePerformanceMonitoring = () => {
           // window.gtag?.('event', name, { value, event_category: 'Web Vitals', event_label: id });
         };
         
-        // Use the web-vitals methods through the imported object
-        webVitals.onCLS(sendMetric);
-        webVitals.onFID(sendMetric);
-        webVitals.onFCP(sendMetric);
-        webVitals.onLCP(sendMetric);
-        webVitals.onTTFB(sendMetric);
+        // Use web-vitals methods
+        onCLS(sendMetric);
+        onFCP(sendMetric);
+        onLCP(sendMetric);
+        onTTFB(sendMetric);
+        onINP(sendMetric); // Use INP instead of FID for newer web-vitals versions
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);
       }

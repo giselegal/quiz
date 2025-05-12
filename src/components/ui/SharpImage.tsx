@@ -65,7 +65,7 @@ const SharpImage: React.FC<SharpImageProps> = ({
       width={width}
       height={height}
       loading="eager"
-      fetchPriority="high" // Corrected from fetchpriority to fetchPriority
+      fetchPriority="high" // Correct attribute name
       decoding="sync"
       className={cn(
         "w-full h-full",
