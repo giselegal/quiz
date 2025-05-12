@@ -1,0 +1,204 @@
+name: Implantação Corrigida (Sem Duplicação)
+
+on:
+  workflow_dispatch:  # Apenas gatilho manual para segurança inicial
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build project
+        run: npm run build
+        
+      - name: Setup Service Worker for subdirectory
+        run: |
+          # Verificar e corrigir o Service Worker
+          cat << 'EOF' > dist/sw.js
+          // Service Worker para subdiretório quiz-de-estilo
+          const CACHE_VERSION = 'v5';
+          const CACHE_NAME = `quiz-sell-genius-${CACHE_VERSION}`;
+          const BASE_PATH = '/quiz-de-estilo/';
+
+          // Lista de recursos críticos para LCP
+          const CRITICAL_LCP_ASSETS = [
+            'https://res.cloudinary.com/dqljyf76t/image/upload/f_avif,q_80,w_450,c_limit,dpr_auto,e_sharpen:30/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.avif',
+            'https://res.cloudinary.com/dqljyf76t/image/upload/f_webp,q_90,w_450,c_limit,dpr_auto,e_sharpen:30/v1746838118/20250509_2137_Desordem_e_Reflex%C3%A3o_simple_compose_01jtvszf8sfaytz493z9f16rf2_z1c2up.webp'
+          ];
+
+          // Lista de recursos para pré-cache
+          const STATIC_ASSETS = [
+            BASE_PATH,
+            `${BASE_PATH}index.html`
+          ];
+
+          // Evento de instalação
+          self.addEventListener('install', (event) => {
+            self.skipWaiting();
+            event.waitUntil(
+              caches.open(CACHE_NAME).then((cache) => {
+                return Promise.all([
+                  cache.addAll(CRITICAL_LCP_ASSETS),
+                  cache.addAll(STATIC_ASSETS)
+                ]);
+              })
+            );
+          });
+
+          // Evento de ativação
+          self.addEventListener('activate', (event) => {
+            event.waitUntil(
+              clients.claim().then(() => {
+                return caches.keys().then((cacheNames) => {
+                  return Promise.all(
+                    cacheNames.map((cacheName) => {
+                      if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                      }
+                    })
+                  );
+                });
+              })
+            );
+          });
+
+          // Evento de fetch
+          self.addEventListener('fetch', (event) => {
+            if (event.request.method !== 'GET') return;
+            
+            const url = new URL(event.request.url);
+            
+            // Estratégia para HTML e navegação
+            if (url.pathname.endsWith('.html') || 
+                url.pathname.endsWith('/') ||
+                url.pathname === BASE_PATH.slice(0, -1)) {
+              
+              event.respondWith(
+                fetch(event.request).catch(() => {
+                  return caches.match(`${BASE_PATH}index.html`);
+                })
+              );
+              return;
+            }
+            
+            // Estratégia para outros recursos
+            event.respondWith(
+              caches.match(event.request).then((cachedResponse) => {
+                if (cachedResponse) {
+                  return cachedResponse;
+                }
+                return fetch(event.request).then((networkResponse) => {
+                  if (!networkResponse || networkResponse.status !== 200) {
+                    return networkResponse;
+                  }
+                  const responseToCache = networkResponse.clone();
+                  caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseToCache);
+                  });
+                  return networkResponse;
+                });
+              })
+            );
+          });
+          EOF
+          
+          # Corrigir o registro do service worker no index.html
+          sed -i "s|navigator.serviceWorker.register('/sw.js'|navigator.serviceWorker.register('/quiz-de-estilo/sw.js'|g" dist/index.html
+          sed -i "s|scope: '/'|scope: '/quiz-de-estilo/'|g" dist/index.html
+      
+      - name: Create .htaccess file
+        run: |
+          cat << 'EOF' > dist/.htaccess
+          # Configurações otimizadas para Hostinger (Apache)
+          
+          # Habilitar reescrita de URL para SPA (crucial para React Router)
+          <IfModule mod_rewrite.c>
+              RewriteEngine On
+              RewriteBase /quiz-de-estilo/
+          
+              # Se o arquivo solicitado não existir fisicamente, redirecionar para index.html
+              RewriteCond %{REQUEST_FILENAME} !-f
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteRule ^(.*)$ index.html [L,QSA]
+          </IfModule>
+          
+          # Definir tipos MIME corretos
+          <IfModule mod_mime.c>
+              # JavaScript
+              AddType application/javascript .js
+              AddType application/javascript .jsx
+              AddType application/javascript .mjs
+              AddType application/javascript .ts
+              AddType application/javascript .tsx
+              
+              # JSON
+              AddType application/json .json
+              
+              # Imagens modernas
+              AddType image/webp .webp
+              AddType image/avif .avif
+              AddType image/svg+xml .svg
+              AddType image/png .png
+              AddType image/jpeg .jpg .jpeg
+          </IfModule>
+          
+          # Desabilitar sniffing de MIME types
+          <IfModule mod_headers.c>
+              Header set X-Content-Type-Options "nosniff"
+              
+              # Cabeçalhos específicos para JavaScript
+              <FilesMatch "\.(js|jsx|mjs|ts|tsx)$">
+                  Header set Content-Type "application/javascript; charset=UTF-8"
+              </FilesMatch>
+              
+              # Cabeçalhos específicos para JSON
+              <FilesMatch "\.json$">
+                  Header set Content-Type "application/json; charset=UTF-8"
+              </FilesMatch>
+              
+              # Cabeçalhos específicos para CSS
+              <FilesMatch "\.css$">
+                  Header set Content-Type "text/css; charset=UTF-8"
+              </FilesMatch>
+          </IfModule>
+          EOF
+          
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          
+      # Corrigir o problema da duplicação de pastas no FTP
+      - name: Deploy to Hostinger (Caminho Correto)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ftp.giselegalvao.com.br
+          username: u116045488.giselegalvao
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: /public_html/quiz-de-estilo/
+          dangerous-clean-slate: true
