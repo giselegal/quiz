@@ -34,6 +34,7 @@ const EditorPage: React.FC = () => {
   
   const handleSave = async () => {
     try {
+      // Call saveConfig without arguments as it uses the current config state
       saveConfig();
       toast({
         title: "Configuração salva com sucesso!",

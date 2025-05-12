@@ -14,7 +14,7 @@ interface CustomWindow extends Window {
   _fbq?: any;
 }
 
-// Extend the global Window interface
+// Extend the global Window interface without redeclaring fbq with a different type
 declare global {
   interface Window {
     fbq?: FacebookPixel;
