@@ -3,6 +3,7 @@ import React from 'react';
 import { Block } from '@/types/editor';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Star } from 'lucide-react'; // Default icon
 
 interface IconBlockPreviewProps {
   block: Block;
@@ -13,9 +14,9 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
   const { iconName, size, color, alignment } = content;
   
   // Safely get the icon component or use a default
-  const getIconComponent = (): React.ElementType => {
+  const getIconComponent = () => {
     if (!iconName || typeof iconName !== 'string') {
-      return LucideIcons.Star; // Default icon
+      return Star; // Default icon
     }
     
     // Format the icon name to PascalCase for Lucide
@@ -25,7 +26,7 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
       .join('');
     
     // Return the icon component or default to Star if not found
-    return (LucideIcons[formattedName as keyof typeof LucideIcons] || LucideIcons.Star);
+    return (LucideIcons[formattedName as keyof typeof LucideIcons] || Star);
   };
   
   // Get the icon component

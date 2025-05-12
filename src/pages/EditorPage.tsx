@@ -1,92 +1,138 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { ResultPageVisualEditor } from '@/components/result-editor/ResultPageVisualEditor';
-import { TemplateList } from '@/components/editor/templates/TemplateList';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { ResultPageConfig, BlockType } from '@/types/editor';
+import { QuizBuilderConfig } from '@/types/quizBuilder';
+import { VisualEditor } from '@/components/visual-editor/VisualEditor';
+import QuizBuilder from '@/components/quiz-builder/QuizBuilder';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from '@/components/ui/button';
-// Importar ambos os templates
-import { defaultResultTemplate, directOfferTemplate } from '@/config/resultPageTemplates';
-import { createOfferSectionConfig } from '@/utils/config/offerDefaults';
-import { ResultPageConfig } from '@/types/resultPageConfig'; // Para tipagem explícita
+import { toast } from '@/components/ui/use-toast';
+import { useEditor } from '@/hooks/useEditor';
 
-export const EditorPage = () => {
-  const [showTemplates, setShowTemplates] = useState(false);
-  // Adicionar pageType aos parâmetros da rota
+const EditorPage: React.FC = () => {
   const { pageType, style } = useParams<{ pageType?: string; style?: string }>();
-  
-  const styleCategory = (style as "Natural" | "Clássico" | "Contemporâneo" | "Elegante" | "Romântico" | "Sexy" | "Dramático" | "Criativo") || 'Natural';
-  
-  // Determinar qual template base usar
-  let templateToUse: ResultPageConfig = defaultResultTemplate as ResultPageConfig;
-  if (pageType === 'direct-offer') {
-    templateToUse = directOfferTemplate as ResultPageConfig;
-  }
-  
-  // Construir initialConfig com base no template selecionado
-  const initialConfig: ResultPageConfig = {
-    styleType: styleCategory,
-    // Assumindo que header sempre existe nos templates base e é do tipo correto
-    header: {
-      ...(templateToUse.header!), // Usar ! para afirmar que header existe e é completo
-      style: {
-        ...(templateToUse.header!.style),
-        borderRadius: '0' // Consistência
-      }
-    },
-    
-    // Incluir mainContent apenas se existir no templateToUse
-    ...(templateToUse.mainContent && { 
-      mainContent: {
-        ...templateToUse.mainContent,
-      }
-    }),
-    
-    // Incluir offer se existir, senão usar um default
-    offer: templateToUse.offer ? {
-      ...templateToUse.offer,
-    } : createOfferSectionConfig(), 
-    
-    // Incluir secondaryStyles apenas se existir no templateToUse
-    ...(templateToUse.secondaryStyles && {
-      secondaryStyles: {
-        ...templateToUse.secondaryStyles,
-      }
-    }),
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('tab') || 'result';
+  const { config, saveConfig, loadConfig } = useEditor();
+  const [activeTab, setActiveTab] = useState(tab);
 
-    globalStyles: {
-      primaryColor: '#B89B7A',
-      secondaryColor: '#432818',
-      textColor: '#432818',
-      backgroundColor: '#FAF9F7',
-      fontFamily: 'Playfair Display, serif'
-    },
-    // Manter blocks como um array vazio se não estiver definido no template
-    blocks: (templateToUse as any).blocks || [] 
-  };
+  useEffect(() => {
+    // Load config based on pageType and style
+    if (pageType && style) {
+      loadConfig(pageType, style);
+    } else {
+      // Set default config
+      const defaultConfig = {
+        styleType: 'default',
+        header: {
+          content: {
+            title: 'Descubra Seu Estilo de Decoração',
+            subtitle: 'Faça o quiz e encontre o estilo perfeito para você!',
+          },
+          style: {
+            paddingY: 'md',
+            paddingX: 'md',
+            backgroundColor: '#f8f1ed',
+            textColor: '#432818',
+            borderRadius: 'sm',
+          },
+          visible: true,
+        },
+        mainContent: {
+          content: {
+            description: 'Encontre o estilo que mais combina com você e transforme sua casa!',
+          },
+          style: {
+            paddingY: 'md',
+            paddingX: 'md',
+            backgroundColor: '#f8f1ed',
+            textColor: '#432818',
+            borderRadius: 'sm',
+          },
+          visible: true,
+        },
+        offer: {
+          content: {
+            title: 'Transforme sua casa com o guia completo de decoração!',
+            description: 'Aprenda a combinar cores, móveis e acessórios para criar ambientes únicos e personalizados.',
+            features: [
+              'Dicas de especialistas em decoração',
+              'Inspirações para todos os estilos',
+              'Guia de compras com os melhores produtos',
+            ],
+            ctaText: 'Quero transformar minha casa!',
+            ctaLink: '/oferta',
+            price: 'R$ 97,00',
+            discountPrice: 'R$ 47,00',
+          },
+          style: {
+            padding: 'md',
+            backgroundColor: '#f8f1ed',
+            accentColor: '#B89B7A',
+            textColor: '#432818',
+          },
+          visible: true,
+        },
+      } as unknown as ResultPageConfig;
+      
+      saveConfig(defaultConfig);
+    }
+  }, [pageType, style, loadConfig, saveConfig]);
   
+  const handleSave = async () => {
+    try {
+      if (pageType && style) {
+        await saveConfig(config, pageType, style);
+        toast({
+          title: "Configuração salva com sucesso!",
+          description: "As alterações foram salvas e aplicadas à página.",
+        });
+      } else {
+        toast({
+          title: "Erro ao salvar configuração",
+          description: "Tipo de página ou estilo não especificados.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao salvar a configuração:", error);
+      toast({
+        title: "Erro ao salvar configuração",
+        description: "Ocorreu um erro ao salvar a configuração. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="h-screen">
-      {showTemplates ? (
-        <div className="p-8 max-w-4xl mx-auto">
-          <Button
-            onClick={() => setShowTemplates(false)}
-            variant="outline"
-            className="mb-4"
-          >
-            Voltar ao Editor
-          </Button>
-          <TemplateList onSelectTemplate={() => setShowTemplates(false)} />
+    <div className="flex flex-col h-screen">
+      <div className="border-b">
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-xl font-semibold">Editor de Páginas</h1>
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" onClick={() => navigate('/admin')}>
+              Voltar
+            </Button>
+            <Button onClick={handleSave}>Salvar</Button>
+          </div>
         </div>
-      ) : (
-        <ResultPageVisualEditor 
-          selectedStyle={{ // selectedStyle ainda é necessário pelo ResultPageVisualEditor
-            category: styleCategory,
-            score: 100,
-            percentage: 100
-          }} 
-          onShowTemplates={() => setShowTemplates(true)}
-          initialConfig={initialConfig} // Passar a configuração dinâmica
-        />
-      )}
+      </div>
+      
+      <Tabs defaultValue={activeTab} className="flex flex-col h-full">
+        <TabsList className="flex-shrink-0">
+          <TabsTrigger value="result" onClick={() => setActiveTab('result')}>Página de Resultado</TabsTrigger>
+          <TabsTrigger value="quiz" onClick={() => setActiveTab('quiz')}>Quiz Builder</TabsTrigger>
+        </TabsList>
+        <div className="flex-1 overflow-auto">
+          <TabsContent value="result" className="h-full">
+            <VisualEditor />
+          </TabsContent>
+          <TabsContent value="quiz" className="h-full">
+            <QuizBuilder />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 };

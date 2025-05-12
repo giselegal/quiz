@@ -11,14 +11,14 @@ interface FacebookPixel {
 declare global {
   interface Window {
     fbq: FacebookPixel;
-    _fbq: FacebookPixel;
+    _fbq: any;
   }
 }
 
 export const initFacebookPixel = () => {
   if (typeof window !== 'undefined') {
     // Initialize Facebook Pixel
-    !function(f,b,e,v,n,t,s) {
+    !function(f: any, b: any, e: any, v: any, n: any, t: any, s: any) {
       if(f.fbq) return;
       n=f.fbq=function() {
         n.callMethod ? n.callMethod.apply(n,arguments) : n.queue.push(arguments)
@@ -47,6 +47,9 @@ export const initFacebookPixel = () => {
   }
 };
 
+// Alias for loadFacebookPixel to fix App.tsx import error
+export const loadFacebookPixel = initFacebookPixel;
+
 // Facebook Pixel tracking functions
 export const trackFacebookPixelEvent = (eventName: string, parameters?: Record<string, any>) => {
   if (typeof window !== 'undefined' && window.fbq) {
@@ -54,6 +57,9 @@ export const trackFacebookPixelEvent = (eventName: string, parameters?: Record<s
     console.log(`[Facebook Pixel] Tracked event: ${eventName}`, parameters);
   }
 };
+
+// Alias for trackPixelEvent to fix Funil2OfertaDireta.tsx import error
+export const trackPixelEvent = trackFacebookPixelEvent;
 
 export const trackFacebookPixelCustomEvent = (eventName: string, parameters?: Record<string, any>) => {
   if (typeof window !== 'undefined' && window.fbq) {
