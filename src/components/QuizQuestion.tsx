@@ -88,8 +88,18 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       autoAdvance && 
       newSelectedOptions.length === question.multiSelect;
     
+    // Ativar o efeito visual do botão antes da transição automática
+    if (newSelectedOptions.length === question.multiSelect) {
+      setIsButtonActive(true);
+    } else {
+      setIsButtonActive(false);
+    }
+    
     if (shouldAutoAdvance && onNextClick) {
-      onNextClick();
+      // Atraso pequeno para mostrar o efeito visual do botão ativo antes da transição
+      setTimeout(() => {
+        onNextClick();
+      }, 300);
     }
   };
   
@@ -135,12 +145,15 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
             </div>
           )}
           
-          <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 mb-4 text-center font-medium">
-            {isStrategicQuestion 
-              ? "Selecione 1 opção para avançar"
-              : `Selecione ${question.multiSelect} opções para avançar`
-            }
-          </p>
+          {/* Mensagem de instrução - mostrar apenas se não for questão não-estratégica com autoAdvance=false */}
+          {!((!autoAdvance && !isStrategicQuestion)) && (
+            <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 mb-4 text-center font-medium">
+              {isStrategicQuestion 
+                ? "Selecione 1 opção para avançar"
+                : `Selecione ${question.multiSelect} opções para avançar`
+              }
+            </p>
+          )}
         </>
       )}
       
@@ -186,20 +199,35 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
         </div>
       )}
 
-      <div className="flex justify-between items-center gap-3 mt-6">
-        {!autoAdvance && !isStrategicQuestion && ( // Não mostrar para estratégicas
+      <div className="text-center mt-6">
+        {/* Mostrar a mensagem de instrução apenas para questões não-estratégicas com autoAdvance=false */}
+        {!autoAdvance && !isStrategicQuestion && (
           <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 text-center font-medium">
             Selecione {question.multiSelect} {question.multiSelect === 1 ? 'Opção' : 'Opções'} para avançar
           </p>
         )}
         
-        <div className="ml-auto">
-          {/* Navigation buttons would go here if needed */}
-        </div>
+        {/* Botão "Próximo" para transição automática com efeito visual */}
+        {!isStrategicQuestion && autoAdvance && onNextClick && (
+          <div className="mt-2">
+            <Button 
+              onClick={onNextClick}
+              disabled={!isButtonActive}
+              className={cn(
+                "text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50",
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
+                isButtonActive
+                  ? "bg-brand-primary hover:bg-brand-primary/90 transform hover:scale-105 focus:ring-brand-primary hover:shadow-lg" 
+                  : "bg-gray-300 hover:bg-gray-300"
+              )}
+            >
+              Próximo <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export { QuizQuestion };
-
