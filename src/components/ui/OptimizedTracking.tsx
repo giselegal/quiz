@@ -1,8 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
 
-// This is a simplified version of the component that fixes type issues
-
 interface OptimizedTrackingProps {
   category: string;
   event?: string;
@@ -23,7 +21,7 @@ export const OptimizedTracking: React.FC<OptimizedTrackingProps> = ({
   children
 }) => {
   const tracked = useRef(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null); // Use NodeJS.Timeout for setTimeout
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Correct type for setTimeout
 
   useEffect(() => {
     // Only track once

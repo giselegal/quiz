@@ -25,7 +25,7 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
       .join('');
     
     // Return the icon component or default to Star if not found
-    return (LucideIcons[formattedName as keyof typeof LucideIcons] || LucideIcons.Star) as React.ElementType;
+    return (LucideIcons[formattedName as keyof typeof LucideIcons] || LucideIcons.Star);
   };
   
   // Get the icon component

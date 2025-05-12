@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 /**
  * Hook para monitorar e reportar métricas de desempenho Web Vitals
- * Coleta FCP, LCP, CLS, TTFB e FID para análise de desempenho
+ * Coleta FCP, LCP, CLS, TTFB e INP para análise de desempenho
  */
 export const usePerformanceMonitoring = () => {
   useEffect(() => {

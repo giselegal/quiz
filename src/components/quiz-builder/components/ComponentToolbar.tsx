@@ -15,7 +15,7 @@ interface ComponentToolbarProps {
 interface ComponentTypeInfo {
   type: QuizComponentType;
   label: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<any>;
 }
 
 export const ComponentToolbar: React.FC<ComponentToolbarProps> = ({

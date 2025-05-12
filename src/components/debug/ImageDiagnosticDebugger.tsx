@@ -14,6 +14,9 @@ interface ImageDiagnosticDebuggerProps {
   isVisible: boolean;
 }
 
+// Define valid format types
+type FormatType = "auto" | "webp" | "avif";
+
 const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVisible }) => {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [analysisResults, setAnalysisResults] = useState<ImageAnalysis[]>([]);
@@ -21,7 +24,7 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
   const [isLoading, setIsLoading] = useState(false);
   const [optimizationSettings, setOptimizationSettings] = useState({
     quality: 80,
-    format: 'auto',
+    format: 'auto' as FormatType,
     responsive: true,
   });
   const [customUrl, setCustomUrl] = useState('');
@@ -47,20 +50,19 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
 
   const analyzeImage = async (url: string): Promise<ImageAnalysis> => {
     const isCloudinary = url.includes('cloudinary.com');
-    const optimizationSettingsTyped = {
+    const optimizedUrl = isCloudinary ? optimizeCloudinaryUrl(url, {
       quality: optimizationSettings.quality,
-      format: optimizationSettings.format as "auto" | "webp" | "avif",
-      // Remove responsive as it's not part of the expected type
-    };
-    const optimizedUrl = isCloudinary ? optimizeCloudinaryUrl(url, optimizationSettingsTyped) : url;
+      format: optimizationSettings.format
+    }) : url;
     const originalSize = await getImageSize(url);
     const optimizedSize = await getImageSize(optimizedUrl);
 
     let suggestedImprovements: string[] = [];
-    if (isCloudinary && optimizationSettingsTyped.quality < 80) {
+    if (isCloudinary && optimizationSettings.quality < 80) {
       suggestedImprovements.push('Aumentar a qualidade da imagem para pelo menos 80.');
     }
-    if (isCloudinary && optimizationSettingsTyped.format === 'jpg') {
+    // Compare with string literals to avoid type errors
+    if (isCloudinary && optimizationSettings.format === 'auto') {
       suggestedImprovements.push('Usar formato automático ou WebP para melhor compressão.');
     }
     if (!url.includes('w_auto') && !url.includes('dpr_auto')) {
@@ -142,16 +144,19 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
       } else {
         const isCloudinary = url.includes('cloudinary.com');
         if (isCloudinary) {
-          const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettingsTyped);
+          const optimizedUrl = optimizeCloudinaryUrl(url, {
+            quality: optimizationSettings.quality,
+            format: optimizationSettings.format
+          });
           const originalSize = await getImageSize(url);
           const optimizedSize = await getImageSize(optimizedUrl);
           totalDownloadedBytes += optimizedSize;
 
-          if (optimizationSettingsTyped.quality < 80) {
+          if (optimizationSettings.quality < 80) {
             totalImagesWithIssues++;
             issues.push('Qualidade da imagem abaixo do recomendado (80).');
           }
-          if (optimizationSettingsTyped.format === 'jpg') {
+          if (optimizationSettings.format === 'auto') {
             totalImagesWithIssues++;
             issues.push('Formato da imagem não é otimizado (usar auto ou webp).');
           }
@@ -210,12 +215,10 @@ const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVis
     }
 
     try {
-      const optimizationSettingsTyped = {
+      const optimizedUrl = optimizeCloudinaryUrl(url, {
         quality: optimizationSettings.quality,
-        format: optimizationSettings.format as "auto" | "webp" | "avif",
-        // Remove responsive as it's not part of the expected type
-      };
-      const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettingsTyped);
+        format: optimizationSettings.format
+      });
       const responsiveSources = getResponsiveImageSources(url, [320, 640, 960, 1280]);
       
       // Create a temporary image element to apply the optimized URL

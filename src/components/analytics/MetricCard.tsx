@@ -27,17 +27,17 @@ export const MetricCard = ({
   compact = false,
 }: MetricCardProps) => {
   // Get icon dynamically if provided
-  let IconComponent: React.ElementType | null = null;
-  if (icon) {
+  const IconComponent = icon ? (() => {
     const formattedIconName = icon
       .split('-')
       .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
       .join('');
       
     if (formattedIconName in LucideIcons) {
-      IconComponent = LucideIcons[formattedIconName as keyof typeof LucideIcons];
+      return LucideIcons[formattedIconName as keyof typeof LucideIcons];
     }
-  }
+    return null;
+  })() : null;
   
   return (
     <Card className={cn('shadow-sm border-border/40', className)}>
