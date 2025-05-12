@@ -49,6 +49,31 @@ echo -e "\n${YELLOW}4. Copiando .htaccess para pasta dist${NC}"
 cp "./public/.htaccess" "./dist/.htaccess"
 echo -e "   ${GREEN}✓ .htaccess copiado com sucesso${NC}"
 
+# Adicionando upload automático via FTP
+# Atualizar as credenciais de FTP para usar variáveis de ambiente
+FTP_HOST="$FTP_SERVER"
+FTP_USER="$FTP_USERNAME"
+FTP_PASS="$FTP_PASSWORD"
+REMOTE_DIR="$FTP_SERVER_DIR"
+
+# Substituir o upload via lftp por curl
+# Realizar upload dos arquivos
+UPLOAD_URL="ftp://$FTP_HOST$REMOTE_DIR"
+echo -e "\n${YELLOW}5. Realizando upload dos arquivos para o servidor FTP usando curl${NC}"
+
+# Enviar cada arquivo individualmente
+find ./dist -type f | while read FILE; do
+    RELATIVE_PATH="${FILE#./dist/}"
+    REMOTE_PATH="$UPLOAD_URL/$RELATIVE_PATH"
+    curl -T "$FILE" --ftp-create-dirs -u "$FTP_USER:$FTP_PASS" "$REMOTE_PATH"
+    if [ $? -ne 0 ]; then
+        echo -e "   ${RED}✗ Erro ao enviar o arquivo: $RELATIVE_PATH${NC}"
+        exit 1;
+    fi
+done
+
+echo -e "   ${GREEN}✓ Upload concluído com sucesso${NC}"
+
 # Finalização
 echo -e "\n${GREEN}=== BUILD CONCLUÍDO ===${NC}"
 echo -e "O projeto foi construído para ser hospedado na raiz do domínio:"
