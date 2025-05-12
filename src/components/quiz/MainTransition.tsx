@@ -43,17 +43,15 @@ export const MainTransition: React.FC<MainTransitionProps> = ({
     }
   };
 
-  // Garantir que o botão 'Continuar' só avança após clique
   const handleNextClick = () => {
-    if (currentAnswersForQuestion.length > 0) {
-      if (currentQuestionIndex < strategicQuestions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-      } else {
-        onAnswer({
-          questionId: currentQuestion.id,
-          selectedOptions: currentAnswersForQuestion,
-        });
-      }
+    if (currentQuestionIndex < strategicQuestions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      // If this is the last strategic question, notify the parent component
+      onAnswer({
+        questionId: currentQuestion.id,
+        selectedOptions: currentAnswersForQuestion,
+      });
     }
   };
 

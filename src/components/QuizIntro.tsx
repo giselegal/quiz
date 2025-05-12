@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -85,75 +85,108 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const mainImageRef = useRef<HTMLDivElement>(null);
   const imageLoaded = useRef<boolean>(false);
   
-  // Combinei os hooks useEffect para evitar loops infinitos e melhorar a performance
+  // Efeito para capturar a largura da imagem principal
   useEffect(() => {
-    const updateWidth = () => {
-      if (mainImageRef.current) {
-        setMainImageWidth(mainImageRef.current.offsetWidth);
-      }
-    };
+    if (mainImageRef.current) {
+      const updateWidth = () => {
+        if (mainImageRef.current) {
+          setMainImageWidth(mainImageRef.current.offsetWidth);
+        }
+      };
+      
+      // Atualiza na montagem
+      updateWidth();
+      
+      // Atualiza no resize
+      window.addEventListener('resize', updateWidth);
+      
+      return () => {
+        window.removeEventListener('resize', updateWidth);
+      };
+    }
+  }, []);
 
-    // Atualiza na montagem e no resize
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-
+  // Efeito único e simplificado para carregamento posterior de recursos
+  useEffect(() => {
     // Carrega recursos adicionais após o componente estar visível
-    const idleCallback = typeof requestIdleCallback === 'function'
-      ? requestIdleCallback
-      : (cb) => setTimeout(cb, 2000);
+    if (typeof requestIdleCallback === 'function') {
+      // Usa tempos ociosos do browser para carregar recursos não-críticos
+      requestIdleCallback(() => {
+        preloadCriticalImages('quiz');
+      }, { timeout: 2000 });
+    } else {
+      // Fallback para browsers que não suportam requestIdleCallback
+      const idleTimer = setTimeout(() => {
+        preloadCriticalImages('quiz');
+      }, 2000); // Tempo suficiente para garantir que o LCP ocorreu
+      
+      return () => clearTimeout(idleTimer);
+    }
+  }, []);
 
-    const idleTimer = idleCallback(() => {
-      preloadCriticalImages('quiz');
-    });
-
-    // Preload de imagens críticas
+  // Pré-carregamento para LCP com estratégia otimizada e priorização de conteúdo mínimo viável
+  useEffect(() => {
     const preconnectLink = document.createElement('link');
     preconnectLink.rel = 'preconnect';
     preconnectLink.href = 'https://res.cloudinary.com';
     preconnectLink.crossOrigin = 'anonymous';
     document.head.appendChild(preconnectLink);
 
+    const dnsPrefetchLink = document.createElement('link');
+    dnsPrefetchLink.rel = 'dns-prefetch';
+    dnsPrefetchLink.href = 'https://res.cloudinary.com';
+    document.head.appendChild(dnsPrefetchLink);
+
+    // Preload do placeholder
     const placeholderPreload = document.createElement('link');
     placeholderPreload.rel = 'preload';
     placeholderPreload.as = 'image';
-    placeholderPreload.href = STATIC_INTRO_IMAGE_URLS.placeholder;
+    placeholderPreload.href = STATIC_INTRO_IMAGE_URLS.placeholder; // Usar constante
     placeholderPreload.type = 'image/webp';
     placeholderPreload.setAttribute('fetchpriority', 'high');
     document.head.appendChild(placeholderPreload);
 
+    // Preload do candidato LCP principal (AVIF large, conforme identificado pelo Lighthouse)
     const lcpCandidatePreload = document.createElement('link');
     lcpCandidatePreload.rel = 'preload';
     lcpCandidatePreload.as = 'image';
-    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.large;
+    // Alterado de .avif.small para .avif.large para corresponder ao LCP identificado
+    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.large; 
     lcpCandidatePreload.type = 'image/avif';
     lcpCandidatePreload.setAttribute('fetchpriority', 'high');
     document.head.appendChild(lcpCandidatePreload);
+    
+    // O preload do logo é tratado pela tag <img loading="eager" fetchpriority="high">
+    // Não é necessário pré-carregar via JS aqui, a menos que testes mostrem ser benéfico.
 
-    // Carrega a versão tiny da imagem como base64
-    const loadTinyBase64 = async () => {
-      if (!tinyBase64) {
-        try {
-          const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder);
-          setTinyBase64(base64Data);
-        } catch (error) {
-          console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
-        }
-      }
-    };
-    loadTinyBase64();
-
+    // Limpa os links de preload quando o componente desmonta
     return () => {
-      window.removeEventListener('resize', updateWidth);
-      if (typeof cancelIdleCallback === 'function') {
-        cancelIdleCallback(idleTimer as number);
-      } else {
-        clearTimeout(idleTimer as NodeJS.Timeout);
-      }
-      [preconnectLink, placeholderPreload, lcpCandidatePreload].forEach(link => {
-        if (link.parentNode) link.parentNode.removeChild(link);
-      });
+      if (preconnectLink.parentNode) preconnectLink.parentNode.removeChild(preconnectLink);
+      if (dnsPrefetchLink.parentNode) dnsPrefetchLink.parentNode.removeChild(dnsPrefetchLink);
+      if (placeholderPreload.parentNode) placeholderPreload.parentNode.removeChild(placeholderPreload);
+      if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
     };
-  }, [tinyBase64]);
+  }, []); // As dependências foram removidas pois as URLs agora são constantes de módulo estáveis
+
+  // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea
+  useEffect(() => {
+    // Carrega a versão mais leve possível da imagem como base64 para exibição instantânea
+    const loadTinyBase64 = async () => {
+      try {
+        // Carrega apenas uma vez se tinyBase64 ainda não estiver definido
+        if (!tinyBase64) { // Simplificado: tenta carregar se ainda não tiver o base64.
+                           // A flag imageLoaded.current pode ser desnecessária aqui,
+                           // pois o objetivo é ter o placeholder o mais cedo possível.
+          const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder); 
+          setTinyBase64(base64Data);
+        }
+      } catch (error) {
+        console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
+      }
+    };
+    
+    loadTinyBase64();
+  }, []); // Alterado para array de dependências vazio. A lógica interna previne recarregamentos.
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
