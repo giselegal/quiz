@@ -22,41 +22,25 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const [autoAdvanceTimer, setAutoAdvanceTimer] = React.useState<NodeJS.Timeout | null>(null);
 
-  // Verificar quando o botão se torna disponível para mostrar o efeito e auto-avançar
+  // Atualizar lógica para desativar auto-avanço em questões estratégicas
   React.useEffect(() => {
     if (autoAdvanceTimer) {
       clearTimeout(autoAdvanceTimer);
       setAutoAdvanceTimer(null);
     }
 
-    if (canProceed) {
+    if (canProceed && currentQuestionType === 'normal') {
       setShowActivationEffect(true);
       const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
       }, 2000);
 
-      let shouldAutoAdvance = false;
-      if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
-        shouldAutoAdvance = true;
-      } else if (currentQuestionType === 'strategic' && selectedOptionsCount >= 1) {
-        shouldAutoAdvance = true;
-      }
-
-      if (shouldAutoAdvance) {
-        const newTimer = setTimeout(() => {
-          onNext();
-        }, 1500);
-        setAutoAdvanceTimer(newTimer);
-      }
-
-      return () => {
-        clearTimeout(visualTimer);
-        if (autoAdvanceTimer) {
-          clearTimeout(autoAdvanceTimer);
-        }
-      };
+      const newTimer = setTimeout(() => {
+        onNext();
+      }, 1500);
+      setAutoAdvanceTimer(newTimer);
     }
-  }, [canProceed, currentQuestionType, selectedOptionsCount, onNext]);
+  }, [canProceed, currentQuestionType, onNext]);
 
   const getHelperText = () => {
     if (!canProceed) {
