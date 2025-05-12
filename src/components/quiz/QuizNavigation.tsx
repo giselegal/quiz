@@ -24,55 +24,39 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
 
   // Verificar quando o botão se torna disponível para mostrar o efeito e auto-avançar
   React.useEffect(() => {
-    // Limpar qualquer timer de auto-avanço pendente se as condições mudarem ou o componente re-renderizar
     if (autoAdvanceTimer) {
       clearTimeout(autoAdvanceTimer);
-      setAutoAdvanceTimer(null); // Reseta o estado do timer
+      setAutoAdvanceTimer(null);
     }
 
     if (canProceed) {
-      // Mostrar o efeito de ativação visual no botão
       setShowActivationEffect(true);
-      
       const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
-      }, 2000); // Duração do efeito visual (ex: 2 segundos)
-      
-      // Determinar se o auto-avanço deve ocorrer
+      }, 2000);
+
       let shouldAutoAdvance = false;
       if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
         shouldAutoAdvance = true;
       } else if (currentQuestionType === 'strategic' && selectedOptionsCount >= 1) {
-        // Para questões estratégicas, avançar se pelo menos uma opção estiver selecionada
-        // (assumindo que são single-select e canProceed já validou isso)
         shouldAutoAdvance = true;
       }
 
       if (shouldAutoAdvance) {
         const newTimer = setTimeout(() => {
-          onNext(); // Chama a função para avançar para a próxima questão/etapa
-        }, 1500); // Aumentado para 1.5 segundos para o efeito visual ser mais perceptível antes do avanço
+          onNext();
+        }, 1500);
         setAutoAdvanceTimer(newTimer);
       }
-      
-      // Função de limpeza para este useEffect
+
       return () => {
-        clearTimeout(visualTimer); // Limpa o timer do efeito visual
-        // Limpa o timer de auto-avanço se ele foi definido e o efeito está sendo limpo
-        // Isso é crucial para evitar que onNext() seja chamado após o componente
-        // ter sido desmontado ou as dependências do useEffect terem mudado.
-        if (autoAdvanceTimer) { // Verifica o estado atual do timer
-            clearTimeout(autoAdvanceTimer);
+        clearTimeout(visualTimer);
+        if (autoAdvanceTimer) {
+          clearTimeout(autoAdvanceTimer);
         }
-        // Se um newTimer foi criado mas o componente/efeito é limpo antes de newTimer ser atribuído ao estado,
-        // a lógica atual (limpar autoAdvanceTimer no início do useEffect) deve cobrir.
       };
-    } else {
-      // Se não pode prosseguir, garantir que o efeito de ativação seja removido
-      setShowActivationEffect(false);
     }
-    // Adicionar onNext às dependências, pois é chamado dentro do efeito.
-  }, [canProceed, currentQuestionType, selectedOptionsCount, onNext]); 
+  }, [canProceed, currentQuestionType, selectedOptionsCount, onNext]);
 
   const getHelperText = () => {
     if (!canProceed) {
