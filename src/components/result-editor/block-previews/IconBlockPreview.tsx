@@ -3,7 +3,7 @@ import React from 'react';
 import { Block } from '@/types/editor';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Star } from 'lucide-react'; // Default icon
+import { Star, LucideIcon } from 'lucide-react'; // Default icon
 
 interface IconBlockPreviewProps {
   block: Block;
@@ -26,7 +26,8 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
       .join('');
     
     // Return the icon component or default to Star if not found
-    return (LucideIcons[formattedName as keyof typeof LucideIcons] || Star);
+    const IconComponent = (LucideIcons[formattedName as keyof typeof LucideIcons] as LucideIcon) || Star;
+    return IconComponent;
   };
   
   // Get the icon component

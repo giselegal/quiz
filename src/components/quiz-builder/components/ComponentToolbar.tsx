@@ -3,8 +3,7 @@ import React from 'react';
 import { QuizStage, QuizComponentType } from '@/types/quizBuilder';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { Eye, EyeOff, Heading, Text, Image, ListOrdered, CheckCircle, LayoutGrid } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { Eye, EyeOff, Heading, Text, Image, ListOrdered, CheckCircle, LayoutGrid, LucideIcon } from 'lucide-react';
 
 interface ComponentToolbarProps {
   activeStage: QuizStage | null;
@@ -16,7 +15,7 @@ interface ComponentToolbarProps {
 interface ComponentTypeInfo {
   type: QuizComponentType;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
 }
 
 export const ComponentToolbar: React.FC<ComponentToolbarProps> = ({

@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, LucideIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 interface MetricCardProps {
@@ -36,8 +35,7 @@ export const MetricCard = ({
       .join('');
       
     if (formattedIconName in LucideIcons) {
-      const Icon = LucideIcons[formattedIconName as keyof typeof LucideIcons];
-      return Icon;
+      return LucideIcons[formattedIconName as keyof typeof LucideIcons] as LucideIcon;
     }
     return null;
   };

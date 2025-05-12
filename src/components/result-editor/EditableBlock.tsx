@@ -109,7 +109,7 @@ const EditableBlock: React.FC<EditableBlockProps> = ({
       case 'two-column':
         return <TwoColumnBlockPreview content={block.content} />;
       case 'icon':
-        return <IconBlockPreview block={{ content, type: 'icon', id: block.id, style: block.style }} />;
+        return <IconBlockPreview block={block} />;
       case 'faq':
         return <FAQBlockPreview content={block.content} />;
       case 'carousel':

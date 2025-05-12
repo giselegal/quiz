@@ -1,5 +1,6 @@
+
 import { useEffect } from 'react';
-import { onCLS, onFID, onLCP } from 'web-vitals';
+import { onCLS, onLCP } from 'web-vitals';
 
 interface PerformanceMonitoringProps {
   analyticsId: string;
@@ -12,7 +13,7 @@ export const usePerformanceMonitoring = ({ analyticsId }: PerformanceMonitoringP
         window.gtag('event', metric.name, {
           event_category: 'Web Vitals',
           event_label: metric.id,
-          value: Math.round(metric.value * 100) / 100, // Convert to ms for FID/LCP
+          value: Math.round(metric.value * 100) / 100, // Convert to ms
           non_interaction: true, // Doesn't affect bounce rate
         });
         console.log(`[Performance] ${metric.name}: ${metric.value}`);
@@ -20,7 +21,9 @@ export const usePerformanceMonitoring = ({ analyticsId }: PerformanceMonitoringP
     };
 
     onCLS(logMetric);
-    onFID(logMetric);
+    // FID (First Input Delay) has been replaced in the latest web-vitals
+    // Instead, we can use INP (Interaction to Next Paint) when needed
+    // onFID(logMetric); - removed as it's not available in the latest version
     onLCP(logMetric);
   }, [analyticsId]);
 };

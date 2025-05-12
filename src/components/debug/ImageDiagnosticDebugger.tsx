@@ -190,7 +190,7 @@ export const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = (
             </div>
 
             <div className="flex items-center space-x-2">
-              <Switch id="imageResponsive" checked={responsive} onCheckedChange={setResponsive} />
+              <Switch id="imageResponsive" checked={responsive} onCheckedChange={(value) => setResponsive(!!value)} />
               <Label htmlFor="imageResponsive">Responsive</Label>
             </div>
 

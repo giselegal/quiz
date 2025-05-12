@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+
+// Remove imports that don't exist
+// import { ResultPageConfig } from '@/types/editor';
+// import { QuizBuilderConfig } from '@/types/quizBuilder';
 
 const EditorPage = () => {
   const [searchParams] = useSearchParams();

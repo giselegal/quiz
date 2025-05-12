@@ -1,4 +1,3 @@
-
 // Function to fix main routes in the application
 export const fixMainRoutes = () => {
   // Implementation for fixing routes
@@ -39,3 +38,11 @@ if (typeof window !== 'undefined') {
 }
 
 export default fixMainRoutes;
+
+// At the bottom of your file, add:
+// Add this to global Window interface
+declare global {
+  interface Window {
+    fixMainRoutes?: () => void;
+  }
+}

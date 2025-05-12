@@ -1,7 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { extname } from 'path';
-import { optimize } from 'svgo';
 
 interface Options {
   apiKey: string;
