@@ -36,24 +36,25 @@ elif ! grep -q "RewriteBase /" "./public/.htaccess" 2>/dev/null; then
     echo -e "   Adicionando regras de redirecionamento para SPA..."
     
     # Adicionar regras de redirecionamento se não existirem
-    echo '
+    cat <<EOL >> "./public/.htaccess"
 # Configuração SPA - Redireciona todas as solicitações para index.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  
+
   # Não redirecionar para arquivos existentes ou diretórios
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  
+
   # Redirecionar todo o restante para index.html
   RewriteRule ^(.*)$ index.html [L,QSA]
 </IfModule>
 
 # Especificar tipos MIME corretos para arquivos JavaScript
-<FilesMatch "\.(js|jsx|mjs)$">
+<FilesMatch "\\.(js|jsx|mjs)$">
   Header set Content-Type "application/javascript; charset=UTF-8"
-</FilesMatch>' >> "./public/.htaccess"
+</FilesMatch>
+EOL
     
     echo -e "   ${GREEN}✓ Regras de redirecionamento adicionadas ao .htaccess${NC}"
 else
