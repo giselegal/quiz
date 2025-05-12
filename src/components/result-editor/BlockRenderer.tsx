@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Block } from '@/types/editor';
 import { cn } from '@/lib/utils';
@@ -78,7 +79,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       case 'two-column':
         return <TwoColumnBlockPreview content={block.content} />;
       case 'icon':
-        return <IconBlockPreview block={block} />;
+        return <IconBlockPreview content={block.content} />;
       case 'faq':
         return <FAQBlockPreview content={block.content} />;
       case 'carousel':

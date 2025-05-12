@@ -1,53 +1,63 @@
 
 import React from 'react';
-import { Block } from '@/types/editor';
-import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Star } from 'lucide-react'; // Default icon
-import { formatIconName } from '@/utils/dynamicIconImport';
+import { dynamicIconImport } from '@/utils/dynamicIconImport';
 
 interface IconBlockPreviewProps {
-  block: Block;
+  content: {
+    icon?: string;
+    size?: string;
+    color?: string;
+    title?: string;
+    position?: 'top' | 'right' | 'bottom' | 'left';
+    style?: any;
+  };
 }
 
-const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
-  const { content = {}, style = {} } = block;
-  const { iconName, size, color, alignment } = content;
-  
-  // Get the icon component or use Star as default
-  const IconComponent = React.useMemo(() => {
-    if (!iconName || typeof iconName !== 'string') {
-      return Star; // Default icon
-    }
-    
-    const formattedName = formatIconName(iconName);
-    return (LucideIcons[formattedName as keyof typeof LucideIcons] as React.ComponentType<any>) || Star;
-  }, [iconName]);
-  
-  // Calculate the icon size
-  const iconSize = size ? parseInt(size) : 24;
-  const iconColor = color || 'currentColor';
-  
-  // Get alignment class
-  const alignmentClass = {
-    'left': 'justify-start',
-    'center': 'justify-center',
-    'right': 'justify-end'
-  }[alignment || 'center'] || 'justify-center';
+const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ content }) => {
+  const { 
+    icon = 'star', 
+    size = '32px', 
+    color = '#B89B7A',
+    title = '',
+    position = 'top',
+    style = {} 
+  } = content;
 
+  // Get the icon component as a React ElementType
+  const IconComponent = dynamicIconImport(icon);
+  
+  const containerStyle = {
+    ...style,
+    display: 'flex',
+    flexDirection: position === 'right' ? 'row-reverse' : 
+                 position === 'bottom' ? 'column-reverse' : 
+                 position === 'left' ? 'row' : 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
+  };
+
+  const sizeInPixels = parseInt(size) || 24;
+  
   return (
-    <div 
-      className={cn(
-        "flex w-full py-4", 
-        alignmentClass
+    <div className="w-full" style={containerStyle as React.CSSProperties}>
+      <div className="flex items-center justify-center">
+        <IconComponent 
+          color={color}
+          size={sizeInPixels}
+          strokeWidth={1.5}
+        />
+      </div>
+      
+      {title && (
+        <div className={cn(
+          "text-center",
+          (position === 'left' || position === 'right') && "flex-1"
+        )}>
+          {title}
+        </div>
       )}
-      style={style}
-    >
-      <IconComponent 
-        size={iconSize} 
-        color={iconColor} 
-        strokeWidth={1.5}
-      />
     </div>
   );
 };

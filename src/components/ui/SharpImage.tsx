@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -65,7 +64,7 @@ const SharpImage: React.FC<SharpImageProps> = ({
       width={width}
       height={height}
       loading="eager"
-      fetchPriority="high" // Correct attribute name
+      fetchpriority="high"
       decoding="sync"
       className={cn(
         "w-full h-full",

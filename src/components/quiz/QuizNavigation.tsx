@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Button } from '../ui/button';
 
@@ -23,31 +22,41 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const [autoAdvanceTimer, setAutoAdvanceTimer] = React.useState<NodeJS.Timeout | null>(null);
 
-  // Atualizar lógica para ativar visualmente o botão antes da transição automática, 
-  // e desativar auto-avanço em questões estratégicas
+  // Verificar quando o botão se torna disponível para mostrar o efeito e auto-avançar
   React.useEffect(() => {
     if (autoAdvanceTimer) {
       clearTimeout(autoAdvanceTimer);
       setAutoAdvanceTimer(null);
     }
 
-    // Só configurar auto-avanço para questões normais, não para estratégicas
-    if (canProceed && currentQuestionType === 'normal') {
-      // Mostrar a ativação visual do botão primeiro
+    if (canProceed) {
       setShowActivationEffect(true);
-      
-      // Timer visual - mantém o efeito visual por um tempo antes da transição
-      setTimeout(() => {
+      const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
       }, 2000);
 
-      // Timer para auto-avanço - definir um tempo maior que o efeito visual
-      const newTimer = setTimeout(() => {
-        onNext();
-      }, 1500);
-      setAutoAdvanceTimer(newTimer);
+      let shouldAutoAdvance = false;
+      if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
+        shouldAutoAdvance = true;
+      } else if (currentQuestionType === 'strategic' && selectedOptionsCount >= 1) {
+        shouldAutoAdvance = true;
+      }
+
+      if (shouldAutoAdvance) {
+        const newTimer = setTimeout(() => {
+          onNext();
+        }, 1500);
+        setAutoAdvanceTimer(newTimer);
+      }
+
+      return () => {
+        clearTimeout(visualTimer);
+        if (autoAdvanceTimer) {
+          clearTimeout(autoAdvanceTimer);
+        }
+      };
     }
-  }, [canProceed, currentQuestionType, onNext]);
+  }, [canProceed, currentQuestionType, selectedOptionsCount, onNext]);
 
   const getHelperText = () => {
     if (!canProceed) {
@@ -62,7 +71,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0">
       <div className="flex flex-col items-center w-full">
-        {!canProceed && (
+        {!canProceed && currentQuestionType !== 'strategic' && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
@@ -77,6 +86,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             </Button>
           )}
 
+          {/* O botão "Próximo" só será renderizado se não for uma questão estratégica OU se for estratégica e puder prosseguir */}
+          {/* Para questões estratégicas, o botão "Continuar" é renderizado dentro de QuizQuestion.tsx */}
           {currentQuestionType === 'strategic' ? (
             <Button
               onClick={onNext}
@@ -101,7 +112,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
                   : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
                 } 
                 ${showActivationEffect 
-                  ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação visual
+                  ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação atualizado
                   : ''
                 }
               `}

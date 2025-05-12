@@ -66,7 +66,6 @@ export const QuizContent: React.FC<QuizContentProps> = ({
             showQuestionImage={true}
             onPreviousClick={handlePrevious}
             autoAdvance={true}
-            isStrategicQuestion={false}
           />
         )}
       </div>

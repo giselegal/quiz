@@ -1,83 +1,92 @@
-
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { EditorConfig } from '@/types/editor';
-import { VisualEditor } from '@/components/visual-editor/VisualEditor';
-import QuizBuilder from '@/components/quiz-builder/QuizBuilder';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { ResultPageVisualEditor } from '@/components/result-editor/ResultPageVisualEditor';
+import { TemplateList } from '@/components/editor/templates/TemplateList';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
-import { useEditor } from '@/hooks/useEditor';
+// Importar ambos os templates
+import { defaultResultTemplate, directOfferTemplate } from '@/config/resultPageTemplates';
+import { createOfferSectionConfig } from '@/utils/config/offerDefaults';
+import { ResultPageConfig } from '@/types/resultPageConfig'; // Para tipagem explícita
 
-const EditorPage: React.FC = () => {
+export const EditorPage = () => {
+  const [showTemplates, setShowTemplates] = useState(false);
+  // Adicionar pageType aos parâmetros da rota
   const { pageType, style } = useParams<{ pageType?: string; style?: string }>();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const tab = searchParams.get('tab') || 'result';
-  const { config, saveConfig } = useEditor();
-  const [activeTab, setActiveTab] = useState(tab);
-
-  useEffect(() => {
-    // Create a default config if needed
-    if (!config || Object.keys(config).length === 0) {
-      const defaultConfig = {
-        blocks: [],
-        meta: {
-          title: 'Editor Page',
-          description: 'Editor page description'
-        }
-      };
-      
-      saveConfig(defaultConfig as EditorConfig);
-    }
-  }, [config, saveConfig]);
   
-  const handleSave = async () => {
-    try {
-      // Call saveConfig without arguments as it uses the current config state
-      saveConfig();
-      toast({
-        title: "Configuração salva com sucesso!",
-        description: "As alterações foram salvas e aplicadas à página.",
-      });
-    } catch (error) {
-      console.error("Erro ao salvar a configuração:", error);
-      toast({
-        title: "Erro ao salvar configuração",
-        description: "Ocorreu um erro ao salvar a configuração. Por favor, tente novamente.",
-        variant: "destructive",
-      });
-    }
-  };
+  const styleCategory = (style as "Natural" | "Clássico" | "Contemporâneo" | "Elegante" | "Romântico" | "Sexy" | "Dramático" | "Criativo") || 'Natural';
+  
+  // Determinar qual template base usar
+  let templateToUse: ResultPageConfig = defaultResultTemplate as ResultPageConfig;
+  if (pageType === 'direct-offer') {
+    templateToUse = directOfferTemplate as ResultPageConfig;
+  }
+  
+  // Construir initialConfig com base no template selecionado
+  const initialConfig: ResultPageConfig = {
+    styleType: styleCategory,
+    // Assumindo que header sempre existe nos templates base e é do tipo correto
+    header: {
+      ...(templateToUse.header!), // Usar ! para afirmar que header existe e é completo
+      style: {
+        ...(templateToUse.header!.style),
+        borderRadius: '0' // Consistência
+      }
+    },
+    
+    // Incluir mainContent apenas se existir no templateToUse
+    ...(templateToUse.mainContent && { 
+      mainContent: {
+        ...templateToUse.mainContent,
+      }
+    }),
+    
+    // Incluir offer se existir, senão usar um default
+    offer: templateToUse.offer ? {
+      ...templateToUse.offer,
+    } : createOfferSectionConfig(), 
+    
+    // Incluir secondaryStyles apenas se existir no templateToUse
+    ...(templateToUse.secondaryStyles && {
+      secondaryStyles: {
+        ...templateToUse.secondaryStyles,
+      }
+    }),
 
+    globalStyles: {
+      primaryColor: '#B89B7A',
+      secondaryColor: '#432818',
+      textColor: '#432818',
+      backgroundColor: '#FAF9F7',
+      fontFamily: 'Playfair Display, serif'
+    },
+    // Manter blocks como um array vazio se não estiver definido no template
+    blocks: (templateToUse as any).blocks || [] 
+  };
+  
   return (
-    <div className="flex flex-col h-screen">
-      <div className="border-b">
-        <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-semibold">Editor de Páginas</h1>
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" onClick={() => navigate('/admin')}>
-              Voltar
-            </Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </div>
+    <div className="h-screen">
+      {showTemplates ? (
+        <div className="p-8 max-w-4xl mx-auto">
+          <Button
+            onClick={() => setShowTemplates(false)}
+            variant="outline"
+            className="mb-4"
+          >
+            Voltar ao Editor
+          </Button>
+          <TemplateList onSelectTemplate={() => setShowTemplates(false)} />
         </div>
-      </div>
-      
-      <Tabs defaultValue={activeTab} className="flex flex-col h-full">
-        <TabsList className="flex-shrink-0">
-          <TabsTrigger value="result" onClick={() => setActiveTab('result')}>Página de Resultado</TabsTrigger>
-          <TabsTrigger value="quiz" onClick={() => setActiveTab('quiz')}>Quiz Builder</TabsTrigger>
-        </TabsList>
-        <div className="flex-1 overflow-auto">
-          <TabsContent value="result" className="h-full">
-            <VisualEditor />
-          </TabsContent>
-          <TabsContent value="quiz" className="h-full">
-            <QuizBuilder />
-          </TabsContent>
-        </div>
-      </Tabs>
+      ) : (
+        <ResultPageVisualEditor 
+          selectedStyle={{ // selectedStyle ainda é necessário pelo ResultPageVisualEditor
+            category: styleCategory,
+            score: 100,
+            percentage: 100
+          }} 
+          onShowTemplates={() => setShowTemplates(true)}
+          initialConfig={initialConfig} // Passar a configuração dinâmica
+        />
+      )}
     </div>
   );
 };

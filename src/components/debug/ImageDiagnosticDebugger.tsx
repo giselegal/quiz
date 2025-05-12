@@ -1,365 +1,385 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAllImages } from '@/data/imageBank';
+import { optimizeCloudinaryUrl, getResponsiveImageSources } from '@/utils/imageUtils';
+import { ImageAnalysis, ImageDiagnosticResult } from '@/utils/images/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Copy, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/components/ui/use-toast';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ImageDiagnosticDebuggerProps {
-  imageUrl?: string;
+  isVisible: boolean;
 }
 
-export const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ imageUrl }) => {
-  const [path, setPath] = useState(imageUrl || '/og.png');
-  const [quality, setQuality] = useState(80);
-  const [format, setFormat] = useState<'auto' | 'webp' | 'avif'>('auto');
-  const [responsive, setResponsive] = useState(true);
-  const [debug, setDebug] = useState(false);
-  const [eager, setEager] = useState(false);
-  const [raw, setRaw] = useState(false);
-  const [width, setWidth] = useState<number | undefined>(undefined);
-  const [height, setHeight] = useState<number | undefined>(undefined);
-  const [sizes, setSizes] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState<'lazy' | 'eager' | undefined>(undefined);
-  const [unoptimized, setUnoptimized] = useState(false);
-  const [priority, setPriority] = useState(false);
-  const [fill, setFill] = useState(false);
-  const [customParams, setCustomParams] = useState('');
-  const [showOriginal, setShowOriginal] = useState(false);
-  const [showTransformed, setShowTransformed] = useState(true);
-  const [showSettings, setShowSettings] = useState(true);
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
-  const [showPlaceholder, setShowPlaceholder] = useState(true);
-  const [placeholderType, setPlaceholderType] = useState<'blur' | 'empty'>('blur');
-  const [blurDataURL, setBlurDataURL] = useState<string | undefined>(undefined);
-  const [onLoadingCompleteCalled, setOnLoadingCompleteCalled] = useState(false);
-  const [onErrorCalled, setOnErrorCalled] = useState(false);
-  const [onLoadCalled, setOnLoadCalled] = useState(false);
-  const [imageKey, setImageKey] = useState(0);
-
-  // Define valid formats as a type
-  type FormatType = 'auto' | 'webp' | 'avif';
-
-  // Update the optimization settings with proper typing
-  const optimizationSettings = {
+const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = ({ isVisible }) => {
+  const [images, setImages] = useState<HTMLImageElement[]>([]);
+  const [analysisResults, setAnalysisResults] = useState<ImageAnalysis[]>([]);
+  const [diagnosticResult, setDiagnosticResult] = useState<ImageDiagnosticResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [optimizationSettings, setOptimizationSettings] = useState({
     quality: 80,
-    format: 'auto' as FormatType,
+    format: 'auto',
     responsive: true,
+  });
+  const [customUrl, setCustomUrl] = useState('');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    setIsLoading(true);
+    // Wait for the DOM to be fully loaded
+    const waitForImages = () => {
+      const imgs = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
+      if (imgs.length > 0) {
+        setImages(imgs);
+        setIsLoading(false);
+      } else {
+        setTimeout(waitForImages, 500); // Check again after 500ms
+      }
+    };
+
+    waitForImages();
+  }, [isVisible]);
+
+  const analyzeImage = async (url: string): Promise<ImageAnalysis> => {
+    const isCloudinary = url.includes('cloudinary.com');
+    const optimizedUrl = isCloudinary ? optimizeCloudinaryUrl(url, optimizationSettings) : url;
+    const originalSize = await getImageSize(url);
+    const optimizedSize = await getImageSize(optimizedUrl);
+
+    let suggestedImprovements: string[] = [];
+    if (isCloudinary && optimizationSettings.quality < 80) {
+      suggestedImprovements.push('Aumentar a qualidade da imagem para pelo menos 80.');
+    }
+    if (isCloudinary && optimizationSettings.format === 'jpg') {
+      suggestedImprovements.push('Usar formato automático ou WebP para melhor compressão.');
+    }
+    if (!url.includes('w_auto') && !url.includes('dpr_auto')) {
+      suggestedImprovements.push('Considerar URLs responsivas para diferentes tamanhos de tela.');
+    }
+
+    const analysis: ImageAnalysis = {
+      url,
+      format: 'desconhecido',
+      quality: 'desconhecida',
+      width: 'desconhecida',
+      height: 'desconhecida',
+      isOptimized: optimizedSize < originalSize,
+      isResponsive: url.includes('w_auto') || url.includes('dpr_auto'),
+      suggestedImprovements,
+      estimatedSizeReduction: originalSize - optimizedSize,
+    };
+
+    return analysis;
   };
 
-  const getImageUrl = (path: string, settings: { quality: number; format: FormatType; responsive: boolean }) => {
-    let url = path;
-    const params = [];
-
-    if (settings.quality) {
-      params.push(`q_${settings.quality}`);
-    }
-    if (settings.format && settings.format !== 'auto') {
-      params.push(`f_${settings.format}`);
-    }
-    if (settings.responsive) {
-      params.push('w_auto');
-    }
-
-    if (params.length > 0) {
-      url += '?' + params.join('&');
-    }
-
-    return url;
-  };
-
-  const transformedImageUrl = getImageUrl(path, { quality, format, responsive });
-
-  const handleReset = () => {
-    setPath(imageUrl || '/og.png');
-    setQuality(80);
-    setFormat('auto');
-    setResponsive(true);
-    setDebug(false);
-    setEager(false);
-    setRaw(false);
-    setWidth(undefined);
-    setHeight(undefined);
-    setSizes(undefined);
-    setLoading(undefined);
-    setUnoptimized(false);
-    setPriority(false);
-    setFill(false);
-    setCustomParams('');
-    setShowOriginal(false);
-    setShowTransformed(true);
-    setShowSettings(true);
-    setShowAdvancedSettings(false);
-    setShowPlaceholder(true);
-    setPlaceholderType('blur');
-    setBlurDataURL(undefined);
-    setOnLoadingCompleteCalled(false);
-    setOnErrorCalled(false);
-    setOnLoadCalled(false);
-    setImageKey(prevKey => prevKey + 1);
-  };
-
-  const handleImageLoad = useCallback(() => {
-    setOnLoadCalled(true);
-    toast({
-      title: "Image Loaded",
-      description: "onLoad event was triggered.",
+  const getImageSize = (url: string): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.responseType = 'blob';
+        request.onload = () => {
+          const blob = request.response;
+          resolve(blob.size);
+        };
+        request.onerror = () => reject(new Error(`Erro ao obter o tamanho da imagem: ${url}`));
+        request.send();
+      };
+      img.onerror = () => reject(new Error(`Erro ao carregar a imagem: ${url}`));
+      img.src = url;
     });
-  }, []);
-
-  const handleImageError = useCallback(() => {
-    setOnErrorCalled(true);
-    toast({
-      title: "Image Error",
-      description: "onError event was triggered.",
-      variant: "destructive",
-    });
-  }, []);
-
-  const handleLoadingComplete = useCallback(() => {
-    setOnLoadingCompleteCalled(true);
-    toast({
-      title: "Loading Complete",
-      description: "onLoadingComplete event was triggered.",
-    });
-  }, []);
-
-  // Fix for CheckedState handling
-  const handleShowPlaceholderChange = (checked: boolean) => {
-    setShowPlaceholder(checked);
   };
 
-  const handlePlaceholderTypeChange = (value: 'blur' | 'empty') => {
-    setPlaceholderType(value);
+  const runDiagnostics = async () => {
+    setIsLoading(true);
+    const results: ImageAnalysis[] = [];
+
+    for (const imageEl of images) {
+      try {
+        const url = imageEl.src;
+        const analysis = await analyzeImage(url);
+        results.push(analysis);
+      } catch (error: any) {
+        console.error(`Erro ao analisar imagem: ${imageEl.src}`, error);
+        results.push({
+          url: imageEl.src,
+          format: 'desconhecido',
+          quality: 'desconhecida',
+          width: 'desconhecida',
+          height: 'desconhecida',
+          isOptimized: false,
+          isResponsive: false,
+          suggestedImprovements: ['Erro ao analisar a imagem.'],
+        });
+      }
+    }
+
+    setAnalysisResults(results);
+
+    const totalImagesRendered = images.length;
+    let totalImagesWithIssues = 0;
+    let totalDownloadedBytes = 0;
+    let detailedIssues: ImageDiagnosticResult['detailedIssues'] = [];
+
+    for (const imageEl of images) {
+      const url = imageEl.src;
+      const issues: string[] = [];
+
+      if (!url) {
+        totalImagesWithIssues++;
+        issues.push('URL da imagem não encontrada.');
+      } else {
+        const isCloudinary = url.includes('cloudinary.com');
+        if (isCloudinary) {
+          const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettings);
+          const originalSize = await getImageSize(url);
+          const optimizedSize = await getImageSize(optimizedUrl);
+          totalDownloadedBytes += optimizedSize;
+
+          if (optimizationSettings.quality < 80) {
+            totalImagesWithIssues++;
+            issues.push('Qualidade da imagem abaixo do recomendado (80).');
+          }
+          if (optimizationSettings.format === 'jpg') {
+            totalImagesWithIssues++;
+            issues.push('Formato da imagem não é otimizado (usar auto ou webp).');
+          }
+          if (!url.includes('w_auto') && !url.includes('dpr_auto')) {
+            totalImagesWithIssues++;
+            issues.push('URLs não são responsivas para diferentes tamanhos de tela.');
+          }
+          if (optimizedSize > originalSize) {
+            issues.push('Tamanho da imagem otimizada é maior que a original.');
+          }
+        } else {
+          totalImagesWithIssues++;
+          issues.push('Imagem não está hospedada no Cloudinary.');
+        }
+      }
+
+      if (issues.length > 0) {
+        detailedIssues.push({
+          url,
+          element: imageEl,
+          issues,
+          dimensions: {
+            natural: { width: imageEl.naturalWidth, height: imageEl.naturalHeight },
+            display: { width: imageEl.width, height: imageEl.height }
+          }
+        });
+      }
+    }
+
+    const estimatedPerformanceImpact = totalImagesWithIssues > 0 ? 'Alto' : 'Baixo';
+
+    setDiagnosticResult({
+      summary: {
+        totalImagesRendered,
+        totalImagesWithIssues,
+        totalDownloadedBytes,
+        estimatedPerformanceImpact,
+      },
+      detailedIssues,
+    });
+
+    setIsLoading(false);
   };
 
-  const renderPlaceholder = () => {
-    if (!showPlaceholder) return undefined;
+  const optimizeImageUrl = async (url: string) => {
+    if (!url) return;
 
-    if (placeholderType === 'blur') {
-      return 'blur';
-    } else {
-      return 'empty';
+    const isCloudinary = url.includes('cloudinary.com');
+    if (!isCloudinary) {
+      toast({
+        title: "Erro",
+        description: "A URL não é do Cloudinary.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const optimizedUrl = optimizeCloudinaryUrl(url, optimizationSettings);
+      const responsiveSources = getResponsiveImageSources(url, [320, 640, 960, 1280]);
+      
+      // Create a temporary image element to apply the optimized URL
+      const imageEl = new Image();
+      imageEl.src = optimizedUrl;
+      imageEl.srcset = responsiveSources.srcSet;
+      imageEl.sizes = responsiveSources.sizes;
+
+      // Copy the optimized URL to the clipboard
+      await navigator.clipboard.writeText(imageEl.src);
+      toast({
+        title: "Sucesso",
+        description: "URL otimizada copiada para a área de transferência.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível otimizar e copiar a URL.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 p-4">
-      {/* Settings Panel */}
-      {showSettings && (
-        <Card className="w-full md:w-1/3">
-          <CardContent className="space-y-4">
-            <h2 className="text-lg font-semibold">Image Settings</h2>
+    isVisible && (
+      <div className="fixed top-0 left-0 w-full h-full bg-gray-100 bg-opacity-75 z-50 overflow-auto">
+        <div className="container mx-auto p-4">
+          <h2 className="text-2xl font-bold mb-4">Image Diagnostic Debugger</h2>
 
+          {/* Optimization Settings */}
+          <div className="mb-4 p-4 bg-white rounded shadow-md">
+            <h3 className="text-lg font-semibold mb-2">Optimization Settings</h3>
             <div className="space-y-2">
-              <Label htmlFor="imagePath">Image Path</Label>
+              <div>
+                <Label htmlFor="quality">Quality ({optimizationSettings.quality})</Label>
+                <Slider
+                  id="quality"
+                  defaultValue={[optimizationSettings.quality]}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => setOptimizationSettings({ ...optimizationSettings, quality: value[0] })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="format">Format</Label>
+                <select
+                  id="format"
+                  className="w-full p-2 border rounded"
+                  value={optimizationSettings.format}
+                  onChange={(e) => setOptimizationSettings({ ...optimizationSettings, format: e.target.value })}
+                >
+                  <option value="auto">Auto</option>
+                  <option value="webp">WebP</option>
+                  <option value="jpg">JPG</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="responsive"
+                  checked={optimizationSettings.responsive}
+                  onCheckedChange={(checked) => setOptimizationSettings({ ...optimizationSettings, responsive: checked })}
+                />
+                <Label htmlFor="responsive">Generate Responsive Images</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Custom URL Input */}
+          <div className="mb-4 p-4 bg-white rounded shadow-md">
+            <h3 className="text-lg font-semibold mb-2">Optimize Custom URL</h3>
+            <div className="flex space-x-2">
               <Input
-                id="imagePath"
-                value={path}
-                onChange={(e) => setPath(e.target.value)}
-                placeholder="Enter image path"
+                type="url"
+                placeholder="Enter image URL"
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
               />
+              <Button onClick={() => optimizeImageUrl(customUrl)} disabled={!customUrl}>
+                Optimize & Copy
+              </Button>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="imageQuality">Quality (0-100)</Label>
-              <Input
-                id="imageQuality"
-                type="number"
-                value={quality}
-                onChange={(e) => setQuality(Number(e.target.value))}
-                placeholder="Enter quality"
-              />
+          {/* Run Diagnostics Button */}
+          <Button onClick={runDiagnostics} disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analisando...
+              </>
+            ) : (
+              "Executar Diagnóstico"
+            )}
+          </Button>
+
+          {/* Diagnostic Summary */}
+          {diagnosticResult && (
+            <div className="mt-4 p-4 bg-white rounded shadow-md">
+              <h3 className="text-lg font-semibold mb-2">Diagnostic Summary</h3>
+              <p>Total Images Rendered: {diagnosticResult.summary.totalImagesRendered}</p>
+              <p>Total Images with Issues: {diagnosticResult.summary.totalImagesWithIssues}</p>
+              <p>Total Downloaded Bytes: {diagnosticResult.summary.totalDownloadedBytes}</p>
+              <p>Estimated Performance Impact: {diagnosticResult.summary.estimatedPerformanceImpact}</p>
             </div>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="imageFormat">Format</Label>
-              <Select value={format} onValueChange={(value) => setFormat(value as FormatType)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="auto">Auto</SelectItem>
-                  <SelectItem value="webp">WebP</SelectItem>
-                  <SelectItem value="avif">AVIF</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Detailed Issues */}
+          {diagnosticResult && diagnosticResult.detailedIssues.length > 0 && (
+            <div className="mt-4 p-4 bg-white rounded shadow-md">
+              <h3 className="text-lg font-semibold mb-2">Detailed Issues</h3>
+              {diagnosticResult.detailedIssues.map((issue, index) => (
+                <div key={index} className="mb-4 p-4 border rounded">
+                  <p>
+                    <strong>URL:</strong> {issue.url}
+                  </p>
+                  <p>
+                    <strong>Natural Dimensions:</strong> {issue.dimensions?.natural.width}x{issue.dimensions?.natural.height}
+                  </p>
+                  <p>
+                    <strong>Display Dimensions:</strong> {issue.dimensions?.display.width}x{issue.dimensions?.display.height}
+                  </p>
+                  {issue.issues.map((error, i) => (
+                    <p key={i} className="text-red-500">
+                      <AlertTriangle className="inline-block h-4 w-4 mr-1" />
+                      {error}
+                    </p>
+                  ))}
+                </div>
+              ))}
             </div>
+          )}
 
-            <div className="flex items-center space-x-2">
-              <Switch id="imageResponsive" checked={responsive} onCheckedChange={(value) => setResponsive(!!value)} />
-              <Label htmlFor="imageResponsive">Responsive</Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch id="showOriginal" checked={showOriginal} onCheckedChange={setShowOriginal} />
-              <Label htmlFor="showOriginal">Show Original</Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch id="showTransformed" checked={showTransformed} onCheckedChange={setShowTransformed} />
-              <Label htmlFor="showTransformed">Show Transformed</Label>
-            </div>
-
-            <Button onClick={handleReset} variant="outline">Reset</Button>
-
-            <Button onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}>
-              {showAdvancedSettings ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
-            </Button>
-
-            {showAdvancedSettings && (
-              <div className="mt-4 space-y-4 border rounded p-4">
-                <h3 className="text-md font-semibold">Advanced Settings</h3>
-
-                <div className="flex items-center space-x-2">
-                  <Switch id="imageDebug" checked={debug} onCheckedChange={setDebug} />
-                  <Label htmlFor="imageDebug">Debug</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch id="imageEager" checked={eager} onCheckedChange={setEager} />
-                  <Label htmlFor="imageEager">Eager</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch id="imageRaw" checked={raw} onCheckedChange={setRaw} />
-                  <Label htmlFor="imageRaw">Raw</Label>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="imageWidth">Width</Label>
-                  <Input
-                    id="imageWidth"
-                    type="number"
-                    value={width}
-                    onChange={(e) => setWidth(Number(e.target.value))}
-                    placeholder="Enter width"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="imageHeight">Height</Label>
-                  <Input
-                    id="imageHeight"
-                    type="number"
-                    value={height}
-                    onChange={(e) => setHeight(Number(e.target.value))}
-                    placeholder="Enter height"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="imageSizes">Sizes</Label>
-                  <Input
-                    id="imageSizes"
-                    value={sizes}
-                    onChange={(e) => setSizes(e.target.value)}
-                    placeholder="Enter sizes"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="imageLoading">Loading</Label>
-                  <Select value={loading} onValueChange={(value) => setLoading(value as 'lazy' | 'eager')}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select loading" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="lazy">Lazy</SelectItem>
-                      <SelectItem value="eager">Eager</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch id="imageUnoptimized" checked={unoptimized} onCheckedChange={setUnoptimized} />
-                  <Label htmlFor="imageUnoptimized">Unoptimized</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch id="imagePriority" checked={priority} onCheckedChange={setPriority} />
-                  <Label htmlFor="imagePriority">Priority</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch id="imageFill" checked={fill} onCheckedChange={setFill} />
-                  <Label htmlFor="imageFill">Fill</Label>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="imageCustomParams">Custom Parameters</Label>
-                  <Input
-                    id="imageCustomParams"
-                    value={customParams}
-                    onChange={(e) => setCustomParams(e.target.value)}
-                    placeholder="Enter custom parameters"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Placeholder</Label>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="showPlaceholder"
-                      checked={showPlaceholder}
-                      onCheckedChange={handleShowPlaceholderChange}
-                    />
-                    <Label htmlFor="showPlaceholder">Show Placeholder</Label>
+          {/* Image List and Analysis */}
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold mb-2">Image Analysis</h3>
+            {isLoading ? (
+              <p>Loading images...</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {images.map((img, index) => (
+                  <div key={index} className="bg-white rounded shadow-md p-4">
+                    <img src={img.src} alt={`Image ${index}`} className="mb-2 rounded" style={{ maxWidth: '100%', height: 'auto' }} />
+                    <p className="text-sm">
+                      <strong>URL:</strong> {img.src}
+                    </p>
+                    {analysisResults[index] && (
+                      <>
+                        <p className="text-sm">
+                          <strong>Optimized:</strong> {analysisResults[index].isOptimized ? <CheckCircle className="inline-block h-4 w-4 text-green-500" /> : <AlertTriangle className="inline-block h-4 w-4 text-red-500" />}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Responsive:</strong> {analysisResults[index].isResponsive ? <CheckCircle className="inline-block h-4 w-4 text-green-500" /> : <AlertTriangle className="inline-block h-4 w-4 text-red-500" />}
+                        </p>
+                        {analysisResults[index].suggestedImprovements.length > 0 && (
+                          <>
+                            <p className="text-sm font-medium">Suggested Improvements:</p>
+                            <ul className="list-disc list-inside text-sm text-red-500">
+                              {analysisResults[index].suggestedImprovements.map((improvement, i) => (
+                                <li key={i}>{improvement}</li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+                      </>
+                    )}
                   </div>
-                  {showPlaceholder && (
-                    <div className="ml-4">
-                      <Label htmlFor="placeholderType">Placeholder Type</Label>
-                      <Select value={placeholderType} onValueChange={(value) => handlePlaceholderTypeChange(value as 'blur' | 'empty')}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select placeholder type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="blur">Blur</SelectItem>
-                          <SelectItem value="empty">Empty</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Image Display */}
-      <div className="w-full md:w-2/3 flex flex-col space-y-4">
-        {showOriginal && (
-          <div className="border rounded p-4">
-            <h3 className="text-md font-semibold">Original Image</h3>
-            <img
-              key={imageKey}
-              src={path}
-              alt="Original"
-              style={{ maxWidth: '100%', height: 'auto' }}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-            />
           </div>
-        )}
-
-        {showTransformed && (
-          <div className="border rounded p-4">
-            <h3 className="text-md font-semibold">Transformed Image</h3>
-            <img
-              key={imageKey + 1}
-              src={transformedImageUrl}
-              alt="Transformed"
-              style={{ maxWidth: '100%', height: 'auto' }}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-            />
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+    )
   );
 };
+
+export default ImageDiagnosticDebugger;
