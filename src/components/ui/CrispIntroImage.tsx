@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +17,7 @@ interface CrispIntroImageProps {
   loading?: 'eager' | 'lazy';
   fetchPriority?: 'high' | 'low' | 'auto';
   decoding?: 'sync' | 'async' | 'auto';
+  style?: React.CSSProperties; // Added style prop to the interface
 }
 
 /**
@@ -36,7 +38,8 @@ const CrispIntroImage: React.FC<CrispIntroImageProps> = ({
   sizes = "(max-width: 640px) 345px, (max-width: 768px) 400px, 450px",
   loading = 'eager',
   fetchPriority = 'high',
-  decoding = 'sync'
+  decoding = 'sync',
+  style
 }) => {
   // Determinar a URL da imagem principal
   const sourceUrl = srcPng || src;
@@ -90,7 +93,8 @@ const CrispIntroImage: React.FC<CrispIntroImageProps> = ({
     margin: '0 auto',
     filter: 'none',
     transform: 'none',
-    transition: 'none'
+    transition: 'none',
+    ...style // Merge the provided style with our default styles
   } as React.CSSProperties;
   
   // Se temos srcSets para AVIF ou WebP, usamos a tag picture

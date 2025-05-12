@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 
 /**
@@ -9,7 +10,8 @@ export const usePerformanceMonitoring = () => {
     // Importar web-vitals apenas quando necessário
     const reportWebVitals = async () => {
       try {
-        const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
+        // Import the correct named exports from web-vitals
+        const webVitals = await import('web-vitals');
         
         // Função para enviar métricas
         const sendMetric = ({ name, value, id }) => {
@@ -23,12 +25,12 @@ export const usePerformanceMonitoring = () => {
           // window.gtag?.('event', name, { value, event_category: 'Web Vitals', event_label: id });
         };
         
-        // Registrar callbacks para cada métrica
-        getCLS(sendMetric);
-        getFID(sendMetric);
-        getFCP(sendMetric);
-        getLCP(sendMetric);
-        getTTFB(sendMetric);
+        // Use the web-vitals methods through the imported object
+        webVitals.onCLS(sendMetric);
+        webVitals.onFID(sendMetric);
+        webVitals.onFCP(sendMetric);
+        webVitals.onLCP(sendMetric);
+        webVitals.onTTFB(sendMetric);
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);
       }

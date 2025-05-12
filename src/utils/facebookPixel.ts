@@ -1,10 +1,12 @@
+
 /**
  * Utility para gerenciar Facebook Pixel
  */
 
 declare global {
   interface Window {
-    fbq: any;
+    fbq: any; // Use any type to avoid conflicts with existing declarations
+    _fbq: any;
   }
 }
 
@@ -21,7 +23,7 @@ export const initFacebookPixel = (pixelId: string): void => {
     if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
     n.queue=[];t=b.createElement(e);t.async=!0;
     t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    if(s && s.parentNode) s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
     window.fbq('init', pixelId);

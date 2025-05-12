@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
-import { dynamicIconImport } from '@/utils/dynamicIconImport';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react'; // Import specific icons
 
 interface MetricCardProps {
   title: string;
@@ -26,8 +26,8 @@ export const MetricCard = ({
   icon,
   compact = false,
 }: MetricCardProps) => {
-  // Use the dynamic icon import utility
-  const IconComponent = icon ? dynamicIconImport(icon) : null;
+  // Safely get the icon component
+  const IconComponent = icon ? LucideIcons[icon] : null;
   
   return (
     <Card className={cn('shadow-sm border-border/40', className)}>
@@ -36,7 +36,7 @@ export const MetricCard = ({
           <div className="flex items-center justify-between space-x-4">
             {IconComponent && (
               <div className="rounded-full p-1.5 bg-muted">
-                {React.createElement(IconComponent, { className: "h-5 w-5 text-foreground/80" })}
+                <IconComponent className="h-5 w-5 text-foreground/80" />
               </div>
             )}
             <div className="space-y-0.5 flex-1">
@@ -48,11 +48,11 @@ export const MetricCard = ({
                     trend === 'up' ? 'text-emerald-500' : 
                     trend === 'down' ? 'text-red-500' : 'text-orange-500')}>
                     {trend === 'up' ? (
-                      <LucideIcons.TrendingUp className="mr-1 h-3 w-3" />
+                      <TrendingUp className="mr-1 h-3 w-3" />
                     ) : trend === 'down' ? (
-                      <LucideIcons.TrendingDown className="mr-1 h-3 w-3" />
+                      <TrendingDown className="mr-1 h-3 w-3" />
                     ) : (
-                      <LucideIcons.Minus className="mr-1 h-3 w-3" />
+                      <Minus className="mr-1 h-3 w-3" />
                     )}
                     {change}
                   </div>
@@ -68,7 +68,7 @@ export const MetricCard = ({
               <CardTitle className="text-sm font-medium">{title}</CardTitle>
               {IconComponent && (
                 <div className="rounded-full p-1.5 bg-muted">
-                  {React.createElement(IconComponent, { className: "h-4 w-4 text-foreground/80" })}
+                  <IconComponent className="h-4 w-4 text-foreground/80" />
                 </div>
               )}
             </div>
@@ -84,11 +84,11 @@ export const MetricCard = ({
                   trend === 'up' ? 'text-emerald-500' : 
                   trend === 'down' ? 'text-red-500' : 'text-orange-500')}>
                   {trend === 'up' ? (
-                    <LucideIcons.TrendingUp className="mr-1 h-3 w-3" />
+                    <TrendingUp className="mr-1 h-3 w-3" />
                   ) : trend === 'down' ? (
-                    <LucideIcons.TrendingDown className="mr-1 h-3 w-3" />
+                    <TrendingDown className="mr-1 h-3 w-3" />
                   ) : (
-                    <LucideIcons.Minus className="mr-1 h-3 w-3" />
+                    <Minus className="mr-1 h-3 w-3" />
                   )}
                   {change}
                 </div>
