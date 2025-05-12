@@ -1,4 +1,4 @@
-name: Deploy to Hostinger Root Domain
+name: Deploy to Hostinger Root Domain (giselegalvao.com.br)
 
 on:
   push:
@@ -26,9 +26,9 @@ jobs:
         
       - name: Prepare deployment package
         run: |
-          cd dist
+          cd dist || exit 1
           # Corrigir o .htaccess para domínio raiz
-          cat > .htaccess << 'EOF'
+          cat > .htaccess << 'HTACCESS'
 # Configurações otimizadas para React app no domínio raiz
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -58,19 +58,19 @@ jobs:
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
 </IfModule>
-EOF
+HTACCESS
           
           # Corrigir o Service Worker para domínio raiz
-          cat > sw.js << 'EOF'
+          cat > sw.js << 'SERVICEWORKER'
 // Service Worker para domínio raiz
 const CACHE_VERSION = 'v1';
-const CACHE_NAME = `quiz-estilo-${CACHE_VERSION}`;
+const CACHE_NAME = \`quiz-estilo-\${CACHE_VERSION}\`;
 const BASE_PATH = '/';
 
 // Lista de recursos essenciais para cache
 const STATIC_ASSETS = [
   BASE_PATH,
-  `${BASE_PATH}index.html`
+  \`\${BASE_PATH}index.html\`
 ];
 
 // Instalar Service Worker
@@ -112,7 +112,7 @@ self.addEventListener('fetch', (event) => {
       url.pathname === BASE_PATH.slice(0, -1)) {
     event.respondWith(
       fetch(event.request)
-        .catch(() => caches.match(`${BASE_PATH}index.html`))
+        .catch(() => caches.match(\`\${BASE_PATH}index.html\`))
     );
     return;
   }
@@ -135,26 +135,27 @@ self.addEventListener('fetch', (event) => {
             return cachedResponse;
           }
           if (event.request.mode === 'navigate') {
-            return caches.match(`${BASE_PATH}index.html`);
+            return caches.match(\`\${BASE_PATH}index.html\`);
           }
           return new Response('Not found', { status: 404 });
         });
       })
   );
 });
-EOF
+SERVICEWORKER
           
-          # Corrigir referências no index.html
+          # Corrigir referências no index.html para o domínio raiz giselegalvao.com.br
           if [ -f "index.html" ]; then
             sed -i 's|/quiz-de-estilo/|/|g' index.html
+            echo "<!-- Configurado para domínio: giselegalvao.com.br -->" >> index.html
           fi
-          
+      
       - name: Deploy to Hostinger Root Domain
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: \${{ secrets.FTP_SERVER }}
+          username: \${{ secrets.FTP_USERNAME }}
+          password: \${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /public_html/
           dangerous-clean-slate: true  # ⚠️ Cuidado: Isso apaga todos os arquivos do diretório de destino
