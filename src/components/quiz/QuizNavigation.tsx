@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { Button } from '../ui/button';
 
@@ -22,19 +23,25 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const [autoAdvanceTimer, setAutoAdvanceTimer] = React.useState<NodeJS.Timeout | null>(null);
 
-  // Atualizar lógica para desativar auto-avanço em questões estratégicas
+  // Atualizar lógica para ativar visualmente o botão antes da transição automática, 
+  // e desativar auto-avanço em questões estratégicas
   React.useEffect(() => {
     if (autoAdvanceTimer) {
       clearTimeout(autoAdvanceTimer);
       setAutoAdvanceTimer(null);
     }
 
+    // Só configurar auto-avanço para questões normais, não para estratégicas
     if (canProceed && currentQuestionType === 'normal') {
+      // Mostrar a ativação visual do botão primeiro
       setShowActivationEffect(true);
-      const visualTimer = setTimeout(() => {
+      
+      // Timer visual - mantém o efeito visual por um tempo antes da transição
+      setTimeout(() => {
         setShowActivationEffect(false);
       }, 2000);
 
+      // Timer para auto-avanço - definir um tempo maior que o efeito visual
       const newTimer = setTimeout(() => {
         onNext();
       }, 1500);
@@ -55,7 +62,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0">
       <div className="flex flex-col items-center w-full">
-        {!canProceed && currentQuestionType !== 'strategic' && (
+        {!canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
@@ -70,8 +77,6 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             </Button>
           )}
 
-          {/* O botão "Próximo" só será renderizado se não for uma questão estratégica OU se for estratégica e puder prosseguir */}
-          {/* Para questões estratégicas, o botão "Continuar" é renderizado dentro de QuizQuestion.tsx */}
           {currentQuestionType === 'strategic' ? (
             <Button
               onClick={onNext}
@@ -96,7 +101,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
                   : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
                 } 
                 ${showActivationEffect 
-                  ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação atualizado
+                  ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação visual
                   : ''
                 }
               `}

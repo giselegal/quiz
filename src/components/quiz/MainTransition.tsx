@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '../ui/card';
 import { QuizQuestion } from '../QuizQuestion';
@@ -28,11 +29,7 @@ export const MainTransition: React.FC<MainTransitionProps> = ({
     try {
       console.log('Strategic Question Answered:', response);
       onAnswer(response);
-      
-      // Only auto advance if the user has selected an option
-      if (response.selectedOptions.length > 0) {
-        // We don't auto-advance here anymore, we'll do it through the onNextClick
-      }
+      // Removemos o auto-avanço aqui - agora o usuário precisa clicar em "Continuar"
     } catch (error) {
       console.error('Error handling strategic question:', error);
       toast({
@@ -49,6 +46,7 @@ export const MainTransition: React.FC<MainTransitionProps> = ({
       if (currentQuestionIndex < strategicQuestions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
       } else {
+        // Se for a última questão estratégica, passamos a resposta para o callback
         onAnswer({
           questionId: currentQuestion.id,
           selectedOptions: currentAnswersForQuestion,
@@ -109,9 +107,10 @@ export const MainTransition: React.FC<MainTransitionProps> = ({
                 question={strategicQuestions[currentQuestionIndex]}
                 onAnswer={handleQuestionAnswer}
                 currentAnswers={currentAnswersForQuestion}
-                autoAdvance={true}
+                autoAdvance={false} // Desabilitar auto-avanço para questões estratégicas
                 hideTitle={true}
                 onNextClick={handleNextClick}
+                isStrategicQuestion={true} // Adicionar prop para identificar questões estratégicas
               />
             </div>
           </Card>
