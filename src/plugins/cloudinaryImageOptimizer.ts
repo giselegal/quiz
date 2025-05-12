@@ -90,19 +90,19 @@ export default function cloudinaryImageOptimizer(options: Options = {}) {
       res.setHeader('Cache-Control', `public, max-age=${expires}, immutable`);
       res.setHeader('Content-Type', `image/${format}`);
 
-      // Handle response methods with proper type handling
+      // Safe way to handle response methods
       const originalWrite = res.write;
       const originalEnd = res.end;
-
-      // Use type assertions to fix typing issues
-      res.write = function(chunk: any, ...args: any[]) {
-        // @ts-ignore - we need to bypass the type checking here
-        return originalWrite.apply(this, [chunk, ...args]);
+      
+      // Use type assertions for TypeScript compatibility
+      // @ts-ignore: TypeScript doesn't fully understand the types here
+      res.write = function(chunk: any) {
+        return originalWrite.call(this, chunk);
       };
       
-      res.end = function(...args: any[]) {
-        // @ts-ignore - we need to bypass the type checking here
-        return originalEnd.apply(this, args);
+      // @ts-ignore: TypeScript doesn't fully understand the types here
+      res.end = function(chunk?: any) {
+        return originalEnd.call(this, chunk);
       };
 
       try {

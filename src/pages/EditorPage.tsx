@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { EditorConfig, BlockType } from '@/types/editor';
+import { EditorConfig } from '@/types/editor';
 import { VisualEditor } from '@/components/visual-editor/VisualEditor';
 import QuizBuilder from '@/components/quiz-builder/QuizBuilder';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"

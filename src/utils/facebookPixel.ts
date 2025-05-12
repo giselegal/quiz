@@ -24,8 +24,8 @@ declare global {
 
 export const initFacebookPixel = () => {
   if (typeof window !== 'undefined') {
-    // Initialize Facebook Pixel with proper type casting
-    const win = window as CustomWindow;
+    // Cast to CustomWindow to avoid type errors
+    const win = window as unknown as CustomWindow;
     
     if (!win.fbq) {
       // Initialize Facebook Pixel
