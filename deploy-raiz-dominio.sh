@@ -35,8 +35,8 @@ elif ! grep -q "RewriteBase /" "./public/.htaccess" 2>/dev/null; then
     echo -e "   ${RED}✗ RewriteBase não encontrado${NC}"
     echo -e "   Adicionando regras de redirecionamento para SPA..."
     
-    # Corrigindo o encerramento do bloco cat <<EOL e verificando aspas
-    cat <<EOL >> "./public/.htaccess"
+    # Reescrevendo o bloco cat para evitar erros de sintaxe
+    cat <<EOL > "./public/.htaccess"
 # Configuração SPA - Redireciona todas as solicitações para index.html
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -49,11 +49,6 @@ elif ! grep -q "RewriteBase /" "./public/.htaccess" 2>/dev/null; then
   # Redirecionar todo o restante para index.html
   RewriteRule ^(.*)$ index.html [L,QSA]
 </IfModule>
-
-# Especificar tipos MIME corretos para arquivos JavaScript
-<FilesMatch "\\.(js|jsx|mjs)$">
-  Header set Content-Type "application/javascript; charset=UTF-8"
-</FilesMatch>
 EOL
 
     # Garantindo que o bloco seja encerrado corretamente e sem erros de sintaxe
