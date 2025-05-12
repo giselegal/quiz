@@ -25,11 +25,11 @@ declare global {
 export const initFacebookPixel = () => {
   if (typeof window !== 'undefined') {
     // Initialize Facebook Pixel with proper type casting
-    const win = window as unknown as CustomWindow;
+    const win = window as CustomWindow;
     
     if (!win.fbq) {
       // Initialize Facebook Pixel
-      (function(f: any, b, e, v, n: any, t, s) {
+      (function(f: any, b, e, v, n: any, t: any, s: any) {
         if (f.fbq) return;
         n = f.fbq = function() {
           n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);

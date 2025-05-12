@@ -34,7 +34,7 @@ const EditorPage: React.FC = () => {
   
   const handleSave = async () => {
     try {
-      saveConfig(config);
+      saveConfig();
       toast({
         title: "Configuração salva com sucesso!",
         description: "As alterações foram salvas e aplicadas à página.",

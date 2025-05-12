@@ -8,16 +8,20 @@ import compression from "vite-plugin-compression";
 export default defineConfig(({ mode }) => {
   // Wrapper function for cloudinaryImageOptimizer to make it compatible with Vite plugin API
   const cloudinaryImageOptimizerPlugin = (): Plugin => {
-    const cloudinaryImageOptimizer = require('./src/plugins/cloudinaryImageOptimizer').default;
-    
     return {
       name: 'cloudinary-image-optimizer',
       configureServer(server) {
-        server.middlewares.use(cloudinaryImageOptimizer({
-          apiKey: process.env.CLOUDINARY_API_KEY || '',
-          apiSecret: process.env.CLOUDINARY_API_SECRET || '',
-          cloudName: process.env.CLOUDINARY_CLOUD_NAME || ''
-        }));
+        // Dynamically import the middleware to avoid TypeScript errors
+        import('./src/plugins/cloudinaryImageOptimizer').then(module => {
+          const cloudinaryImageOptimizer = module.default;
+          server.middlewares.use(cloudinaryImageOptimizer({
+            apiKey: process.env.CLOUDINARY_API_KEY || '',
+            apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+            cloudName: process.env.CLOUDINARY_CLOUD_NAME || ''
+          }));
+        }).catch(err => {
+          console.error('Failed to load cloudinaryImageOptimizer:', err);
+        });
       }
     };
   };

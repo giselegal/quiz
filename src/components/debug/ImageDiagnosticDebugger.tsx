@@ -132,6 +132,10 @@ export const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = (
     setShowPlaceholder(checked);
   };
 
+  const handlePlaceholderTypeChange = (value: 'blur' | 'empty') => {
+    setPlaceholderType(value);
+  };
+
   const renderPlaceholder = () => {
     if (!showPlaceholder) return undefined;
 
@@ -308,7 +312,7 @@ export const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = (
                   {showPlaceholder && (
                     <div className="ml-4">
                       <Label htmlFor="placeholderType">Placeholder Type</Label>
-                      <Select value={placeholderType} onValueChange={(value) => handlePlaceholderChange(value as 'blur' | 'empty')}>
+                      <Select value={placeholderType} onValueChange={(value) => handlePlaceholderTypeChange(value as 'blur' | 'empty')}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select placeholder type" />
                         </SelectTrigger>

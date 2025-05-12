@@ -2,7 +2,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { extname } from 'path';
-// Remove svgo import if not needed
 
 interface Options {
   apiKey?: string;
@@ -21,7 +20,7 @@ interface Options {
 }
 
 // Helper function for type checking
-const checkTypeAndIncludes = (value: string | number | readonly string[], search: string): boolean => {
+const checkTypeAndIncludes = (value: unknown, search: string): boolean => {
   if (typeof value === 'string') {
     return value.includes(search);
   }
@@ -91,21 +90,19 @@ export default function cloudinaryImageOptimizer(options: Options = {}) {
       res.setHeader('Cache-Control', `public, max-age=${expires}, immutable`);
       res.setHeader('Content-Type', `image/${format}`);
 
-      // Fix the type issues with response.write and response.end
+      // Handle response methods with proper type handling
       const originalWrite = res.write;
       const originalEnd = res.end;
 
       // Use type assertions to fix typing issues
-      res.write = function(chunk: any, encoding?: BufferEncoding, callback?: () => void) {
-        return originalWrite.call(this, chunk, encoding as any, callback as any);
+      res.write = function(chunk: any, ...args: any[]) {
+        // @ts-ignore - we need to bypass the type checking here
+        return originalWrite.apply(this, [chunk, ...args]);
       };
       
-      res.end = function(chunk?: any, encoding?: BufferEncoding, callback?: () => void) {
-        if (chunk) {
-          this.write(chunk, encoding, callback);
-          return originalEnd.call(this);
-        }
-        return originalEnd.call(this, callback as any);
+      res.end = function(...args: any[]) {
+        // @ts-ignore - we need to bypass the type checking here
+        return originalEnd.apply(this, args);
       };
 
       try {
