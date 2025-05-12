@@ -62,6 +62,17 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       }
     }
   }, [currentAnswers, isStrategicQuestion, isButtonActive]); // Adicionado isButtonActive às dependências
+
+  // Adicionar lógica para ativar visualmente o botão "Próximo" antes da transição automática
+  useEffect(() => {
+    if (!isStrategicQuestion && autoAdvance && isButtonActive) {
+      const timer = setTimeout(() => {
+        if (onNextClick) onNextClick();
+      }, 1000); // 1 segundo para o efeito visual
+
+      return () => clearTimeout(timer);
+    }
+  }, [isButtonActive, autoAdvance, isStrategicQuestion, onNextClick]);
   
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];
