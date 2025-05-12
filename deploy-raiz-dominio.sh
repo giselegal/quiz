@@ -56,6 +56,12 @@ FTP_USER="$FTP_USERNAME"
 FTP_PASS="$FTP_PASSWORD"
 REMOTE_DIR="$FTP_SERVER_DIR"
 
+# Verificar se as variáveis de ambiente estão definidas
+if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USERNAME" ] || [ -z "$FTP_PASSWORD" ] || [ -z "$FTP_SERVER_DIR" ]; then
+    echo -e "${RED}✗ Erro: Variáveis de ambiente FTP_SERVER, FTP_USERNAME, FTP_PASSWORD ou FTP_SERVER_DIR não estão definidas.${NC}"
+    exit 1
+fi
+
 # Substituir o upload via lftp por curl
 # Realizar upload dos arquivos
 UPLOAD_URL="ftp://$FTP_HOST$REMOTE_DIR"
@@ -65,14 +71,15 @@ echo -e "\n${YELLOW}5. Realizando upload dos arquivos para o servidor FTP usando
 find ./dist -type f | while read FILE; do
     RELATIVE_PATH="${FILE#./dist/}"
     REMOTE_PATH="$UPLOAD_URL/$RELATIVE_PATH"
+    echo -e "   ${YELLOW}Enviando: $RELATIVE_PATH${NC}"
     curl -T "$FILE" --ftp-create-dirs -u "$FTP_USER:$FTP_PASS" "$REMOTE_PATH"
     if [ $? -ne 0 ]; then
         echo -e "   ${RED}✗ Erro ao enviar o arquivo: $RELATIVE_PATH${NC}"
-        exit 1;
+    else
+        echo -e "   ${GREEN}✓ Arquivo enviado com sucesso: $RELATIVE_PATH${NC}"
     fi
+    sleep 1 # Adicionar um pequeno atraso para evitar sobrecarga no servidor
 done
-
-echo -e "   ${GREEN}✓ Upload concluído com sucesso${NC}"
 
 # Finalização
 echo -e "\n${GREEN}=== BUILD CONCLUÍDO ===${NC}"
