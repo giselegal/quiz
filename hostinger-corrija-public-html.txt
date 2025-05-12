@@ -1,0 +1,33 @@
+INSTRUÇÕES PARA REMOVER "public_html" DA URL DO SITE
+
+PROBLEMA:
+- O site está mostrando "public_html" na URL, exemplo:
+  https://giselegalvao.com.br/public_html/quiz-de-estilo/ ou
+  https://giselegalvao.com.br/quiz-de-estilo/public_html/
+
+SOLUÇÃO:
+1. Acesse o Painel de Controle da Hostinger
+2. Vá para o Gerenciador de Arquivos
+3. Confirme que os arquivos estão na estrutura correta:
+   public_html/quiz-de-estilo/    ← Aqui devem estar os arquivos do site
+   
+4. Se encontrar uma estrutura como esta:
+   public_html/quiz-de-estilo/public_html/   ← Estrutura errada com pasta redundante
+   
+   Faça o seguinte:
+   a. Selecione todos os arquivos de public_html/quiz-de-estilo/public_html/
+   b. Mova-os para public_html/quiz-de-estilo/
+   c. Exclua a pasta vazia public_html/quiz-de-estilo/public_html/
+   
+5. Verifique o arquivo .htaccess:
+   - Deve estar na pasta public_html/quiz-de-estilo/
+   - Deve conter a linha: RewriteBase /quiz-de-estilo/
+   - NÃO deve conter: RewriteBase /quiz-de-estilo/public_html/ ou similar
+   
+6. Verifique as configurações de Redirecionamento:
+   - Vá para Hospedagem > Extras > Redirecionamentos
+   - Remova ou corrija qualquer redirecionamento que inclua "public_html"
+   
+7. Teste o site:
+   - Acesse https://giselegalvao.com.br/quiz-de-estilo/
+   - Navegue pelo site para confirmar que "public_html" não aparece mais na URL
