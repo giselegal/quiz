@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { Button } from '../ui/button';
 
 interface QuizNavigationProps {
@@ -19,11 +19,11 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   isLastQuestion = false
 }) => {
   // Estado para controlar a animação de ativação do botão
-  const [showActivationEffect, setShowActivationEffect] = useState(false);
-  const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [showActivationEffect, setShowActivationEffect] = React.useState(false);
+  const [autoAdvanceTimer, setAutoAdvanceTimer] = React.useState<NodeJS.Timeout | null>(null);
 
   // Verificar quando o botão se torna disponível para mostrar o efeito e auto-avançar
-  useEffect(() => {
+  React.useEffect(() => {
     // Limpar qualquer timer de auto-avanço pendente se as condições mudarem ou o componente re-renderizar
     if (autoAdvanceTimer) {
       clearTimeout(autoAdvanceTimer);
@@ -104,7 +104,20 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
 
           {/* O botão "Próximo" só será renderizado se não for uma questão estratégica OU se for estratégica e puder prosseguir */}
           {/* Para questões estratégicas, o botão "Continuar" é renderizado dentro de QuizQuestion.tsx */}
-          {currentQuestionType !== 'strategic' && (
+          {currentQuestionType === 'strategic' ? (
+            <Button
+              onClick={onNext}
+              disabled={!canProceed}
+              className={`
+                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50
+                ${!canProceed
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'}
+              `}
+            >
+              Continuar
+            </Button>
+          ) : (
             <Button
               onClick={onNext}
               disabled={!canProceed}

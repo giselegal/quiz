@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import * as React from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useQuizLogic } from '../hooks/useQuizLogic';
 import { UserResponse } from '@/types/quiz';
 import { toast } from './ui/use-toast';
@@ -307,7 +308,7 @@ const QuizPage: React.FC = () => {
                   isLastQuestion={isLastQuestion}
                   onNext={handleNextClick}
                   onPrevious={handlePrevious}
-                  canProceed={getCurrentCanProceed()}
+                  canProceed={canProceed}
                 />
               </motion.div>
             )}
