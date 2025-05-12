@@ -8,12 +8,13 @@ interface FacebookPixel {
   queue: Array<any>;
 }
 
-// Define the window interface extension separately
+// Use a more precise window interface extension
 interface CustomWindow extends Window {
   fbq?: FacebookPixel;
   _fbq?: any;
 }
 
+// Extend the global Window interface
 declare global {
   interface Window {
     fbq?: FacebookPixel;
@@ -23,29 +24,28 @@ declare global {
 
 export const initFacebookPixel = () => {
   if (typeof window !== 'undefined') {
-    // Initialize Facebook Pixel with type guard
-    const win = window as CustomWindow;
+    // Initialize Facebook Pixel with proper type casting
+    const win = window as unknown as CustomWindow;
     
     if (!win.fbq) {
       // Initialize Facebook Pixel
-      // @ts-ignore - Facebook's initialization function
-      !function(f, b, e, v, n, t, s) {
-        if(f.fbq) return;
+      (function(f: any, b, e, v, n: any, t, s) {
+        if (f.fbq) return;
         n = f.fbq = function() {
           n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
         };
         
-        if(!f._fbq) f._fbq = n;
+        if (!f._fbq) f._fbq = n;
         n.push = n;
-        n.loaded = !0;
+        n.loaded = true;
         n.version = '2.0';
         n.queue = [];
         t = b.createElement(e);
-        t.async = !0;
+        t.async = true;
         t.src = v;
         s = b.getElementsByTagName(e)[0];
         s && s.parentNode && s.parentNode.insertBefore(t, s);
-      }(
+      })(
         window,
         document,
         'script',

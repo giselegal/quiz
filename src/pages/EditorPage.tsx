@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ResultPageConfig, BlockType } from '@/types/editor';
-import { QuizBuilderConfig } from '@/types/quizBuilder';
+import { EditorConfig, BlockType } from '@/types/editor';
 import { VisualEditor } from '@/components/visual-editor/VisualEditor';
 import QuizBuilder from '@/components/quiz-builder/QuizBuilder';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -14,87 +14,31 @@ const EditorPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tab = searchParams.get('tab') || 'result';
-  const { config, saveConfig, loadConfig } = useEditor();
+  const { config, saveConfig } = useEditor();
   const [activeTab, setActiveTab] = useState(tab);
 
   useEffect(() => {
-    // Load config based on pageType and style
-    if (pageType && style) {
-      loadConfig(pageType, style);
-    } else {
-      // Set default config
+    // Create a default config if needed
+    if (!config || Object.keys(config).length === 0) {
       const defaultConfig = {
-        styleType: 'default',
-        header: {
-          content: {
-            title: 'Descubra Seu Estilo de Decoração',
-            subtitle: 'Faça o quiz e encontre o estilo perfeito para você!',
-          },
-          style: {
-            paddingY: 'md',
-            paddingX: 'md',
-            backgroundColor: '#f8f1ed',
-            textColor: '#432818',
-            borderRadius: 'sm',
-          },
-          visible: true,
-        },
-        mainContent: {
-          content: {
-            description: 'Encontre o estilo que mais combina com você e transforme sua casa!',
-          },
-          style: {
-            paddingY: 'md',
-            paddingX: 'md',
-            backgroundColor: '#f8f1ed',
-            textColor: '#432818',
-            borderRadius: 'sm',
-          },
-          visible: true,
-        },
-        offer: {
-          content: {
-            title: 'Transforme sua casa com o guia completo de decoração!',
-            description: 'Aprenda a combinar cores, móveis e acessórios para criar ambientes únicos e personalizados.',
-            features: [
-              'Dicas de especialistas em decoração',
-              'Inspirações para todos os estilos',
-              'Guia de compras com os melhores produtos',
-            ],
-            ctaText: 'Quero transformar minha casa!',
-            ctaLink: '/oferta',
-            price: 'R$ 97,00',
-            discountPrice: 'R$ 47,00',
-          },
-          style: {
-            padding: 'md',
-            backgroundColor: '#f8f1ed',
-            accentColor: '#B89B7A',
-            textColor: '#432818',
-          },
-          visible: true,
-        },
-      } as unknown as ResultPageConfig;
+        blocks: [],
+        meta: {
+          title: 'Editor Page',
+          description: 'Editor page description'
+        }
+      };
       
-      saveConfig(defaultConfig);
+      saveConfig(defaultConfig as EditorConfig);
     }
-  }, [pageType, style, loadConfig, saveConfig]);
+  }, [config, saveConfig]);
   
   const handleSave = async () => {
     try {
-      if (pageType && style) {
-        await saveConfig(config, pageType, style);
-        toast({
-          title: "Configuração salva com sucesso!",
-          description: "As alterações foram salvas e aplicadas à página.",
-        });
-      } else {
-        toast({
-          title: "Erro ao salvar configuração",
-          description: "Tipo de página ou estilo não especificados.",
-          variant: "destructive",
-        });
-      }
+      saveConfig(config);
+      toast({
+        title: "Configuração salva com sucesso!",
+        description: "As alterações foram salvas e aplicadas à página.",
+      });
     } catch (error) {
       console.error("Erro ao salvar a configuração:", error);
       toast({

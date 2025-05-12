@@ -1,11 +1,13 @@
+
 import { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
 import { extname } from 'path';
+// Remove svgo import if not needed
 
 interface Options {
-  apiKey: string;
-  apiSecret: string;
-  cloudName: string;
+  apiKey?: string;
+  apiSecret?: string;
+  cloudName?: string;
   secure?: boolean;
   baseUrl?: string;
   assetUrl?: string;
@@ -18,6 +20,7 @@ interface Options {
   bypassCache?: boolean;
 }
 
+// Helper function for type checking
 const checkTypeAndIncludes = (value: string | number | readonly string[], search: string): boolean => {
   if (typeof value === 'string') {
     return value.includes(search);
@@ -28,15 +31,12 @@ const checkTypeAndIncludes = (value: string | number | readonly string[], search
   return false;
 };
 
-export default function cloudinaryImageOptimizer(options: Options) {
-  if (!options.apiKey || !options.apiSecret || !options.cloudName) {
-    throw new Error('Cloudinary credentials are required');
-  }
-
+export default function cloudinaryImageOptimizer(options: Options = {}) {
+  // Default options if not provided
   const {
-    apiKey,
-    apiSecret,
-    cloudName,
+    apiKey = process.env.CLOUDINARY_API_KEY || '',
+    apiSecret = process.env.CLOUDINARY_API_SECRET || '',
+    cloudName = process.env.CLOUDINARY_CLOUD_NAME || '',
     secure = true,
     baseUrl = '',
     assetUrl = '',
@@ -53,7 +53,7 @@ export default function cloudinaryImageOptimizer(options: Options) {
     const parsedUrl = parse(req.url || '', true);
     let imagePath = parsedUrl.pathname || '';
 
-    if (checkTypeAndIncludes(imagePath, '/_next/image')) {
+    if (typeof imagePath === 'string' && imagePath.includes('/_next/image')) {
       const imageUrl = parsedUrl.query.url as string;
       const imageWidth = parseInt(parsedUrl.query.w as string, 10);
 
@@ -91,15 +91,19 @@ export default function cloudinaryImageOptimizer(options: Options) {
       res.setHeader('Cache-Control', `public, max-age=${expires}, immutable`);
       res.setHeader('Content-Type', `image/${format}`);
 
+      // Fix the type issues with response.write and response.end
       const originalWrite = res.write;
-      res.write = function(chunk, encoding?, callback?) {
-        return originalWrite.apply(this, arguments as any);
-      };
-
       const originalEnd = res.end;
-      res.end = function(chunk?: any, encoding?: BufferEncoding, callback?: () => void): ServerResponse<IncomingMessage> {
+
+      // Use type assertions to fix typing issues
+      res.write = function(chunk: any, encoding?: BufferEncoding, callback?: () => void) {
+        return originalWrite.call(this, chunk, encoding as any, callback as any);
+      };
+      
+      res.end = function(chunk?: any, encoding?: BufferEncoding, callback?: () => void) {
         if (chunk) {
-          res.write(chunk, encoding);
+          this.write(chunk, encoding, callback);
+          return originalEnd.call(this);
         }
         return originalEnd.call(this, callback as any);
       };

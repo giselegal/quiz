@@ -8,14 +8,16 @@ import { LucideIcon } from 'lucide-react';
  * @param iconName Name of the icon from lucide-react
  * @returns The icon component or null if not found
  */
-export function dynamicIconImport(iconName: string): LucideIcon | null {
+export function dynamicIconImport(iconName: string): React.ComponentType<any> | null {
   if (!iconName) return null;
   
   // Check if the icon exists in lucide-react
   const formattedIconName = formatIconName(iconName);
   
   if (formattedIconName in LucideIcons) {
-    return LucideIcons[formattedIconName as keyof typeof LucideIcons] as LucideIcon;
+    const icon = LucideIcons[formattedIconName as keyof typeof LucideIcons];
+    // Use type assertion to help TypeScript understand this is a valid component
+    return icon as React.ComponentType<any>;
   }
   
   console.warn(`Icon "${iconName}" not found in lucide-react`);

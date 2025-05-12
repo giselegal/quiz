@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Minus, LucideIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import { formatIconName } from '@/utils/dynamicIconImport';
 
 interface MetricCardProps {
   title: string;
@@ -26,21 +27,15 @@ export const MetricCard = ({
   compact = false,
 }: MetricCardProps) => {
   // Get icon dynamically if provided
-  const getIconComponent = () => {
+  const IconComponent = React.useMemo(() => {
     if (!icon) return null;
     
-    const formattedIconName = icon
-      .split('-')
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join('');
-      
+    const formattedIconName = formatIconName(icon);
     if (formattedIconName in LucideIcons) {
-      return LucideIcons[formattedIconName as keyof typeof LucideIcons] as LucideIcon;
+      return LucideIcons[formattedIconName as keyof typeof LucideIcons] as React.ComponentType<any>;
     }
     return null;
-  };
-  
-  const IconComponent = icon ? getIconComponent() : null;
+  }, [icon]);
   
   return (
     <Card className={cn('shadow-sm border-border/40', className)}>

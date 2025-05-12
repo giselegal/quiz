@@ -20,11 +20,14 @@ export const usePerformanceMonitoring = ({ analyticsId }: PerformanceMonitoringP
       }
     };
 
+    // Monitor Core Web Vitals
     onCLS(logMetric);
-    // FID (First Input Delay) has been replaced in the latest web-vitals
-    // Instead, we can use INP (Interaction to Next Paint) when needed
-    // onFID(logMetric); - removed as it's not available in the latest version
     onLCP(logMetric);
+    
+    // Note: FID (First Input Delay) has been replaced in the latest web-vitals
+    // If you need INP (Interaction to Next Paint), you can add it here
+    // import { onINP } from 'web-vitals';
+    // onINP(logMetric);
   }, [analyticsId]);
 };
 

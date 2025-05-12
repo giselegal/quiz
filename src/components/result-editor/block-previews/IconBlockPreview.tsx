@@ -3,7 +3,8 @@ import React from 'react';
 import { Block } from '@/types/editor';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Star, LucideIcon } from 'lucide-react'; // Default icon
+import { Star } from 'lucide-react'; // Default icon
+import { formatIconName } from '@/utils/dynamicIconImport';
 
 interface IconBlockPreviewProps {
   block: Block;
@@ -13,25 +14,15 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ block }) => {
   const { content = {}, style = {} } = block;
   const { iconName, size, color, alignment } = content;
   
-  // Safely get the icon component or use a default
-  const getIconComponent = () => {
+  // Get the icon component or use Star as default
+  const IconComponent = React.useMemo(() => {
     if (!iconName || typeof iconName !== 'string') {
       return Star; // Default icon
     }
     
-    // Format the icon name to PascalCase for Lucide
-    const formattedName = iconName
-      .split('-')
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join('');
-    
-    // Return the icon component or default to Star if not found
-    const IconComponent = (LucideIcons[formattedName as keyof typeof LucideIcons] as LucideIcon) || Star;
-    return IconComponent;
-  };
-  
-  // Get the icon component
-  const IconComponent = getIconComponent();
+    const formattedName = formatIconName(iconName);
+    return (LucideIcons[formattedName as keyof typeof LucideIcons] as React.ComponentType<any>) || Star;
+  }, [iconName]);
   
   // Calculate the icon size
   const iconSize = size ? parseInt(size) : 24;

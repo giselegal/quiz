@@ -127,13 +127,9 @@ export const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = (
     });
   }, []);
 
-  const handlePlaceholderChange = (type: 'blur' | 'empty') => {
-    setPlaceholderType(type);
-    if (type === 'blur') {
-      setBlurDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAACgcytNAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQAAAAASUVORK5CYII=');
-    } else {
-      setBlurDataURL(undefined);
-    }
+  // Fix for CheckedState handling
+  const handleShowPlaceholderChange = (checked: boolean) => {
+    setShowPlaceholder(checked);
   };
 
   const renderPlaceholder = () => {
@@ -305,7 +301,7 @@ export const ImageDiagnosticDebugger: React.FC<ImageDiagnosticDebuggerProps> = (
                     <Checkbox
                       id="showPlaceholder"
                       checked={showPlaceholder}
-                      onCheckedChange={setShowPlaceholder}
+                      onCheckedChange={handleShowPlaceholderChange}
                     />
                     <Label htmlFor="showPlaceholder">Show Placeholder</Label>
                   </div>
