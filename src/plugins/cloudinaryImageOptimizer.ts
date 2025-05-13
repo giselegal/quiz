@@ -1,5 +1,6 @@
 
 import { Plugin } from 'vite';
+import type { ServerResponse } from 'http';
 
 /**
  * Plugin Vite para otimizar imagens do Cloudinary durante o build
@@ -133,7 +134,9 @@ export default function cloudinaryImageOptimizer(): Plugin {
                 // Injetar antes do </body>
                 html = html.replace('</body>', `${injectScript}</body>`);
                 
+                // @ts-ignore
                 originalWrite.call(res, html);
+                // @ts-ignore
                 originalEnd.call(res);
               };
             }
