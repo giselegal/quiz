@@ -3,7 +3,8 @@ import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { AnimatedWrapper } from '../ui/animated-wrapper';
-import { preloadImagesByUrls, preloadCriticalImages } from '@/utils/imageManager';
+import { preloadImagesByUrls } from '@/utils/images/preloading';
+import { preloadCriticalImages } from '@/utils/imageManager';
 
 interface StrategicQuestionsProps {
   currentQuestionIndex: number;

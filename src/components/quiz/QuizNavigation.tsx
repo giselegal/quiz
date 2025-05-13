@@ -34,28 +34,38 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       timerRef.current = null;
     }
     
-    // Configurar auto-avanço para todas as questões quando atingir o número de seleções necessárias
+    // Condição para auto-avanço: Pode prosseguir (canProceed) E selecionou EXATAMENTE o número requerido
     if (canProceed && selectedOptionsCount === requiredOptionsCount) {
-      console.log(`Auto-avanço preparado: Tipo=${currentQuestionType}, Selected=${selectedOptionsCount}, Required=${requiredOptionsCount}`);
+      console.log(`Condições para auto-avanço instantâneo satisfeitas: Tipo=${currentQuestionType}, Selected=${selectedOptionsCount}, Required=${requiredOptionsCount}`);
       
       // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
-      // Timer para auto-avanço - reduzido para 800ms para ser mais rápido, mas ainda perceptível
+      // Configurar um timer muito curto para permitir que o feedback visual seja renderizado
+      // antes do avanço automático - 100ms é quase instantâneo para percepção humana
       timerRef.current = setTimeout(() => {
-        console.log("Executando auto-avanço agora");
+        console.log("Executando auto-avanço instantâneo");
         onNext();
         setShowActivationEffect(false); // Resetar o efeito visual após o avanço
-      }, 800);
+        timerRef.current = null; // Limpar referência após execução
+      }, 100); // Reduzido para 100ms para ser praticamente instantâneo
+      
+      return () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      };
     } else {
-      // Resetar o efeito visual se as condições não forem satisfeitas
-      setShowActivationEffect(false);
+      // Se as condições não são mais satisfeitas (ex: usuário desmarcou uma opção)
+      setShowActivationEffect(false); // Resetar o efeito visual
     }
   }, [canProceed, onNext, selectedOptionsCount, requiredOptionsCount, currentQuestionType]);
 
   // Limpar timers quando o componente for desmontado
   React.useEffect(() => {
     return () => {
+      console.log("QuizNavigation desmontando - limpando timers");
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -113,7 +123,5 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
     </div>
   );
 };
-
-export default QuizNavigation;
 
 export default QuizNavigation;

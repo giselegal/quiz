@@ -64,6 +64,8 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   // Manipulador de clique para seleção de opção - sem delay
   const handleClick = () => {
     if (!isDisabled) {
+      console.log(`Opção clicada: ${option.id}, tipo: ${isStrategicOption ? 'estratégica' : 'normal'}`);
+      
       // Aplicar mudança visual imediatamente para feedback instantâneo
       if (optionRef.current) {
         // Efeito visual de seleção instantâneo
@@ -71,10 +73,20 @@ const QuizOption: React.FC<QuizOptionProps> = ({
           // Adicionar flash de seleção para feedback instantâneo
           optionRef.current.classList.add('quiz-option-selected-flash');
           
-          // Aplicar classe de seleção para destaque imediato
-          optionRef.current.classList.add('option-selected');
+          // Aplicar transformação imediata para feedback visual
+          if (type === 'text') {
+            optionRef.current.style.borderColor = '#b29670';
+            optionRef.current.style.boxShadow = isStrategicOption 
+              ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
+              : '0 4px 8px rgba(178, 150, 112, 0.25)';
+          } else {
+            optionRef.current.style.transform = 'scale(1.02)';
+            optionRef.current.style.boxShadow = isStrategicOption 
+              ? '0 15px 30px rgba(0, 0, 0, 0.25)' 
+              : '0 12px 24px rgba(0, 0, 0, 0.2)';
+          }
           
-          // Remover flash após a animação terminar, mas manter a seleção
+          // Remover a classe de animação após a animação terminar
           setTimeout(() => {
             if (optionRef.current) {
               optionRef.current.classList.remove('quiz-option-selected-flash');
