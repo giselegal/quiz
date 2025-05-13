@@ -34,6 +34,8 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     isStrategicQuestion = false
   } = props;
 
+  console.log(`QuizQuestion - autoAdvance: ${autoAdvance}, isStrategic: ${isStrategicQuestion}, requiredSelections: ${question?.multiSelect || 1}, currentAnswers: ${currentAnswers?.length || 0}`);
+
   // Fallback defensivo para evitar tela branca
   if (!question || !question.title || !Array.isArray(question.options)) {
     return (
@@ -60,8 +62,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       setIsButtonActive(currentAnswers.length > 0);
     } else {
       // Para questões normais, o botão fica ativo quando o número exato de seleções é atingido
-      setIsButtonActive(currentAnswers.length === question.multiSelect);
+      setIsButtonActive(currentAnswers.length === (question.multiSelect || 3));
     }
+    
+    console.log(`Botão ativo: ${isButtonActive}, seleções atuais: ${currentAnswers.length}, necessárias: ${question.multiSelect || 3}`);
   }, [currentAnswers, isStrategicQuestion, question.multiSelect]);
 
   const handleOptionSelect = (optionId: string) => {
@@ -82,6 +86,8 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
         newSelectedOptions = [...currentAnswers, optionId];
       }
     }
+    
+    console.log(`Opção selecionada: ${optionId}, novas seleções: [${newSelectedOptions.join(', ')}]`);
     
     // Atualizar as respostas
     onAnswer({
@@ -136,7 +142,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
           <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 mb-4 text-center font-medium">
             {isStrategicQuestion 
               ? "Selecione 1 opção para avançar"
-              : `Selecione ${question.multiSelect} opções para avançar`
+              : `Selecione ${question.multiSelect || 3} opções para avançar`
             }
           </p>
         </>
@@ -158,7 +164,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
             questionId={question.id}
             isDisabled={!currentAnswers.includes(option.id) && 
               !isStrategicQuestion && 
-              currentAnswers.length >= question.multiSelect}
+              currentAnswers.length >= (question.multiSelect || 3)}
             isStrategicOption={isStrategicQuestion}
           />
         ))}
@@ -185,7 +191,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       )}
 
       {/* Botão Próximo para questões não-estratégicas */}
-      {!isStrategicQuestion && autoAdvance && onNextClick && (
+      {!isStrategicQuestion && onNextClick && (
         <div className="text-center mt-6">
           <Button 
             onClick={onNextClick}

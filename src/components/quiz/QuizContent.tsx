@@ -33,6 +33,9 @@ export const QuizContent: React.FC<QuizContentProps> = ({
   // Get user name from localStorage if not provided in props
   const userName = user?.userName || localStorage.getItem('userName') || '';
   
+  // Log important state for debugging
+  console.log(`QuizContent - currentQuestion: ${currentQuestion?.id}, answers: ${currentAnswers?.length || 0}, isStrategic: ${showingStrategicQuestions}`);
+  
   return (
     <>
       <QuizHeader 
@@ -58,7 +61,7 @@ export const QuizContent: React.FC<QuizContentProps> = ({
             question={currentQuestion}
             onAnswer={handleAnswerSubmit}
             currentAnswers={currentAnswers || []}
-            autoAdvance={true} // Questões normais mantêm autoavanço
+            autoAdvance={false} // Desabilitar autoAdvance no QuizQuestion para centralizar no QuizNavigation
             onNextClick={handleNextClick}
             showQuestionImage={true}
             onPreviousClick={handlePrevious}

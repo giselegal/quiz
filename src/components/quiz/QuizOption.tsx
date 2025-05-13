@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { QuizOption as QuizOptionType } from '@/types/quiz';
@@ -62,6 +63,8 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   // Manipulador de clique para seleção de opção
   const handleClick = () => {
     if (!isDisabled) {
+      console.log(`Opção clicada: ${option.id}, tipo: ${isStrategicOption ? 'estratégica' : 'normal'}`);
+      
       // Aplicar mudança visual imediatamente para feedback instantâneo
       if (optionRef.current) {
         // Alterando a aparência com base no estado atual (invertido porque o clique vai mudar o estado)
@@ -79,10 +82,8 @@ const QuizOption: React.FC<QuizOptionProps> = ({
               : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)')); // Sombra padrão
       }
       
-      // Chamar onSelect com pequeno atraso para garantir que a animação visual seja vista
-      setTimeout(() => {
-        onSelect(option.id);
-      }, 50);
+      // Chamar onSelect imediatamente - removido o setTimeout que causava atraso
+      onSelect(option.id);
     }
   };
   
