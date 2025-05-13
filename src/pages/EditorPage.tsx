@@ -44,10 +44,10 @@ export const EditorPage = () => {
         introText: `Conheça seu estilo ${styleCategory}!`,
         benefits: [],
         description: templateToUse.mainContent?.content?.description || `Descrição do estilo ${styleCategory}`,
-        mainImage: templateToUse.mainContent?.content?.mainImage || 'https://placehold.co/600x400?text=Estilo+Predominante',
-        tabletImage: templateToUse.mainContent?.content?.tabletImage || 'https://placehold.co/600x400?text=Tablet+Image',
-        showSecondaryStyles: templateToUse.mainContent?.content?.showSecondaryStyles !== undefined ? templateToUse.mainContent.content.showSecondaryStyles : true,
-        showOffer: templateToUse.mainContent?.content?.showOffer !== undefined ? templateToUse.mainContent.content.showOffer : true
+        mainImage: templateToUse.mainContent?.content?.mainImage || '',
+        tabletImage: templateToUse.mainContent?.content?.tabletImage || '',
+        showSecondaryStyles: templateToUse.mainContent?.content?.showSecondaryStyles || false,
+        showOffer: templateToUse.mainContent?.content?.showOffer || true
       },
       style: templateToUse.mainContent?.style || {
         padding: '2rem 1rem',

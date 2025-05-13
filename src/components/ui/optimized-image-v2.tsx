@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import NextImage from 'next/image';
 import { useIntersection } from '@uidotdev/usehooks';
 import { ImgHTMLAttributes } from 'react';
 
@@ -84,12 +85,11 @@ const OptimizedImageV2: React.FC<OptimizedImageProps> = ({
 
   if (width && height) {
     return isIntersecting ? (
-      <img
+      <NextImage
         {...imageProps}
         width={String(width)}
         height={String(height)}
         ref={imageRef}
-        loading="lazy"
       />
     ) : (
       <div style={{ width: width, height: height, position: 'relative', ...style }}>
@@ -108,10 +108,9 @@ const OptimizedImageV2: React.FC<OptimizedImageProps> = ({
   }
 
   return isIntersecting ? (
-    <img
+    <NextImage
       {...imageProps}
       ref={imageRef}
-      loading="lazy"
     />
   ) : (
     <div style={{ position: 'relative', ...style }}>
