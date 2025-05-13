@@ -5,7 +5,7 @@
 
 declare global {
   interface Window {
-    fbq: (event: string, eventName: string, params?: any, eventId?: { eventID: string }) => void;
+    fbq: any; // Using any type to avoid complex FB Pixel typings
     _fbq?: any;
   }
 }
@@ -33,7 +33,15 @@ export const initFacebookPixel = (pixelId: string): void => {
       t.src = v;
       s = b.getElementsByTagName(e)[0];
       if (s?.parentNode) s.parentNode.insertBefore(t, s);
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    })(
+      window,
+      document,
+      'script',
+      'https://connect.facebook.net/en_US/fbevents.js',
+      undefined,
+      undefined,
+      undefined
+    );
     
     window.fbq('init', pixelId);
     window.fbq('track', 'PageView');

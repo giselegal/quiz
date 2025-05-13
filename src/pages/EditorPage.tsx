@@ -55,53 +55,53 @@ export const EditorPage = () => {
       }
     },
     
-    // Incluir offer com a estrutura correta conforme o tipo OfferSection
+    // Estruturar offer conforme o tipo OfferSection
     offer: {
       hero: {
         visible: true,
-        content: templateToUse.offer?.hero?.content || {
+        content: {
           title: 'Transforme seu Guarda-Roupa',
           subtitle: 'Aprenda a vestir-se de acordo com sua personalidade',
           description: 'Com o Guia Completo de Estilo',
           heroImage: ''
         },
-        style: templateToUse.offer?.hero?.style || {
+        style: {
           padding: '2rem 1rem',
           backgroundColor: '#FFFFFF'
         }
       },
       benefits: {
         visible: true,
-        content: templateToUse.offer?.benefits?.content || {
+        content: {
           title: 'O que você vai aprender',
           items: []
         },
-        style: templateToUse.offer?.benefits?.style || {
+        style: {
           padding: '2rem 1rem',
           backgroundColor: '#FAF9F7'
         }
       },
       products: {
         visible: true,
-        content: templateToUse.offer?.products?.content || {
+        content: {
           title: 'O que está incluído',
           items: []
         },
-        style: templateToUse.offer?.products?.style || {
+        style: {
           padding: '2rem 1rem',
           backgroundColor: '#FFFFFF'
         }
       },
       pricing: {
         visible: true,
-        content: templateToUse.offer?.pricing?.content || {
+        content: {
           title: 'Invista em seu estilo pessoal',
           price: 'R$ 97,00',
           regularPrice: 'R$ 197,00',
           ctaText: 'Quero Transformar Meu Estilo',
           ctaUrl: '#comprar-agora'
         },
-        style: templateToUse.offer?.pricing?.style || {
+        style: {
           padding: '2rem 1rem',
           backgroundColor: '#FAF9F7',
           textAlign: 'center'
@@ -109,23 +109,23 @@ export const EditorPage = () => {
       },
       testimonials: {
         visible: true,
-        content: templateToUse.offer?.testimonials?.content || {
+        content: {
           title: 'O que dizem nossos clientes',
           testimonials: []
         },
-        style: templateToUse.offer?.testimonials?.style || {
+        style: {
           padding: '2rem 1rem',
           backgroundColor: '#FFFFFF'
         }
       },
       guarantee: {
         visible: true,
-        content: templateToUse.offer?.guarantee?.content || {
+        content: {
           title: 'Garantia de 7 dias',
           description: 'Se você não ficar satisfeito com o material, devolvemos seu dinheiro integralmente em até 7 dias após a compra.',
           image: ''
         },
-        style: templateToUse.offer?.guarantee?.style || {
+        style: {
           padding: '2rem 1rem',
           backgroundColor: '#FAF9F7',
           textAlign: 'center'
@@ -134,11 +134,17 @@ export const EditorPage = () => {
     },
     
     // Incluir secondaryStyles apenas se existir no templateToUse
-    ...(templateToUse.secondaryStyles && {
-      secondaryStyles: {
-        ...templateToUse.secondaryStyles,
+    secondaryStyles: templateToUse.secondaryStyles || {
+      visible: true,
+      content: {
+        title: 'Seus estilos secundários',
+        description: 'Estes estilos complementam seu estilo principal'
+      },
+      style: {
+        padding: '1rem',
+        backgroundColor: '#FFFFFF'
       }
-    }),
+    },
 
     globalStyles: {
       primaryColor: '#B89B7A',
