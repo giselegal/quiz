@@ -5,6 +5,7 @@ import { QuizOption as QuizOptionType } from '@/types/quiz';
 import { highlightStrategicWords } from '@/utils/textHighlight';
 import { QuizOptionImage } from './QuizOptionImage';
 import { useIsMobile } from '@/hooks/use-mobile';
+import '@/styles/quiz-animations.css';
 
 interface QuizOptionProps {
   option: QuizOptionType;
@@ -67,17 +68,18 @@ const QuizOption: React.FC<QuizOptionProps> = ({
       
       // Aplicar mudança visual imediatamente para feedback instantâneo
       if (optionRef.current) {
-        // Alterando a aparência com base no estado atual (invertido porque o clique vai mudar o estado)
-        if (type === 'text') {
-          optionRef.current.style.borderColor = isSelected ? '#B89B7A' : '#b29670';
+        // Efeito visual de seleção instantâneo
+        if (!isSelected) {
+          // Adicionar flash de seleção para feedback instantâneo
+          optionRef.current.classList.add('quiz-option-selected-flash');
+          
+          // Remover após a animação terminar
+          setTimeout(() => {
+            if (optionRef.current) {
+              optionRef.current.classList.remove('quiz-option-selected-flash');
+            }
+          }, 300);
         }
-        
-        // Aplicar sombra correspondente ao novo estado (após o clique)
-        optionRef.current.style.boxShadow = isSelected 
-          ? '0 2px 4px rgba(0, 0, 0, 0.05)'
-          : (isStrategicOption 
-              ? (type === 'text' ? '0 6px 12px rgba(178, 150, 112, 0.35)' : '0 15px 30px rgba(0, 0, 0, 0.25)')
-              : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)'));
       }
       
       // Chamar onSelect imediatamente - sem delay

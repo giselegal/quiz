@@ -1,0 +1,58 @@
+/* 
+* Quiz Animations - Efeitos visuais para feedback instantâneo
+* Este arquivo contém animações para melhorar a experiência do usuário no quiz
+*/
+
+/* Animação de seleção */
+@keyframes selectionPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(178, 150, 112, 0); }
+  50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(178, 150, 112, 0.4); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(178, 150, 112, 0); }
+}
+
+/* Flash de seleção para feedback instantâneo */
+.quiz-option-selected-flash {
+  animation: selectionPulse 0.3s ease-in-out;
+  border-color: #b29670 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Animação do botão quando estiver pronto para auto-avanço */
+@keyframes readyPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(178, 150, 112, 0); }
+  50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(178, 150, 112, 0.5); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(178, 150, 112, 0); }
+}
+
+.auto-advance-ready {
+  animation: readyPulse 0.8s ease-in-out infinite;
+}
+
+/* Estilos otimizados para seleção */
+.option-selected {
+  border-color: #b29670 !important;
+  transform: scale(1.01);
+  box-shadow: 0 6px 12px rgba(178, 150, 112, 0.2);
+}
+
+/* Transição suave entre questões */
+.question-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.question-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.question-transition-exit {
+  opacity: 1;
+}
+
+.question-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.25s, transform 0.25s;
+}

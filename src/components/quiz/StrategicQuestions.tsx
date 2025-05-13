@@ -1,11 +1,9 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { AnimatedWrapper } from '../ui/animated-wrapper';
-import { preloadCriticalImages } from '@/utils/imageManager';
-import QuizNavigation from './QuizNavigation';
+import { preloadCriticalImages, preloadImagesByUrls } from '@/utils/imageManager';
 
 interface StrategicQuestionsProps {
   currentQuestionIndex: number;
@@ -22,23 +20,58 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
 }) => {
   const [mountKey, setMountKey] = useState(Date.now());
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
+  const preloadingRef = useRef(false);
   
   const currentQuestion = strategicQuestions[currentQuestionIndex];
   const currentAnswers = currentQuestion ? (answers[currentQuestion.id] || []) : [];
-  const canProceed = currentAnswers.length >= 1; // Questões estratégicas requerem apenas 1 seleção
   
-  console.log('Rendering strategic question:', currentQuestion?.id);
-  console.log('Current answers for strategic question:', currentAnswers);
-  console.log('Question has image:', !!currentQuestion?.imageUrl);
+  // Obter a próxima questão para pré-carregar
+  const nextIndex = currentQuestionIndex + 1;
+  const nextQuestion = nextIndex < strategicQuestions.length ? strategicQuestions[nextIndex] : null;
   
-  // Preload strategic images on first render
+  // Preload strategic images efficiently
   useEffect(() => {
-    if (!imagesPreloaded) {
-      console.log('Preloading strategic images...');
-      preloadCriticalImages('strategic');
-      setImagesPreloaded(true);
+    if (!imagesPreloaded && !preloadingRef.current) {
+      preloadingRef.current = true;
+      
+      // Primeiro, carregue a questão atual com alta prioridade
+      if (currentQuestion?.imageUrl) {
+        preloadImagesByUrls([currentQuestion.imageUrl], {
+          quality: 85,
+          batchSize: 1,
+          onComplete: () => {
+            console.log('Current strategic question image loaded');
+            
+            // Depois, pré-carregar a próxima questão com prioridade média
+            if (nextQuestion?.imageUrl) {
+              preloadImagesByUrls([nextQuestion.imageUrl], {
+                quality: 75,
+                batchSize: 1,
+                onComplete: () => {
+                  console.log('Next strategic question image loaded');
+                  
+                  // Por fim, carregar outras imagens estratégicas em segundo plano
+                  preloadCriticalImages('strategic');
+                  setImagesPreloaded(true);
+                  preloadingRef.current = false;
+                }
+              });
+            } else {
+              // Não há próxima questão, apenas carregue as imagens críticas
+              preloadCriticalImages('strategic');
+              setImagesPreloaded(true);
+              preloadingRef.current = false;
+            }
+          }
+        });
+      } else {
+        // Não há imagem na questão atual, pré-carregar outras imagens estratégicas
+        preloadCriticalImages('strategic');
+        setImagesPreloaded(true);
+        preloadingRef.current = false;
+      }
     }
-  }, [imagesPreloaded]);
+  }, [currentQuestion, nextQuestion, imagesPreloaded]);
   
   // Remount component when question changes to ensure clean state
   useEffect(() => {
@@ -63,16 +96,7 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
         currentAnswers={currentAnswers}
         showQuestionImage={true}
         isStrategicQuestion={true}
-      />
-      
-      {/* Navegação das questões estratégicas */}
-      <QuizNavigation
-        canProceed={canProceed}
-        onNext={onNextClick || (() => {})}
-        currentQuestionType="strategic"
-        selectedOptionsCount={currentAnswers.length}
-        requiredOptionsCount={1}
-        isLastQuestion={currentQuestionIndex === strategicQuestions.length - 1}
+        autoAdvance={true}
       />
     </AnimatedWrapper>
   );

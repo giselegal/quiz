@@ -1,6 +1,7 @@
 
 import * as React from 'react';
 import { Button } from '../ui/button';
+import '@/styles/quiz-animations.css';
 
 interface QuizNavigationProps {
   canProceed: boolean;
@@ -35,19 +36,19 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       timerRef.current = null;
     }
     
-    // Só configurar auto-avanço para questões normais, não para estratégicas
-    if (canProceed && currentQuestionType === 'normal' && selectedOptionsCount === requiredOptionsCount) {
+    // Configurar auto-avanço para todas as questões quando atingir o número de seleções necessárias
+    if (canProceed && selectedOptionsCount === requiredOptionsCount) {
       console.log("Auto-avanço ativado - configurando timer");
       
       // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
-      // Timer para auto-avanço - reduzido para 1 segundo para ser mais rápido
+      // Timer para auto-avanço - reduzido para 800ms para ser mais rápido, mas ainda perceptível
       timerRef.current = setTimeout(() => {
         console.log("Executando auto-avanço");
         onNext();
         setShowActivationEffect(false); // Resetar o efeito visual após o avanço
-      }, 1000); // Tempo reduzido para 1 segundo
+      }, 800);
       
       return () => {
         if (timerRef.current) {
@@ -58,9 +59,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
     } else {
       // Resetar o efeito visual se as condições não forem satisfeitas
       setShowActivationEffect(false);
-      console.log("Auto-avanço não ativado - condições não satisfeitas");
     }
-  }, [canProceed, currentQuestionType, onNext, selectedOptionsCount, requiredOptionsCount]);
+  }, [canProceed, onNext, selectedOptionsCount, requiredOptionsCount]);
 
   // Limpar timers quando o componente for desmontado
   React.useEffect(() => {
@@ -105,13 +105,13 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             onClick={onNext}
             disabled={!canProceed}
             className={`
-              py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50
+              py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50
               ${!canProceed 
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                 : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
               } 
               ${showActivationEffect 
-                ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' 
+                ? 'auto-advance-ready' 
                 : ''
               }
             `}

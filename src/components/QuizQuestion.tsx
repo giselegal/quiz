@@ -1,13 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { QuizQuestion as QuizQuestionType, UserResponse } from '../types/quiz';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { QuizOption } from './quiz/QuizOption';
 import { highlightStrategicWords } from '@/utils/textHighlight';
-import { Button } from './ui/button';
-import { ArrowRight } from 'lucide-react';
 import { useQuestionScroll } from '@/hooks/useQuestionScroll';
+import '@/styles/quiz-animations.css';
 
 interface QuizQuestionProps {
   question: QuizQuestionType;
@@ -33,8 +31,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     showQuestionImage = false,
     isStrategicQuestion = false
   } = props;
-
-  console.log(`QuizQuestion - autoAdvance: ${autoAdvance}, isStrategic: ${isStrategicQuestion}, requiredSelections: ${question?.multiSelect || 3}, currentAnswers: ${currentAnswers?.length || 0}`);
 
   // Fallback defensivo para evitar tela branca
   if (!question || !question.title || !Array.isArray(question.options)) {
@@ -73,9 +69,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       }
     }
     
-    console.log(`Opção selecionada: ${optionId}, novas seleções: [${newSelectedOptions.join(', ')}]`);
-    
-    // Atualizar as respostas imediatamente - sem delay
+    // Atualizar as respostas imediatamente
     onAnswer({
       questionId: question.id,
       selectedOptions: newSelectedOptions
@@ -155,8 +149,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
           />
         ))}
       </div>
-      
-      {/* Removendo o botão extra - mantemos apenas a navegação via QuizNavigation */}
     </div>
   );
 };

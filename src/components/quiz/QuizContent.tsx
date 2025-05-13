@@ -71,21 +71,11 @@ export const QuizContent: React.FC<QuizContentProps> = ({
             showQuestionImage={true}
             onPreviousClick={handlePrevious}
             isStrategicQuestion={false}
+            autoAdvance={true}
           />
         )}
-
-        {/* Usar apenas um componente de navegação unificado */}
-        {!showingStrategicQuestions && (
-          <QuizNavigation
-            canProceed={canProceed}
-            onNext={handleNextClick}
-            onPrevious={currentQuestionIndex > 0 ? handlePrevious : undefined}
-            currentQuestionType="normal"
-            selectedOptionsCount={currentAnswers?.length || 0}
-            isLastQuestion={currentQuestionIndex === totalQuestions - 1}
-            requiredOptionsCount={requiredSelections}
-          />
-        )}
+        
+        {/* A navegação agora é exibida apenas no QuizPage para evitar duplicação */}
       </div>
     </>
   );

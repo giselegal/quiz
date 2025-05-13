@@ -130,6 +130,8 @@ const QuizPage: React.FC = () => {
         const nextIndex = currentStrategicQuestionIndex + 1;
         if (nextIndex < strategicQuestions.length) {
           const nextQuestion = strategicQuestions[nextIndex];
+          
+          // Pré-carregar a próxima questão estratégica imediatamente com alta prioridade
           if (nextQuestion.imageUrl) {
             preloadImages([{ 
               src: nextQuestion.imageUrl, 
@@ -137,11 +139,27 @@ const QuizPage: React.FC = () => {
               category: 'strategic',
               tags: [],
               alt: `Question ${nextIndex}`,
-              preloadPriority: 3
-            }], { quality: 95 });
+              preloadPriority: 5 // Prioridade aumentada
+            }], { quality: 90 }); // Qualidade ligeiramente reduzida para carregamento mais rápido
           }
           
-          // Also preload the next-next question with lower priority if available
+          // Pré-carregar também as imagens das opções da próxima questão
+          const optionImages = nextQuestion.options
+            .map(option => option.imageUrl)
+            .filter(Boolean) as string[];
+            
+          if (optionImages.length > 0) {
+            preloadImages(optionImages.map((src, i) => ({ 
+              src, 
+              id: `strategic-${nextIndex}-option-${i}`,
+              category: 'strategic',
+              tags: ['option'],
+              alt: `Option ${i}`,
+              preloadPriority: 4
+            })), { quality: 85, batchSize: 3 });
+          }
+          
+          // Também pré-carregar a questão depois da próxima com prioridade mais baixa
           if (nextIndex + 1 < strategicQuestions.length) {
             const nextNextQuestion = strategicQuestions[nextIndex + 1];
             if (nextNextQuestion.imageUrl) {
@@ -152,7 +170,7 @@ const QuizPage: React.FC = () => {
                 tags: [],
                 alt: `Question ${nextIndex+1}`,
                 preloadPriority: 2
-              }], { quality: 95 });
+              }], { quality: 85 });
             }
           }
         }
