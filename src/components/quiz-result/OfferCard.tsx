@@ -1,14 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { StyleResult } from '@/types/quiz';
 import BenefitList from './sales/BenefitList';
 import Testimonials from './sales/Testimonials';
-import Guarantee from './sales/Guarantee';
 import Logo from '../ui/logo';
 import { OfferContent } from '@/types/resultPageConfig';
+
+// Lazy load guarantee for better performance
+const GuaranteeSection = lazy(() => import('@/components/result/GuaranteeSection'));
 
 interface OfferCardProps {
   primaryStyle: StyleResult;
@@ -126,7 +128,11 @@ const OfferCard: React.FC<OfferCardProps> = ({ primaryStyle, config }) => {
       </div>
       
       <Testimonials items={config?.testimonials} />
-      <Guarantee text={config?.guaranteeText} />
+      
+      {/* Seção de Garantia Animada */}
+      <Suspense fallback={<div className="h-40 bg-[#fdfaf8] rounded-lg animate-pulse"></div>}>
+        <GuaranteeSection />
+      </Suspense>
       
       <div className="text-center mt-8 relative z-10">
         <Button 

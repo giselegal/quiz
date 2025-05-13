@@ -53,53 +53,72 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     scrollToQuestion(question.id);
   }, [question.id, scrollToQuestion]);
 
-  // Efeito para o botão de questões estratégicas
+  // Efeito para o botão de questões estratégicas e atualização do estado do botão
   useEffect(() => {
     if (isStrategicQuestion) {
-      const isActive = currentAnswers.length > 0;
-      if (isActive !== isButtonActive) { // Apenas atualiza se o estado mudar
-        setIsButtonActive(isActive);
-      }
+      // Para questões estratégicas, o botão fica ativo quando qualquer opção é selecionada
+      setIsButtonActive(currentAnswers.length > 0);
+    } else {
+      // Para questões normais, o botão fica ativo quando o número exato de seleções é atingido
+      setIsButtonActive(currentAnswers.length === question.multiSelect);
     }
+<<<<<<< Updated upstream
   }, [currentAnswers, isStrategicQuestion, isButtonActive]); // Adicionado isButtonActive às dependências
+=======
+  }, [currentAnswers, isStrategicQuestion, question.multiSelect]);
+
+  // Adicionar lógica para ativar visualmente o botão "Próximo" antes da transição automática
+  useEffect(() => {
+    // Avançar automaticamente quando o número necessário de opções for selecionado
+    if (!isStrategicQuestion && autoAdvance && currentAnswers.length === question.multiSelect) {
+      const timer = setTimeout(() => {
+        if (onNextClick) onNextClick();
+      }, 1000); // 1 segundo para o efeito visual
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentAnswers, question.multiSelect, autoAdvance, isStrategicQuestion, onNextClick]);
+>>>>>>> Stashed changes
   
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];
     
     if (currentAnswers.includes(optionId)) {
+      // Se já está selecionado, remova da seleção
       newSelectedOptions = currentAnswers.filter(id => id !== optionId);
     } else {
       if (isStrategicQuestion) {
+        // Para questões estratégicas, apenas uma opção pode ser selecionada
         newSelectedOptions = [optionId];
       } else if (question.multiSelect && currentAnswers.length >= question.multiSelect) {
+        // Se já atingiu o máximo de seleções, substitua a primeira seleção pela nova
         newSelectedOptions = [...currentAnswers.slice(1), optionId];
       } else {
+        // Adicione a nova seleção às existentes
         newSelectedOptions = [...currentAnswers, optionId];
       }
     }
     
-    onAnswer({ // Movido onAnswer para fora do bloco condicional de auto-avanço
+    // Atualizar as respostas
+    onAnswer({
       questionId: question.id,
       selectedOptions: newSelectedOptions
     });
 
+    // Atualizar o estado do botão conforme necessário
+    setIsButtonActive(newSelectedOptions.length === question.multiSelect);
+    
+    // Verificar se deve avançar automaticamente (em questões não-estratégicas)
     const shouldAutoAdvance = 
       !isStrategicQuestion &&
       autoAdvance && 
       newSelectedOptions.length === question.multiSelect;
     
-    // Ativar o efeito visual do botão antes da transição automática
-    if (newSelectedOptions.length === question.multiSelect) {
-      setIsButtonActive(true);
-    } else {
-      setIsButtonActive(false);
-    }
-    
     if (shouldAutoAdvance && onNextClick) {
-      // Atraso pequeno para mostrar o efeito visual do botão ativo antes da transição
+      // Atraso para mostrar o efeito visual do botão ativo antes da transição
       setTimeout(() => {
         onNextClick();
-      }, 300);
+      }, 800);
     }
   };
   
@@ -203,7 +222,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
         {/* Mostrar a mensagem de instrução apenas para questões não-estratégicas com autoAdvance=false */}
         {!autoAdvance && !isStrategicQuestion && (
           <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 text-center font-medium">
-            Selecione {question.multiSelect} {question.multiSelect === 1 ? 'Opção' : 'Opções'} para avançar
+            Selecione {question.multiSelect} opções para avançar
           </p>
         )}
         

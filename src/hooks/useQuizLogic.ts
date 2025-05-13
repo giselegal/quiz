@@ -23,7 +23,7 @@ export const useQuizLogic = () => {
   const nextQuestion = quizQuestions[currentQuestionIndex + 1] || null;
   const nextNextQuestion = quizQuestions[currentQuestionIndex + 2] || null;
   const currentAnswers = answers[currentQuestion?.id] || [];
-  const canProceed = currentAnswers.length === (currentQuestion?.multiSelect || 0);
+  const canProceed = currentQuestion ? currentAnswers.length >= (currentQuestion.multiSelect || 0) : false;
   const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
   const totalQuestions = quizQuestions.length;
   const allQuestions = quizQuestions;

@@ -1,9 +1,11 @@
-export const componentsPath = 'src/components/lovable';
-export const assetsPath = 'public/lovable-uploads';
-export const outputPath = 'dist';
-export const buildCommand = 'npm run build';
-export const previewCommand = 'npm run preview';
-export const development = {
-  port: 8080,
-  startCommand: 'npm run dev'
+module.exports = {
+  componentsPath: 'src/components/lovable',
+  assetsPath: 'public/lovable-uploads',
+  outputPath: 'dist',
+  buildCommand: 'npm run build',
+  previewCommand: 'npm run preview',
+  development: {
+    port: 8080,
+    startCommand: 'npm run dev'
+  }
 };

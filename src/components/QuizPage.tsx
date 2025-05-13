@@ -309,6 +309,7 @@ const QuizPage: React.FC = () => {
                   onNext={handleNextClick}
                   onPrevious={handlePrevious}
                   canProceed={canProceed}
+                  requiredOptionsCount={currentQuestion?.multiSelect || 3}
                 />
               </motion.div>
             )}

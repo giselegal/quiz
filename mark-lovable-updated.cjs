@@ -12,19 +12,20 @@ const componentsToMark = [
 // Verificar se os arquivos existem e marcá-los
 componentsToMark.forEach(componentPath => {
   if (fs.existsSync(componentPath)) {
-    console.log();
+    console.log(`📝 Verificando o componente: ${componentPath}`);
     
     const content = fs.readFileSync(componentPath, 'utf8');
     
     // Verificar se o componente já está marcado
-      const newContent = ;
+    if (!content.includes('// @lovable')) {
+      const newContent = `// @lovable\n${content}`;
       fs.writeFileSync(componentPath, newContent);
-      console.log();
+      console.log(`✅ Componente ${path.basename(componentPath)} marcado com sucesso!`);
     } else {
-      console.log();
+      console.log(`ℹ️ Componente ${path.basename(componentPath)} já está marcado.`);
     }
   } else {
-    console.log();
+    console.log(`⚠️ Componente não encontrado: ${componentPath}`);
   }
 });
 

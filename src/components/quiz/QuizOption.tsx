@@ -59,25 +59,30 @@ const QuizOption: React.FC<QuizOptionProps> = ({
     }
   }, [isSelected, type, isStrategicOption]);
   
-  // Manipulador de clique customizado com debounce
+  // Manipulador de clique para seleção de opção
   const handleClick = () => {
     if (!isDisabled) {
       // Aplicar mudança visual imediatamente para feedback instantâneo
       if (optionRef.current) {
+        // Alterando a aparência com base no estado atual (invertido porque o clique vai mudar o estado)
         if (type === 'text') {
+          // Se estiver selecionado, ao clicar vai desmarcar, então mostra borda padrão
+          // Se não estiver selecionado, vai marcar, então destaca com borda dourada
           optionRef.current.style.borderColor = isSelected ? '#B89B7A' : '#b29670';
         }
-        // Aplicar sombra correspondente ao estado
+        
+        // Aplicar sombra correspondente ao novo estado (após o clique)
         optionRef.current.style.boxShadow = isSelected 
-          ? '0 2px 4px rgba(0, 0, 0, 0.05)' 
+          ? '0 2px 4px rgba(0, 0, 0, 0.05)' // Vai desmarcar, sombra leve
           : (isStrategicOption 
-              ? (type === 'text' ? '0 6px 12px rgba(178, 150, 112, 0.35)' : '0 15px 30px rgba(0, 0, 0, 0.25)') 
-              : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)'));
+              ? (type === 'text' ? '0 6px 12px rgba(178, 150, 112, 0.35)' : '0 15px 30px rgba(0, 0, 0, 0.25)') // Sombra mais forte para questões estratégicas
+              : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)')); // Sombra padrão
       }
-      // Chamar onSelect com um pequeno atraso para evitar flash
+      
+      // Chamar onSelect com pequeno atraso para garantir que a animação visual seja vista
       setTimeout(() => {
         onSelect(option.id);
-      }, 10);
+      }, 50);
     }
   };
   

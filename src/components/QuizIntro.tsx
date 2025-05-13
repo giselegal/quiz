@@ -1,12 +1,11 @@
 'use client';
 
-import * as React from 'react';
+import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { preloadCriticalImages } from '@/utils/imageManager';
 import AutoFixedImages from './ui/AutoFixedImages';
-import CrispIntroImage from './ui/CrispIntroImage'; // Importar o novo componente
 import { 
   // getTinyBase64ImageUrl, // Parece não ser usado diretamente no JSX, mas loadTinyImageAsBase64 é.
   loadTinyImageAsBase64, 
@@ -28,30 +27,30 @@ const buildOptimizedIntroImageUrl = (baseUrl: string, imageId: string, format: s
 };
 
 const buildTinyIntroImageUrl = (baseUrl: string, imageId: string, format: string, width: number) => {
-  return `${baseUrl}f_${format},q_50,w_${width},c_limit,dpr_1.0/${imageId}.${format}`;
+  return `${baseUrl}f_${format},q_60,w_${width},c_limit,dpr_1.0/${imageId}.${format}`;
 };
 
 const STATIC_LOGO_IMAGE_URLS = {
-  webp: `${LOGO_BASE_URL}f_webp,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.webp`,
-  png: `${LOGO_BASE_URL}f_png,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.png`,
-  avif: `${LOGO_BASE_URL}f_avif,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100,b_transparent/${LOGO_IMAGE_ID}.avif`
+  webp: `${LOGO_BASE_URL}f_webp,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100/${LOGO_IMAGE_ID}.webp`,
+  png: `${LOGO_BASE_URL}f_png,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100/${LOGO_IMAGE_ID}.png`,
+  avif: `${LOGO_BASE_URL}f_avif,q_auto,w_140,h_60,c_fit,dpr_auto,e_sharpen:100/${LOGO_IMAGE_ID}.avif`
 };
 
 const STATIC_INTRO_IMAGE_URLS = {
   avif: {
     tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 200),
-    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 345, 80),
-    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 400, 85),
-    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 450, 90)
+    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 345, 75),
+    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 400, 80),
+    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'avif', 450, 85)
   },
   webp: {
     tiny: buildTinyIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 200),
-    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 345, 75),
-    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 400, 80),
-    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 450, 85)
+    small: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 345, 70),
+    medium: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 400, 75),
+    large: buildOptimizedIntroImageUrl(INTRO_IMAGE_BASE_URL, INTRO_IMAGE_ID, 'webp', 450, 80)
   },
-  placeholder: `${INTRO_IMAGE_BASE_URL}f_webp,q_1,w_20,c_limit,e_blur:200/${INTRO_IMAGE_ID}.webp`,
-  png: `${INTRO_IMAGE_BASE_URL}f_png,q_70,w_345,c_limit,fl_progressive/${INTRO_IMAGE_ID}.png`
+  placeholder: `${INTRO_IMAGE_BASE_URL}f_webp,q_10,w_20,c_limit,e_blur:80/${INTRO_IMAGE_ID}.webp`,
+  png: `${INTRO_IMAGE_BASE_URL}f_png,q_75,w_345,c_limit,fl_progressive/${INTRO_IMAGE_ID}.png`
 };
 
 // --- Fim das otimizações de escopo do módulo ---
@@ -85,42 +84,61 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
   const mainImageRef = useRef<HTMLDivElement>(null);
   const imageLoaded = useRef<boolean>(false);
   
-  // Combinei os hooks useEffect para evitar loops infinitos e melhorar a performance
+  // Efeito para capturar a largura da imagem principal
   useEffect(() => {
-    const updateWidth = () => {
-      if (mainImageRef.current) {
-        setMainImageWidth(mainImageRef.current.offsetWidth);
-      }
-    };
+    if (mainImageRef.current) {
+      const updateWidth = () => {
+        if (mainImageRef.current) {
+          setMainImageWidth(mainImageRef.current.offsetWidth);
+        }
+      };
+      
+      // Atualiza na montagem
+      updateWidth();
+      
+      // Atualiza no resize
+      window.addEventListener('resize', updateWidth);
+      
+      return () => {
+        window.removeEventListener('resize', updateWidth);
+      };
+    }
+  }, []);
 
-    // Atualiza na montagem e no resize
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-
+  // Efeito único e simplificado para carregamento posterior de recursos
+  useEffect(() => {
     // Carrega recursos adicionais após o componente estar visível
-    const idleCallback = typeof requestIdleCallback === 'function'
-      ? requestIdleCallback
-      : (cb) => setTimeout(cb, 2000);
-
-    const idleTimer = idleCallback(() => {
-      preloadCriticalImages('quiz');
-    });
-
-    // Preload de imagens críticas
+    if (typeof requestIdleCallback === 'function') {
+      // Usa tempos ociosos do browser para carregar recursos não-críticos
+      requestIdleCallback(() => {
+        preloadCriticalImages('quiz');
+      }, { timeout: 2000 });
+    } else {
+      // Fallback para browsers que não suportam requestIdleCallback
+      const idleTimer = setTimeout(() => {
+        preloadCriticalImages('quiz');
+      }, 2000); // Tempo suficiente para garantir que o LCP ocorreu
+      
+      return () => clearTimeout(idleTimer);
+    }
+  }, []);
+  
+  // Pré-carregamento para LCP com estratégia otimizada - MELHORADO
+  useEffect(() => {
+    // Preconnect para o domínio Cloudinary para acelerar conexões futuras
     const preconnectLink = document.createElement('link');
     preconnectLink.rel = 'preconnect';
     preconnectLink.href = 'https://res.cloudinary.com';
     preconnectLink.crossOrigin = 'anonymous';
     document.head.appendChild(preconnectLink);
 
-    const placeholderPreload = document.createElement('link');
-    placeholderPreload.rel = 'preload';
-    placeholderPreload.as = 'image';
-    placeholderPreload.href = STATIC_INTRO_IMAGE_URLS.placeholder;
-    placeholderPreload.type = 'image/webp';
-    placeholderPreload.setAttribute('fetchpriority', 'high');
-    document.head.appendChild(placeholderPreload);
+    // DNS Prefetch para melhorar resolução de nome
+    const dnsPrefetchLink = document.createElement('link');
+    dnsPrefetchLink.rel = 'dns-prefetch';
+    dnsPrefetchLink.href = 'https://res.cloudinary.com';
+    document.head.appendChild(dnsPrefetchLink);
 
+    // Preload APENAS a imagem principal - LCP crítico
     const lcpCandidatePreload = document.createElement('link');
     lcpCandidatePreload.rel = 'preload';
     lcpCandidatePreload.as = 'image';
@@ -128,33 +146,85 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     lcpCandidatePreload.type = 'image/avif';
     lcpCandidatePreload.setAttribute('fetchpriority', 'high');
     document.head.appendChild(lcpCandidatePreload);
-
-    // Carrega a versão tiny da imagem como base64
-    const loadTinyBase64 = async () => {
-      if (!tinyBase64) {
-        try {
-          const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder);
-          setTinyBase64(base64Data);
-        } catch (error) {
-          console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
-        }
-      }
-    };
-    loadTinyBase64();
-
+    
+    // Limpeza ao desmontar
     return () => {
-      window.removeEventListener('resize', updateWidth);
-      if (typeof cancelIdleCallback === 'function') {
-        cancelIdleCallback(idleTimer as number);
-      } else {
-        clearTimeout(idleTimer as NodeJS.Timeout);
-      }
-      [preconnectLink, placeholderPreload, lcpCandidatePreload].forEach(link => {
-        if (link.parentNode) link.parentNode.removeChild(link);
-      });
+      if (preconnectLink.parentNode) preconnectLink.parentNode.removeChild(preconnectLink);
+      if (dnsPrefetchLink.parentNode) dnsPrefetchLink.parentNode.removeChild(dnsPrefetchLink);
+      if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
     };
-  }, [tinyBase64]);
+  }, []);
 
+
+
+// Novo arquivo otimizado para o useEffect de preload
+// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente de preload
+
+  // Pré-carregamento para LCP com estratégia otimizada - MELHORADO
+  useEffect(() => {
+    // Preconnect para o domínio Cloudinary para acelerar conexões futuras
+    const preconnectLink = document.createElement('link');
+    preconnectLink.rel = 'preconnect';
+    preconnectLink.href = 'https://res.cloudinary.com';
+    preconnectLink.crossOrigin = 'anonymous';
+    document.head.appendChild(preconnectLink);
+
+    // DNS Prefetch para melhorar resolução de nome
+    const dnsPrefetchLink = document.createElement('link');
+    dnsPrefetchLink.rel = 'dns-prefetch';
+    dnsPrefetchLink.href = 'https://res.cloudinary.com';
+    document.head.appendChild(dnsPrefetchLink);
+
+    // Preload APENAS a imagem principal - LCP crítico
+    const lcpCandidatePreload = document.createElement('link');
+    lcpCandidatePreload.rel = 'preload';
+    lcpCandidatePreload.as = 'image';
+    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.large;
+    lcpCandidatePreload.type = 'image/avif';
+    lcpCandidatePreload.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(lcpCandidatePreload);
+    
+    // Limpeza ao desmontar
+    return () => {
+      if (preconnectLink.parentNode) preconnectLink.parentNode.removeChild(preconnectLink);
+      if (dnsPrefetchLink.parentNode) dnsPrefetchLink.parentNode.removeChild(dnsPrefetchLink);
+      if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
+    };
+  }, []); // Dependências vazias = executa uma vez na montagem
+// Novo arquivo otimizado para o useEffect de carregamento base64
+// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente
+
+  // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea - OTIMIZADO
+  useEffect(() => {
+    // Carrega a versão mais leve possível da imagem como base64 para exibição instantânea
+    const loadTinyBase64 = async () => {
+      try {
+        // Evita recarregamentos e usa cache quando possível
+        if (!tinyBase64 && !imageLoaded.current) {
+          // Verifica se já existe no sessionStorage para evitar refetch
+          const cachedImage = sessionStorage.getItem('quiz_intro_tiny_base64');
+          if (cachedImage) {
+            setTinyBase64(cachedImage);
+          } else {
+            const base64Data = await loadTinyImageAsBase64(STATIC_INTRO_IMAGE_URLS.placeholder);
+            if (base64Data) {
+              setTinyBase64(base64Data);
+              // Cache para evitar refetches na mesma sessão
+              try {
+                sessionStorage.setItem('quiz_intro_tiny_base64', base64Data);
+              } catch (e) {
+                // Ignora erros de storage (limite excedido, etc)
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[QuizIntro] Erro ao carregar imagem tiny:', error);
+      }
+    };
+    
+    loadTinyBase64();
+  }, []); // Dependências vazias para executar apenas na montagem
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nome.trim()) {
@@ -196,7 +266,8 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
                     maxWidth: '100%',
                     aspectRatio: '140/60',
                     width: '140px',
-                    height: '60px'
+                    height: '60px',
+                    background: 'none'
                   }}
                 />
               </picture>
@@ -238,31 +309,45 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
               backgroundPosition: 'center'
             }}
           >
-            <CrispIntroImage
-              srcSetAvif={`${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`}
-              srcSetWebp={`${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`}
-              srcPng={STATIC_INTRO_IMAGE_URLS.png}
-              sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
-              alt="Descubra seu estilo predominante"
-              width={345}
-              height={360}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              onLoad={() => { imageLoaded.current = true; }}
-              style={{
-                background: '#f8f6f2', 
-                display: 'block', 
-                margin: '0 auto',
-                objectFit: 'contain',
-                aspectRatio: '345/360',
-                backgroundImage: `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                imageRendering: 'auto',
-                contain: 'paint'
-              }}
-            />
+            <picture>
+              {/* Formatos modernos para browsers que suportam, com preload da versão tiny primeiro */}
+              <source 
+                srcSet={`${STATIC_INTRO_IMAGE_URLS.avif.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.avif.small} 345w, ${STATIC_INTRO_IMAGE_URLS.avif.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.avif.large} 450w`} 
+                type="image/avif" 
+                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
+              />
+              <source 
+                srcSet={`${STATIC_INTRO_IMAGE_URLS.webp.tiny} 200w, ${STATIC_INTRO_IMAGE_URLS.webp.small} 345w, ${STATIC_INTRO_IMAGE_URLS.webp.medium} 400w, ${STATIC_INTRO_IMAGE_URLS.webp.large} 450w`} 
+                type="image/webp" 
+                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
+              />
+              {/* Fallback para navegadores sem suporte a formatos modernos */}
+              {/* O src agora usa uma URL otimizada do mesmo introImageId */}
+              <img
+                src={STATIC_INTRO_IMAGE_URLS.png} // Alterado para usar a URL PNG otimizada do introImageId correto
+                alt="Descubra seu estilo predominante"
+                className="w-full h-auto object-contain quiz-intro-image"
+                width={345}
+                height={360}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                onLoad={() => { imageLoaded.current = true; }}
+                style={{
+                  background: '#f8f6f2', 
+                  display: 'block', 
+                  margin: '0 auto',
+                  objectFit: 'contain',
+                  aspectRatio: '345/360',
+                  backgroundImage: `url('${STATIC_INTRO_IMAGE_URLS.placeholder}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  imageRendering: 'auto',
+                  contain: 'paint'
+                }}
+                sizes="(max-width: 640px) 345px, (max-width: 768px) 400px, 450px"
+              />
+            </picture>
           </div>
 
           {/* Texto descritivo com espaçamento consistente */}

@@ -8,6 +8,7 @@ interface QuizNavigationProps {
   currentQuestionType: 'normal' | 'strategic';
   selectedOptionsCount: number;
   isLastQuestion?: boolean;
+  requiredOptionsCount?: number;
 }
 
 const QuizNavigation: React.FC<QuizNavigationProps> = ({
@@ -16,7 +17,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   onPrevious,
   currentQuestionType,
   selectedOptionsCount,
-  isLastQuestion = false
+  isLastQuestion = false,
+  requiredOptionsCount = 3
 }) => {
   // Estado para controlar a animação de ativação do botão
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
@@ -29,34 +31,28 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       setAutoAdvanceTimer(null);
     }
 
-    if (canProceed) {
+    // Só configurar auto-avanço para questões normais, não para estratégicas
+    if (canProceed && currentQuestionType === 'normal' && selectedOptionsCount === requiredOptionsCount) {
+      // Mostrar a ativação visual do botão primeiro
       setShowActivationEffect(true);
+      
+      // Timer visual - mantém o efeito visual por um tempo antes da transição
       const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
       }, 2000);
-
-      let shouldAutoAdvance = false;
-      if (currentQuestionType === 'normal' && selectedOptionsCount === 3) {
-        shouldAutoAdvance = true;
-      } else if (currentQuestionType === 'strategic' && selectedOptionsCount >= 1) {
-        shouldAutoAdvance = true;
-      }
-
-      if (shouldAutoAdvance) {
-        const newTimer = setTimeout(() => {
-          onNext();
-        }, 1500);
-        setAutoAdvanceTimer(newTimer);
-      }
-
+      
+      // Timer para auto-avanço - definir um tempo que dê para ver a seleção
+      const newTimer = setTimeout(() => {
+        onNext();
+      }, 1500);
+      setAutoAdvanceTimer(newTimer);
+      
       return () => {
         clearTimeout(visualTimer);
-        if (autoAdvanceTimer) {
-          clearTimeout(autoAdvanceTimer);
-        }
+        clearTimeout(newTimer);
       };
     }
-  }, [canProceed, currentQuestionType, selectedOptionsCount, onNext]);
+  }, [canProceed, currentQuestionType, onNext, selectedOptionsCount, requiredOptionsCount]);
 
   const getHelperText = () => {
     if (!canProceed) {

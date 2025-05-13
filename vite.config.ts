@@ -61,6 +61,32 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
         pure_funcs: process.env.NODE_ENV === 'production' ? ['console.log', 'console.info', 'console.debug'] : []
       }
+<<<<<<< Updated upstream
+=======
+    };
+  };
+
+  return {
+    root: '.',
+    base: '/', // Garantir que o site seja servido na raiz do domínio
+    
+    server: {
+      host: "::",
+      port: 8080,
+      // Configurações CORS e mime-types para desenvolvimento
+      headers: {
+        'X-Content-Type-Options': 'nosniff',
+        'Access-Control-Allow-Origin': '*',
+      },
+      fs: {
+        allow: ['../']
+      },
+      allowedHosts: [
+        "a10d1b34-b5d4-426b-8c97-45f125d03ec1.lovableproject.com",
+        "giselegalvao.com.br",
+        "www.giselegalvao.com.br"
+      ]
+>>>>>>> Stashed changes
     },
     rollupOptions: {
       output: {
