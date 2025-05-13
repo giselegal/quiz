@@ -316,8 +316,9 @@ const QuizPage: React.FC = () => {
       currentQuestionType={currentQuestionTypeForNav}
       selectedOptionsCount={finalSelectedCountForNav}
       isLastQuestion={
-        showingStrategicQuestions &&
-        currentStrategicQuestionIndex === strategicQuestions.length - 1
+        showingStrategicQuestions
+          ? currentStrategicQuestionIndex === strategicQuestions.length - 1
+          : isLastQuestion // Usar a prop isLastQuestion do useQuizLogic para questões normais
       }
       requiredOptionsCount={calculatedRequiredOptions}
     />
