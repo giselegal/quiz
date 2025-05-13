@@ -33,6 +33,7 @@
   border-color: #b29670 !important;
   transform: scale(1.01);
   box-shadow: 0 6px 12px rgba(178, 150, 112, 0.2);
+  transition: all 0.2s ease-in-out;
 }
 
 /* Transição suave entre questões */
@@ -89,4 +90,15 @@
     animation: none;
     border-color: #b29670 !important;
   }
+}
+
+/* Efeito de brilho para indicação visual de seleção */
+@keyframes glowEffect {
+  0% { box-shadow: 0 0 0 rgba(178, 150, 112, 0); }
+  50% { box-shadow: 0 0 20px rgba(178, 150, 112, 0.4); }
+  100% { box-shadow: 0 0 0 rgba(178, 150, 112, 0); }
+}
+
+.option-selected.glow-effect {
+  animation: glowEffect 1.5s ease-in-out;
 }

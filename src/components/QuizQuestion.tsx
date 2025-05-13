@@ -45,10 +45,37 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
   const hasImageOptions = question.type !== 'text';
   const [imageError, setImageError] = useState(false);
   const { scrollToQuestion } = useQuestionScroll();
+  const autoAdvanceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     scrollToQuestion(question.id);
   }, [question.id, scrollToQuestion]);
+
+  // Efeito para auto-avanço ao selecionar o número necessário de opções
+  useEffect(() => {
+    // Limpar timer existente
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+
+    // Verificar se podemos auto-avançar
+    const requiredSelections = isStrategicQuestion ? 1 : (question?.multiSelect || 3);
+    if (autoAdvance && onNextClick && currentAnswers.length === requiredSelections) {
+      // Configurar timer para auto-avanço após 800ms
+      autoAdvanceTimerRef.current = setTimeout(() => {
+        onNextClick();
+      }, 800);
+    }
+
+    // Limpeza ao desmontar
+    return () => {
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+        autoAdvanceTimerRef.current = null;
+      }
+    };
+  }, [autoAdvance, currentAnswers, onNextClick, question?.multiSelect, isStrategicQuestion]);
 
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];

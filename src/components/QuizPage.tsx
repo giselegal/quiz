@@ -320,7 +320,9 @@ const QuizPage: React.FC = () => {
                   handlePrevious={handlePrevious}
                 />
                 
+                {/* Botões de navegação centralizados apenas aqui para evitar duplicação */}
                 <QuizNavigation
+                  key={`nav-${currentQuestionIndex}-${currentStrategicQuestionIndex}`}
                   currentQuestionType={currentQuestion?.id?.startsWith('strategic') ? 'strategic' : 'normal'}
                   selectedOptionsCount={currentAnswers?.length || 0}
                   isLastQuestion={isLastQuestion}

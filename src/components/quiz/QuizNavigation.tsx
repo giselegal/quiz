@@ -26,8 +26,6 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  console.log(`QuizNavigation - CanProceed: ${canProceed}, Type: ${currentQuestionType}, SelectedCount: ${selectedOptionsCount}, Required: ${requiredOptionsCount}`);
-
   // Verificar quando o botão se torna disponível para mostrar o efeito e auto-avançar
   React.useEffect(() => {
     // Limpar qualquer timer existente para evitar conflitos
@@ -38,34 +36,26 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
     
     // Configurar auto-avanço para todas as questões quando atingir o número de seleções necessárias
     if (canProceed && selectedOptionsCount === requiredOptionsCount) {
-      console.log("Auto-avanço ativado - configurando timer");
+      console.log(`Auto-avanço preparado: Tipo=${currentQuestionType}, Selected=${selectedOptionsCount}, Required=${requiredOptionsCount}`);
       
       // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
       // Timer para auto-avanço - reduzido para 800ms para ser mais rápido, mas ainda perceptível
       timerRef.current = setTimeout(() => {
-        console.log("Executando auto-avanço");
+        console.log("Executando auto-avanço agora");
         onNext();
         setShowActivationEffect(false); // Resetar o efeito visual após o avanço
       }, 800);
-      
-      return () => {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
-        }
-      };
     } else {
       // Resetar o efeito visual se as condições não forem satisfeitas
       setShowActivationEffect(false);
     }
-  }, [canProceed, onNext, selectedOptionsCount, requiredOptionsCount]);
+  }, [canProceed, onNext, selectedOptionsCount, requiredOptionsCount, currentQuestionType]);
 
   // Limpar timers quando o componente for desmontado
   React.useEffect(() => {
     return () => {
-      console.log("QuizNavigation desmontando - limpando timers");
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -84,7 +74,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   };
 
   return (
-    <div className="mt-6 w-full px-4 md:px-0">
+    <div className="mt-6 w-full px-4 md:px-0 mb-8">
       <div className="flex flex-col items-center w-full">
         {!canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
@@ -123,5 +113,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
     </div>
   );
 };
+
+export default QuizNavigation;
 
 export default QuizNavigation;
