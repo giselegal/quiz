@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { QuizQuestion as QuizQuestionType, UserResponse } from '../types/quiz';
@@ -17,7 +18,7 @@ interface QuizQuestionProps {
   onNextClick?: () => void;
   onPreviousClick?: () => void;
   showQuestionImage?: boolean;
-  isStrategicQuestion?: boolean; // Nova prop
+  isStrategicQuestion?: boolean;
 }
 
 const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
@@ -43,17 +44,16 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
   }
 
   const isMobile = useIsMobile();
-  // const isStrategicQuestion = question.id.startsWith('strategic'); // Removido para usar a prop
   const hasImageOptions = question.type !== 'text';
   const [imageError, setImageError] = useState(false);
   const { scrollToQuestion } = useQuestionScroll();
-  const [isButtonActive, setIsButtonActive] = useState(false); // Novo estado para efeito visual
-
+  const [isButtonActive, setIsButtonActive] = useState(false); // Estado para efeito visual do botão
+  
   useEffect(() => {
     scrollToQuestion(question.id);
   }, [question.id, scrollToQuestion]);
 
-  // Efeito para o botão de questões estratégicas e atualização do estado do botão
+  // Efeito para atualizar o estado do botão baseado nas seleções
   useEffect(() => {
     if (isStrategicQuestion) {
       // Para questões estratégicas, o botão fica ativo quando qualquer opção é selecionada
@@ -64,18 +64,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     }
   }, [currentAnswers, isStrategicQuestion, question.multiSelect]);
 
-  // Adicionar lógica para ativar visualmente o botão "Próximo" antes da transição automática
-  useEffect(() => {
-    // Avançar automaticamente quando o número necessário de opções for selecionado
-    if (!isStrategicQuestion && autoAdvance && currentAnswers.length === question.multiSelect) {
-      const timer = setTimeout(() => {
-        if (onNextClick) onNextClick();
-      }, 1000); // 1 segundo para o efeito visual
-
-      return () => clearTimeout(timer);
-    }
-  }, [currentAnswers, question.multiSelect, autoAdvance, isStrategicQuestion, onNextClick]);
-  
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];
     
@@ -100,22 +88,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       questionId: question.id,
       selectedOptions: newSelectedOptions
     });
-
-    // Atualizar o estado do botão conforme necessário
-    setIsButtonActive(newSelectedOptions.length === question.multiSelect);
-    
-    // Verificar se deve avançar automaticamente (em questões não-estratégicas)
-    const shouldAutoAdvance = 
-      !isStrategicQuestion &&
-      autoAdvance && 
-      newSelectedOptions.length === question.multiSelect;
-    
-    if (shouldAutoAdvance && onNextClick) {
-      // Atraso para mostrar o efeito visual do botão ativo antes da transição
-      setTimeout(() => {
-        onNextClick();
-      }, 800);
-    }
   };
   
   const getGridColumns = () => {
@@ -160,15 +132,13 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
             </div>
           )}
           
-          {/* Mensagem de instrução - mostrar apenas se não for questão não-estratégica com autoAdvance=false */}
-          {!((!autoAdvance && !isStrategicQuestion)) && (
-            <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 mb-4 text-center font-medium">
-              {isStrategicQuestion 
-                ? "Selecione 1 opção para avançar"
-                : `Selecione ${question.multiSelect} opções para avançar`
-              }
-            </p>
-          )}
+          {/* Mensagem de instrução */}
+          <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 mb-4 text-center font-medium">
+            {isStrategicQuestion 
+              ? "Selecione 1 opção para avançar"
+              : `Selecione ${question.multiSelect} opções para avançar`
+            }
+          </p>
         </>
       )}
       
@@ -189,7 +159,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
             isDisabled={!currentAnswers.includes(option.id) && 
               !isStrategicQuestion && 
               currentAnswers.length >= question.multiSelect}
-            isStrategicOption={isStrategicQuestion} // Passar para QuizOption
+            isStrategicOption={isStrategicQuestion}
           />
         ))}
       </div>
@@ -203,10 +173,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
             className={cn(
               "text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50",
               "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
-              isButtonActive && !(currentAnswers.length === 0) // Aplicar efeito apenas se ativo e não desabilitado
+              isButtonActive && !(currentAnswers.length === 0)
                 ? "bg-brand-primary hover:bg-brand-primary/90 transform hover:scale-105 focus:ring-brand-primary hover:shadow-lg" 
-                : "bg-brand-primary", // Estilo base quando não está no efeito "ativo" mas pode estar habilitado
-              currentAnswers.length === 0 && "bg-gray-300 hover:bg-gray-300" // Estilo para desabilitado
+                : "bg-brand-primary",
+              currentAnswers.length === 0 && "bg-gray-300 hover:bg-gray-300"
             )}
           >
             Continuar <ArrowRight className="ml-2 h-5 w-5" />
@@ -214,33 +184,24 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
         </div>
       )}
 
-      <div className="text-center mt-6">
-        {/* Mostrar a mensagem de instrução apenas para questões não-estratégicas com autoAdvance=false */}
-        {!autoAdvance && !isStrategicQuestion && (
-          <p className="text-xs sm:text-sm text-[#1A1818]/70 px-2 py-2 text-center font-medium">
-            Selecione {question.multiSelect} opções para avançar
-          </p>
-        )}
-        
-        {/* Botão "Próximo" para transição automática com efeito visual */}
-        {!isStrategicQuestion && autoAdvance && onNextClick && (
-          <div className="mt-2">
-            <Button 
-              onClick={onNextClick}
-              disabled={!isButtonActive}
-              className={cn(
-                "text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
-                isButtonActive
-                  ? "bg-brand-primary hover:bg-brand-primary/90 transform hover:scale-105 focus:ring-brand-primary hover:shadow-lg" 
-                  : "bg-gray-300 hover:bg-gray-300"
-              )}
-            >
-              Próximo <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        )}
-      </div>
+      {/* Botão Próximo para questões não-estratégicas */}
+      {!isStrategicQuestion && autoAdvance && onNextClick && (
+        <div className="text-center mt-6">
+          <Button 
+            onClick={onNextClick}
+            disabled={!isButtonActive}
+            className={cn(
+              "text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50",
+              "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
+              isButtonActive
+                ? "bg-brand-primary hover:bg-brand-primary/90 transform hover:scale-105 focus:ring-brand-primary hover:shadow-lg" 
+                : "bg-gray-300 hover:bg-gray-300"
+            )}
+          >
+            Próximo <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import type { Metric } from 'web-vitals';
 
@@ -10,7 +11,7 @@ export const usePerformanceMonitoring = () => {
     // Importar web-vitals apenas quando necessário
     const reportWebVitals = async () => {
       try {
-        const { onCLS, onLCP, onFCP, onTTFB } = await import('web-vitals');
+        const { onCLS, onLCP, onFCP, onTTFB, onFID } = await import('web-vitals');
         
         // Função para enviar métricas
         const sendMetric = ({ name, value, id }: Metric) => {
@@ -29,6 +30,7 @@ export const usePerformanceMonitoring = () => {
         onFID(sendMetric);
         onFCP(sendMetric);
         onTTFB(sendMetric);
+        onLCP(sendMetric);
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);
       }
@@ -47,7 +49,3 @@ export const usePerformanceMonitoring = () => {
 };
 
 export default usePerformanceMonitoring;
-function onFID(_sendMetric: ({ name, value, id }: Metric) => void) {
-  throw new Error('Function not implemented.');
-}
-

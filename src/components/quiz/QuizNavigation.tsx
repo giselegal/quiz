@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { Button } from '../ui/button';
 
@@ -36,15 +37,16 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       // Mostrar a ativação visual do botão primeiro
       setShowActivationEffect(true);
       
-      // Timer visual - mantém o efeito visual por um tempo antes da transição
+      // Timer visual - mantém o efeito visual por um tempo maior antes da transição (2.5s em vez de 1.5s)
       const visualTimer = setTimeout(() => {
         setShowActivationEffect(false);
-      }, 2000);
+      }, 2500);
       
-      // Timer para auto-avanço - definir um tempo que dê para ver a seleção
+      // Timer para auto-avanço - definir um tempo maior para dar para ver o botão ativado
       const newTimer = setTimeout(() => {
         onNext();
-      }, 1500);
+      }, 2000); // Aumentado de 1500ms para 2000ms
+      
       setAutoAdvanceTimer(newTimer);
       
       return () => {
@@ -82,40 +84,24 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             </Button>
           )}
 
-          {/* O botão "Próximo" só será renderizado se não for uma questão estratégica OU se for estratégica e puder prosseguir */}
-          {/* Para questões estratégicas, o botão "Continuar" é renderizado dentro de QuizQuestion.tsx */}
-          {currentQuestionType === 'strategic' ? (
-            <Button
-              onClick={onNext}
-              disabled={!canProceed}
-              className={`
-                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50
-                ${!canProceed
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'}
-              `}
-            >
-              Continuar
-            </Button>
-          ) : (
-            <Button
-              onClick={onNext}
-              disabled={!canProceed}
-              className={`
-                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50
-                ${!canProceed 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
-                } 
-                ${showActivationEffect 
-                  ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação atualizado
-                  : ''
-                }
-              `}
-            >
-              {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
-            </Button>
-          )}
+          {/* O botão "Próximo" será sempre renderizado */}
+          <Button
+            onClick={onNext}
+            disabled={!canProceed}
+            className={`
+              py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50
+              ${!canProceed 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
+              } 
+              ${showActivationEffect 
+                ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação atualizado
+                : ''
+              }
+            `}
+          >
+            {isLastQuestion ? 'Ver Resultado' : currentQuestionType === 'strategic' ? 'Continuar' : 'Próximo'}
+          </Button>
         </div>
       </div>
     </div>

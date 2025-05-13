@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { AnimatedWrapper } from '../ui/animated-wrapper';
 import { preloadCriticalImages } from '@/utils/imageManager';
-import OptimizedImage from '../ui/OptimizedImage';
 
 interface StrategicQuestionsProps {
   currentQuestionIndex: number;
@@ -46,10 +46,10 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
         question={strategicQuestions[currentQuestionIndex]}
         onAnswer={onAnswer}
         currentAnswers={answers[strategicQuestions[currentQuestionIndex].id] || []}
-        autoAdvance={false}
+        autoAdvance={false} // Questões estratégicas NUNCA têm autoavanço
         onNextClick={onNextClick} 
         showQuestionImage={true}
-        isStrategicQuestion={true}
+        isStrategicQuestion={true} // Garantir que está explicitamente marcado como questão estratégica
       />
     </AnimatedWrapper>
   );

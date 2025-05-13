@@ -33,12 +33,6 @@ export const QuizContent: React.FC<QuizContentProps> = ({
   // Get user name from localStorage if not provided in props
   const userName = user?.userName || localStorage.getItem('userName') || '';
   
-  // Determine the required selections based on question type
-  const requiredSelections = showingStrategicQuestions ? 1 : (currentQuestion?.multiSelect || 3);
-  
-  // Check if we have enough selections to proceed
-  const canProceed = currentAnswers?.length === requiredSelections;
-
   return (
     <>
       <QuizHeader 
@@ -53,7 +47,9 @@ export const QuizContent: React.FC<QuizContentProps> = ({
         {showingStrategicQuestions ? (
           <StrategicQuestions
             currentQuestionIndex={currentStrategicQuestionIndex}
-            answers={{}}
+            answers={{
+              [currentQuestion?.id]: currentAnswers // Garantir que as respostas atuais são passadas
+            }}
             onAnswer={handleAnswerSubmit}
             onNextClick={handleNextClick}
           />
@@ -62,10 +58,11 @@ export const QuizContent: React.FC<QuizContentProps> = ({
             question={currentQuestion}
             onAnswer={handleAnswerSubmit}
             currentAnswers={currentAnswers || []}
+            autoAdvance={true} // Questões normais mantêm autoavanço
             onNextClick={handleNextClick}
             showQuestionImage={true}
             onPreviousClick={handlePrevious}
-            autoAdvance={true}
+            isStrategicQuestion={false} // Garantir que está explicitamente marcado como questão normal
           />
         )}
       </div>
