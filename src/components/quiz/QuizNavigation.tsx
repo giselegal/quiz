@@ -124,7 +124,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
               }
             `}
           >
-            {isLastQuestion ? 'Ver Resultado' : currentQuestionType === 'strategic' ? 'Continuar' : 'Próximo'}
+            {isLastQuestion ? 'Ver Resultado' : 'Continuar'}
           </Button>
         </div>
       </div>
