@@ -102,7 +102,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0 mb-8">
       <div className="flex flex-col items-center w-full">
-        {!canProceed && (
+        {!canProceed && currentQuestionType !== 'strategic' && ( // Modificado para não mostrar para strategic aqui, já que o botão pode estar visível
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
@@ -117,24 +117,30 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             </Button>
           )}
 
-          <Button
-            onClick={onNext}
-            disabled={!canProceed}
-            className={`
-              py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50
-              ${!canProceed 
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
-              } 
-              ${showActivationEffect 
-                ? 'auto-advance-ready' 
-                : ''
-              }
-            `}
-          >
-            {isLastQuestion ? 'Ver Resultado' : 'Continuar'}
-          </Button>
+          {(currentQuestionType === 'strategic' || isLastQuestion) && (
+            <Button
+              onClick={onNext}
+              disabled={!canProceed}
+              className={`
+                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50
+                ${!canProceed 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
+                } 
+                ${showActivationEffect && currentQuestionType === 'strategic' // Efeito de ativação só para strategic se o botão estiver visível
+                  ? 'auto-advance-ready' 
+                  : ''
+                }
+              `}
+            >
+              {isLastQuestion ? 'Ver Resultado' : 'Continuar'}
+            </Button>
+          )}
         </div>
+        {/* Adicionar helper text para questões estratégicas se o botão estiver visível e desabilitado */}
+        {currentQuestionType === 'strategic' && !canProceed && (
+           <p className="text-sm text-[#8F7A6A] mt-3">{getHelperText()}</p>
+        )}
       </div>
     </div>
   );
