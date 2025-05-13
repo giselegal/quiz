@@ -97,7 +97,7 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
         currentAnswers={currentAnswers}
         showQuestionImage={true}
         isStrategicQuestion={true}
-        autoAdvance={true}
+        autoAdvance={false} // Desabilitar auto-avanço para questões estratégicas
       />
     </AnimatedWrapper>
   );
