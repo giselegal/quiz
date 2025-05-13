@@ -42,7 +42,7 @@ const QuizPage: React.FC = () => {
     calculateResults,
     handleStrategicAnswer: saveStrategicAnswer,
     submitQuizIfComplete,
-    canProceed: canProceedFromLogic, // Renomeado para evitar conflito
+    // canProceed: canProceedFromLogic, // Removido para evitar confusão
     allQuestions,
     isInitialLoadComplete
   } = useQuizLogic();
@@ -256,65 +256,70 @@ const QuizPage: React.FC = () => {
     }
   }, [calculateResults, handleNext, isLastQuestion, totalQuestions]);
 
-  // Determine if we can proceed based on the question type and selected answers
-  const getCurrentCanProceed = useCallback(() => {
-    if (!currentQuestion) return false;
-    
-    const requiredSelections = currentQuestion.multiSelect || (showingStrategicQuestions ? 1 : 3); // Ajustado para refletir o fallback de QuizNavigation
-    const currentAnswersLength = currentAnswers?.length || 0;
-    
-    // Log para depuração
-    console.log(`[QuizPage] getCurrentCanProceed - Question ID: ${currentQuestion.id}, multiSelect: ${currentQuestion.multiSelect}, requiredSelections: ${requiredSelections}, currentAnswersLength: ${currentAnswersLength}, Result: ${currentAnswersLength >= requiredSelections}`);
-    
-    return currentAnswersLength >= requiredSelections;
-  }, [currentAnswers?.length, currentQuestion, showingStrategicQuestions]);
+  // Define a questão atual com base no tipo (normal ou estratégica)
+  const actualCurrentQuestionData = showingStrategicQuestions
+    ? strategicQuestions[currentStrategicQuestionIndex]
+    : currentQuestion;
 
-  // Adicionar um log para as props enviadas para QuizNavigation
-  useEffect(() => {
-    if (currentQuestion) {
-      const calculatedRequiredOptions = currentQuestion.multiSelect || (showingStrategicQuestions ? 1 : 3);
-      const calculatedCanProceed = getCurrentCanProceed();
-      console.log(`[QuizPage] Props para QuizNavigation - currentQuestionType: ${showingStrategicQuestions ? 'strategic' : 'normal'}, selectedOptionsCount: ${currentAnswers?.length || 0}, requiredOptionsCount: ${calculatedRequiredOptions}, canProceed: ${calculatedCanProceed}, isLastQuestion: ${isLastQuestion}`);
-    }
-  }, [currentQuestion, showingStrategicQuestions, currentAnswers, isLastQuestion, getCurrentCanProceed]);
-
-  // Determine current question type for navigation
+  // Determina o tipo da questão para navegação
   const currentQuestionTypeForNav = showingStrategicQuestions ? 'strategic' : 'normal';
   
-  // Determine required options count for navigation
-  const calculatedRequiredOptions = currentQuestion?.multiSelect || (showingStrategicQuestions ? 1 : 3);
+  // Calcula as opções requeridas com base na questão atual
+  // Fallback para 1 para estratégicas, 3 para normais, se multiSelect não estiver definido
+  const calculatedRequiredOptions = actualCurrentQuestionData?.multiSelect || (showingStrategicQuestions ? 1 : 3);
 
-  // Determine if user can proceed for navigation
-  const currentSelectedCount = currentAnswers?.length || 0;
   let determinedCanProceed;
+  let finalSelectedCountForNav; // Usado para QuizNavigation e logs
 
   if (showingStrategicQuestions) {
-    determinedCanProceed = currentSelectedCount >= calculatedRequiredOptions;
+      // Para questões estratégicas, usa a contagem de strategicAnswers
+      const strategicQuestionId = actualCurrentQuestionData?.id;
+      const currentStrategicSelectedCount = strategicQuestionId ? (strategicAnswers[strategicQuestionId]?.length || 0) : 0;
+      finalSelectedCountForNav = currentStrategicSelectedCount;
+      
+      console.log(`[QuizPage] Cálculo Strategic CanProceed - ID: ${strategicQuestionId}, Selecionadas (strategicAnswers): ${currentStrategicSelectedCount}, Requeridas: ${calculatedRequiredOptions}, Resultado: ${currentStrategicSelectedCount >= calculatedRequiredOptions}`);
+      determinedCanProceed = currentStrategicSelectedCount >= calculatedRequiredOptions;
   } else { // Questões Normais
-    determinedCanProceed = currentSelectedCount === calculatedRequiredOptions;
+      // Para questões normais, usa a contagem de currentAnswers
+      const currentNormalSelectedCount = currentAnswers?.length || 0;
+      finalSelectedCountForNav = currentNormalSelectedCount;
+
+      console.log(`[QuizPage] Cálculo Normal CanProceed - ID: ${actualCurrentQuestionData?.id}, Selecionadas (currentAnswers): ${currentNormalSelectedCount}, Requeridas: ${calculatedRequiredOptions}, Resultado: ${currentNormalSelectedCount === calculatedRequiredOptions}`);
+      determinedCanProceed = currentNormalSelectedCount === calculatedRequiredOptions;
   }
 
   console.log('[QuizPage] Props para QuizNavigation:', {
-    currentQuestionId: currentQuestion?.id,
-    currentQuestionMultiSelect: currentQuestion?.multiSelect,
-    showingStrategicQuestions,
+    currentQuestionId: actualCurrentQuestionData?.id,
+    currentQuestionTypeForNav,
+    currentSelectedCountForNav: finalSelectedCountForNav,
     calculatedRequiredOptions,
-    currentSelectedCount,
-    // canProceedFromLogic, // Não mais usado diretamente para determinar o canProceed final de normais
     finalCanProceedForNav: determinedCanProceed,
-    currentQuestionTypeForNav
   });
 
   // Render QuizNavigation
   const renderQuizNavigation = () => (
     <QuizNavigation
-      canProceed={determinedCanProceed} // Usar o valor recém determinado
-      onNext={showingStrategicQuestions ? () => handleStrategicAnswer({ questionId: strategicQuestions[currentStrategicQuestionIndex].id, selectedOptions: strategicAnswers[strategicQuestions[currentStrategicQuestionIndex].id] || [] }) : handleNextClick}
-      onPrevious={showingStrategicQuestions ? handlePrevious : handlePrevious}
+      canProceed={determinedCanProceed}
+      onNext={
+        showingStrategicQuestions && actualCurrentQuestionData
+          ? () => handleStrategicAnswer({
+              questionId: actualCurrentQuestionData.id,
+              selectedOptions: strategicAnswers[actualCurrentQuestionData.id] || []
+            })
+          : handleNextClick
+      }
+      onPrevious={
+        showingStrategicQuestions
+          ? () => setCurrentStrategicQuestionIndex(prev => Math.max(0, prev - 1))
+          : handlePrevious
+      }
       currentQuestionType={currentQuestionTypeForNav}
-      selectedOptionsCount={currentAnswers?.length || 0}
-      isLastQuestion={showingStrategicQuestions && currentStrategicQuestionIndex === strategicQuestions.length - 1}
-      requiredOptionsCount={calculatedRequiredOptions} // Usar o valor calculado aqui
+      selectedOptionsCount={finalSelectedCountForNav}
+      isLastQuestion={
+        showingStrategicQuestions &&
+        currentStrategicQuestionIndex === strategicQuestions.length - 1
+      }
+      requiredOptionsCount={calculatedRequiredOptions}
     />
   );
 
