@@ -47,7 +47,7 @@ export const usePerformanceMonitoring = () => {
 };
 
 export default usePerformanceMonitoring;
-function onFID(sendMetric: ({ name, value, id }: Metric) => void) {
+function onFID(_sendMetric: ({ name, value, id }: Metric) => void) {
   throw new Error('Function not implemented.');
 }
 
