@@ -37,20 +37,25 @@ export const EditorPage = () => {
       content: templateToUse.header?.content || { title: 'Seu Resultado', logo: '' }
     },
     
-    // Incluir mainContent
-    mainContent: templateToUse.mainContent || {
+    // Incluir mainContent com a estrutura correta
+    mainContent: {
       visible: true,
       content: {
         introText: `Conheça seu estilo ${styleCategory}!`,
-        benefits: []
+        benefits: [],
+        description: templateToUse.mainContent?.content?.description || `Descrição do estilo ${styleCategory}`,
+        mainImage: templateToUse.mainContent?.content?.mainImage || '',
+        tabletImage: templateToUse.mainContent?.content?.tabletImage || '',
+        showSecondaryStyles: templateToUse.mainContent?.content?.showSecondaryStyles || false,
+        showOffer: templateToUse.mainContent?.content?.showOffer || true
       },
-      style: {
+      style: templateToUse.mainContent?.style || {
         padding: '2rem 1rem',
         backgroundColor: '#FFFFFF'
       }
     },
     
-    // Incluir offer com a estrutura correta
+    // Incluir offer com a estrutura correta conforme o tipo OfferSection
     offer: {
       hero: {
         visible: true,
