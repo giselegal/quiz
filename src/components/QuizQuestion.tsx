@@ -74,6 +74,18 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       questionId: question.id,
       selectedOptions: newSelectedOptions
     });
+    
+    // Para questões normais, verificar se atingiu exatamente o número de opções necessárias
+    // e acionar o avanço automático se autoAdvance estiver habilitado
+    if (autoAdvance && 
+        !isStrategicQuestion && 
+        onNextClick && 
+        newSelectedOptions.length === (question.multiSelect || 3)) {
+      // Pequeno delay para garantir que o estado foi atualizado
+      setTimeout(() => {
+        onNextClick();
+      }, 50);
+    }
   };
   
   const getGridColumns = () => {

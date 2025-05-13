@@ -34,21 +34,22 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       timerRef.current = null;
     }
     
-    // Condição para auto-avanço: Pode prosseguir (canProceed) E selecionou EXATAMENTE o número requerido
-    if (canProceed && selectedOptionsCount === requiredOptionsCount) {
+    // Condição para auto-avanço: Somente para questões normais (não estratégicas)
+    // que atingiram exatamente o número requerido de seleções
+    if (currentQuestionType === 'normal' && canProceed && selectedOptionsCount === requiredOptionsCount) {
       console.log(`Condições para auto-avanço instantâneo satisfeitas: Tipo=${currentQuestionType}, Selected=${selectedOptionsCount}, Required=${requiredOptionsCount}`);
       
       // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
-      // Configurar um timer muito curto para permitir que o feedback visual seja renderizado
-      // antes do avanço automático - 100ms é quase instantâneo para percepção humana
+      // Avançar instantaneamente após selecionar a última opção nas questões normais
+      // Timer mínimo apenas para garantir que a UI tenha tempo de mostrar o feedback visual
       timerRef.current = setTimeout(() => {
-        console.log("Executando auto-avanço instantâneo");
+        console.log("Executando auto-avanço instantâneo para questão normal");
         onNext();
         setShowActivationEffect(false); // Resetar o efeito visual após o avanço
         timerRef.current = null; // Limpar referência após execução
-      }, 100); // Reduzido para 100ms para ser praticamente instantâneo
+      }, 50); // Tempo mínimo para um avanço quase instantâneo
       
       return () => {
         if (timerRef.current) {
