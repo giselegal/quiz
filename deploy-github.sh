@@ -51,10 +51,10 @@ git push origin main
 echo -e "\n${GREEN}Processo iniciado com sucesso!${NC}"
 echo -e "O GitHub Actions está agora realizando o deploy."
 echo -e "Você pode acompanhar o progresso em:"
-echo -e "https://github.com/SEU_USUARIO/SEU_REPOSITORIO/actions"
+echo -e "https://github.com/vdp2025/quiz-sell-genius-66/actions"
 
 echo -e "\n${YELLOW}Após a conclusão do deploy:${NC}"
-echo -e "1. Acesse: https://giselegalvao.com.br/quiz-de-estilo/"
+echo -e "1. Acesse: https://giselegalvao.com.br/"
 echo -e "2. Verifique se o site está funcionando corretamente"
 echo -e "3. Se houver problemas, use a página de diagnóstico:"
-echo -e "   https://giselegalvao.com.br/quiz-de-estilo/diagnostico.html"
+echo -e "   https://giselegalvao.com.br/diagnostico.html"
