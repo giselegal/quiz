@@ -316,9 +316,11 @@ const QuizPage: React.FC = () => {
       currentQuestionType={currentQuestionTypeForNav}
       selectedOptionsCount={finalSelectedCountForNav}
       isLastQuestion={
-        showingStrategicQuestions
-          ? currentStrategicQuestionIndex === strategicQuestions.length - 1
-          : isLastQuestion // Usar a prop isLastQuestion do useQuizLogic para questões normais
+        // Considera "última questão" para o botão APENAS se estivermos em questões estratégicas
+        // e for a última delas. Questões normais não terão o botão "Continuar/Ver Resultado"
+        // baseado nesta flag, dependerão do auto-avanço.
+        showingStrategicQuestions &&
+        currentStrategicQuestionIndex === strategicQuestions.length - 1
       }
       requiredOptionsCount={calculatedRequiredOptions}
     />
