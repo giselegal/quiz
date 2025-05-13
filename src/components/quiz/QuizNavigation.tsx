@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Button } from '../ui/button';
 import '@/styles/quiz-animations.css';
@@ -22,6 +21,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   isLastQuestion = false,
   requiredOptionsCount = 3
 }) => {
+  console.log("QuizNavigation RENDERED"); // Adicionado para verificar a renderização
   // Estado para controlar a animação de ativação do botão
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
