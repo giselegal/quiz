@@ -323,6 +323,24 @@ const QuizPage: React.FC = () => {
     />
   );
 
+  // DEBUG: Informações visuais temporárias
+  const renderDebugInfo = () => {
+    if (showingStrategicQuestions) {
+      return null; // Não mostrar para questões estratégicas por enquanto
+    }
+    return (
+      <div style={{ position: 'fixed', bottom: '10px', left: '10px', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '10px', zIndex: 9999, fontSize: '12px', borderRadius: '5px' }}>
+        <p>DEBUG INFO (Questão Normal):</p>
+        <p>- ID Questão Atual: {actualCurrentQuestionData?.id || 'N/A'}</p>
+        <p>- Opções Selecionadas (currentAnswers): {currentAnswers?.length || 0}</p>
+        <p>- Opções Requeridas (calculatedRequiredOptions): {calculatedRequiredOptions}</p>
+        <p>- Pode Prosseguir (determinedCanProceed): {determinedCanProceed ? 'SIM' : 'NÃO'}</p>
+        <p>- Tipo Questão p/ Nav (currentQuestionTypeForNav): {currentQuestionTypeForNav}</p>
+        <p>- Contagem p/ Nav (finalSelectedCountForNav): {finalSelectedCountForNav}</p>
+      </div>
+    );
+  };
+
   return (
     <LoadingManager isLoading={!pageIsReady} useQuizIntroLoading={true}>
       <div className="relative">
@@ -383,6 +401,8 @@ const QuizPage: React.FC = () => {
             )}
           </AnimatePresence>
         </QuizContainer>
+        {/* DEBUG: Renderiza as informações de depuração */}
+        {renderDebugInfo()}
       </div>
     </LoadingManager>
   );
