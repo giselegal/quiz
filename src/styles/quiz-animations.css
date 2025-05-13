@@ -56,3 +56,37 @@
   transform: translateY(-10px);
   transition: opacity 0.25s, transform 0.25s;
 }
+
+/* Melhorias de Performance */
+/* Aplicar hardware acceleration nas animações para melhor desempenho */
+.quiz-option-selected-flash,
+.auto-advance-ready,
+.option-selected,
+.question-transition-enter,
+.question-transition-enter-active,
+.question-transition-exit,
+.question-transition-exit-active {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Reduzir trabalho de repaint/reflow ao limitar mudanças apenas a transform e opacity */
+@keyframes optimizedPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Variante mais leve da animação de pulse para dispositivos de baixo desempenho */
+@media (prefers-reduced-motion: reduce) {
+  .auto-advance-ready {
+    animation: none;
+    transform: scale(1.02);
+  }
+  
+  .quiz-option-selected-flash {
+    animation: none;
+    border-color: #b29670 !important;
+  }
+}
