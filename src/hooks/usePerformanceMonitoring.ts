@@ -10,7 +10,7 @@ export const usePerformanceMonitoring = () => {
     // Importar web-vitals apenas quando necessário
     const reportWebVitals = async () => {
       try {
-        const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
+        const { onCLS, onLCP, onFCP, onTTFB } = await import('web-vitals');
         
         // Função para enviar métricas
         const sendMetric = ({ name, value, id }: Metric) => {
@@ -25,11 +25,10 @@ export const usePerformanceMonitoring = () => {
         };
         
         // Registrar callbacks para cada métrica
-        getCLS(sendMetric);
-        getFID(sendMetric);
-        getFCP(sendMetric);
-        getLCP(sendMetric);
-        getTTFB(sendMetric);
+        onCLS(sendMetric);
+        onFID(sendMetric);
+        onFCP(sendMetric);
+        onTTFB(sendMetric);
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);
       }
@@ -48,3 +47,7 @@ export const usePerformanceMonitoring = () => {
 };
 
 export default usePerformanceMonitoring;
+function onFID(sendMetric: ({ name, value, id }: Metric) => void) {
+  throw new Error('Function not implemented.');
+}
+
