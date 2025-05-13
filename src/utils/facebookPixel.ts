@@ -1,10 +1,12 @@
+
 /**
  * Utility para gerenciar Facebook Pixel
  */
 
 declare global {
   interface Window {
-    fbq: any;
+    fbq: (event: string, eventName: string, params?: any, eventId?: { eventID: string }) => void;
+    _fbq?: any;
   }
 }
 
@@ -15,13 +17,13 @@ const FACEBOOK_PIXEL_ID = '1234567890123456'; // Substitua pelo seu ID real do F
 export const initFacebookPixel = (pixelId: string): void => {
   if (typeof window !== 'undefined') {
     // Inicialização do código do pixel
-    !function(f,b,e,v,n,t,s)
+    !function(f: any, b: any, e: any, v: any, n: any, t: any, s: any)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
     if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
     n.queue=[];t=b.createElement(e);t.async=!0;
     t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    if(s?.parentNode) s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
     window.fbq('init', pixelId);

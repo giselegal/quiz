@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getLowQualityImage } from '@/utils/imageManager';
 import { AspectRatioContainer } from './aspect-ratio-container';
@@ -119,9 +120,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Calcular a proporção de aspecto para o container
   const aspectRatio = height / width;
   
-  // Convert width and height to string for img element
-  const widthStr = String(width);
-  const heightStr = String(height);
+  // Convertendo width e height para string para o elemento img
+  const widthStr = width.toString();
+  const heightStr = height.toString();
   
   return (
     <AspectRatioContainer 

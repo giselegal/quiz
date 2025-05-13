@@ -1,3 +1,4 @@
+
 import { Plugin } from 'vite';
 
 /**
@@ -19,21 +20,25 @@ export default function cloudinaryImageOptimizer(): Plugin {
         // Função para otimizar URLs encontradas
         const optimizedCode = code.replace(cloudinaryUrlRegex, (match, params) => {
           // Verificar se já contém parâmetros de qualidade média-alta
-          if (params.includes('q_70') && params.includes('e_sharpen:40')) {
+          if (typeof params === 'string' && params.includes('q_70') && params.includes('e_sharpen:40')) {
             return match;
           }
           
           // Remover parâmetros de blur e baixa qualidade
-          let optimizedParams = params
-            .replace(/,e_blur:[0-9]+/g, '')
-            .replace(/e_blur:[0-9]+,/g, '')
-            .replace(/e_blur:[0-9]+/g, '')
-            .replace(/q_[0-9]+/g, 'q_70')
-            .replace(/w_20/g, 'w_auto');
+          if (typeof params === 'string') {
+            let optimizedParams = params
+              .replace(/,e_blur:[0-9]+/g, '')
+              .replace(/e_blur:[0-9]+,/g, '')
+              .replace(/e_blur:[0-9]+/g, '')
+              .replace(/q_[0-9]+/g, 'q_70')
+              .replace(/w_20/g, 'w_auto');
+            
+            // Se não houver transformações, adicionar parâmetros padrão
+            const baseUrl = match.split('/upload/')[0];
+            return `${baseUrl}/upload/f_auto,q_70,dpr_1.0,e_sharpen:40/${optimizedParams}`;
+          }
           
-          // Se não houver transformações, adicionar parâmetros padrão
-          const baseUrl = match.split('/upload/')[0];
-          return `${baseUrl}/upload/f_auto,q_70,dpr_1.0,e_sharpen:40/${optimizedParams}`;
+          return match;
         });
         
         return optimizedCode;
@@ -50,18 +55,20 @@ export default function cloudinaryImageOptimizer(): Plugin {
           const originalSetHeader = res.setHeader;
           
           res.setHeader = function(name, value) {
-            if (name === 'Content-Type' && value.includes('text/html')) {
+            if (name === 'Content-Type' && typeof value === 'string' && value.includes('text/html')) {
               // Vamos capturar a saída HTML para injetar nosso script
               const originalWrite = res.write;
               const originalEnd = res.end;
               const chunks: Buffer[] = [];
               
-              res.write = function(chunk) {
+              // @ts-ignore - Isso é necessário pois estamos fazendo um monkey patch
+              res.write = function(chunk: any) {
                 chunks.push(Buffer.from(chunk));
                 return true;
               };
               
-              res.end = function(chunk) {
+              // @ts-ignore - Isso é necessário pois estamos fazendo um monkey patch
+              res.end = function(chunk?: any) {
                 if (chunk) {
                   chunks.push(Buffer.from(chunk));
                 }

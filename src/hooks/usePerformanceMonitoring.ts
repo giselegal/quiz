@@ -4,14 +4,15 @@ import type { Metric } from 'web-vitals';
 
 /**
  * Hook para monitorar e reportar métricas de desempenho Web Vitals
- * Coleta FCP, LCP, CLS, TTFB e FID para análise de desempenho
+ * Coleta FCP, LCP, CLS, TTFB para análise de desempenho
  */
 export const usePerformanceMonitoring = () => {
   useEffect(() => {
     // Importar web-vitals apenas quando necessário
     const reportWebVitals = async () => {
       try {
-        const { onCLS, onLCP, onFCP, onTTFB, onFID } = await import('web-vitals');
+        // Removido onFID que não existe na versão mais recente do web-vitals
+        const { onCLS, onLCP, onFCP, onTTFB } = await import('web-vitals');
         
         // Função para enviar métricas
         const sendMetric = ({ name, value, id }: Metric) => {
@@ -27,10 +28,10 @@ export const usePerformanceMonitoring = () => {
         
         // Registrar callbacks para cada métrica
         onCLS(sendMetric);
-        onFID(sendMetric);
         onFCP(sendMetric);
         onTTFB(sendMetric);
         onLCP(sendMetric);
+        // Removido onFID que não existe mais
       } catch (error) {
         console.error('Erro ao carregar web-vitals:', error);
       }

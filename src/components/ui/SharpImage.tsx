@@ -1,84 +1,82 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+
+import React, { useState, useEffect } from 'react';
 
 interface SharpImageProps {
   src: string;
   alt: string;
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
   className?: string;
-  style?: React.CSSProperties;
-  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  priority?: boolean;
+  onLoad?: () => void;
 }
 
 /**
- * Componente de imagem otimizado que renderiza imagens nítidas sem efeitos de blur
- * Projetado para resolver problemas de imagens embaçadas e melhorar métricas LCP/FCP
+ * SharpImage - Componente básico para exibição de imagens que
+ * implementa boas práticas sem efeitos avançados
  */
-const SharpImage: React.FC<SharpImageProps> = ({
+export const SharpImage: React.FC<SharpImageProps> = ({
   src,
   alt,
   width,
   height,
-  className,
-  style,
-  objectFit = 'cover'
+  className = '',
+  priority = false,
+  onLoad
 }) => {
-  // Otimizar a URL do Cloudinary diretamente, garantindo alta qualidade
-  const optimizedSrc = React.useMemo(() => {
-    if (!src || !src.includes('cloudinary.com')) return src;
-    
-    // Extrair partes da URL do Cloudinary
-    const urlParts = src.split('/upload/');
-    if (urlParts.length !== 2) return src;
-    
-    // Construir URL otimizada com alta qualidade e sem blur
-    const baseUrl = urlParts[0];
-    const pathPart = urlParts[1];
-    
-    // Verificar se já existem transformações
-    const hasTransforms = pathPart.includes('/');
-    
-    if (hasTransforms) {
-      // Remover qualquer parâmetro de blur existente e forçar alta qualidade
-      const cleanedPath = pathPart
-        .replace(/,e_blur:[0-9]+/g, '')
-        .replace(/q_[0-9]+/g, 'q_95');
-      
-      // Adicionar parâmetros para nitidez e DPR automático se não existirem
-      if (!cleanedPath.includes('e_sharpen')) {
-        return `${baseUrl}/upload/f_auto,q_95,dpr_auto,e_sharpen:60/${cleanedPath}`;
-      }
-      
-      return `${baseUrl}/upload/f_auto,q_95,dpr_auto/${cleanedPath}`;
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    // Reset states when src changes
+    setLoaded(false);
+    setError(false);
+
+    if (src && priority) {
+      // Preload high priority images
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        setLoaded(true);
+        if (onLoad) onLoad();
+      };
+      img.onerror = () => setError(true);
     }
-    
-    // Se não houver transformações, adicionar nossos próprios parâmetros otimizados
-    return `${baseUrl}/upload/f_auto,q_95,dpr_auto,e_sharpen:60/${pathPart}`;
-  }, [src]);
+  }, [src, priority, onLoad]);
+
+  const handleLoad = () => {
+    setLoaded(true);
+    if (onLoad) onLoad();
+  };
+
+  const handleError = () => {
+    setError(true);
+    console.error(`Failed to load image: ${src}`);
+  };
+
+  if (error) {
+    return (
+      <div 
+        className={`flex items-center justify-center bg-gray-100 ${className}`}
+        style={{ width: `${width}px`, height: `${height}px` }}
+      >
+        <span className="text-gray-500 text-sm">Image unavailable</span>
+      </div>
+    );
+  }
 
   return (
-    <img
-      src={optimizedSrc}
+    <img 
+      src={src} 
       alt={alt}
       width={width}
       height={height}
-      loading="eager"
-      fetchpriority="high"
-      decoding="sync"
-      className={cn(
-        "w-full h-full",
-        objectFit === 'cover' && "object-cover",
-        objectFit === 'contain' && "object-contain",
-        objectFit === 'fill' && "object-fill",
-        objectFit === 'none' && "object-none",
-        objectFit === 'scale-down' && "object-scale-down",
-        className
-      )}
-      style={{
-        imageRendering: 'crisp-edges',
-        ...style
-      }}
+      className={`${className} ${loaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : "auto"}
+      decoding={priority ? "sync" : "async"}
+      onLoad={handleLoad}
+      onError={handleError}
     />
   );
 };
