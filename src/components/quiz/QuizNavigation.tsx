@@ -23,7 +23,6 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
 }) => {
   // Estado para controlar a animação de ativação do botão
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
-  const [autoAdvanceTimer, setAutoAdvanceTimer] = React.useState<NodeJS.Timeout | null>(null);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   console.log(`QuizNavigation - CanProceed: ${canProceed}, Type: ${currentQuestionType}, SelectedCount: ${selectedOptionsCount}, Required: ${requiredOptionsCount}`);
@@ -36,41 +35,29 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       timerRef.current = null;
     }
     
-    if (autoAdvanceTimer) {
-      clearTimeout(autoAdvanceTimer);
-      setAutoAdvanceTimer(null);
-    }
-
     // Só configurar auto-avanço para questões normais, não para estratégicas
     if (canProceed && currentQuestionType === 'normal' && selectedOptionsCount === requiredOptionsCount) {
-      console.log("Auto-avanço ativado - configurando timers");
+      console.log("Auto-avanço ativado - configurando timer");
       
-      // Mostrar a ativação visual do botão primeiro
+      // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
-      // Timer visual - mantém o efeito visual por um tempo 
-      const visualTimer = setTimeout(() => {
-        console.log("Finalizando efeito visual de ativação");
-        setShowActivationEffect(false);
-      }, 2500);
-      
-      // Timer para auto-avanço - usar ref para manter controle consistente
+      // Timer para auto-avanço - reduzido para 1 segundo para ser mais rápido
       timerRef.current = setTimeout(() => {
         console.log("Executando auto-avanço");
         onNext();
-      }, 2000);
-      
-      // Armazenar também no state para trigger de useEffect
-      setAutoAdvanceTimer(timerRef.current);
+        setShowActivationEffect(false); // Resetar o efeito visual após o avanço
+      }, 1000); // Tempo reduzido para 1 segundo
       
       return () => {
-        clearTimeout(visualTimer);
         if (timerRef.current) {
           clearTimeout(timerRef.current);
           timerRef.current = null;
         }
       };
     } else {
+      // Resetar o efeito visual se as condições não forem satisfeitas
+      setShowActivationEffect(false);
       console.log("Auto-avanço não ativado - condições não satisfeitas");
     }
   }, [canProceed, currentQuestionType, onNext, selectedOptionsCount, requiredOptionsCount]);
@@ -83,11 +70,8 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
-      if (autoAdvanceTimer) {
-        clearTimeout(autoAdvanceTimer);
-      }
     };
-  }, [autoAdvanceTimer]);
+  }, []);
 
   const getHelperText = () => {
     if (!canProceed) {
@@ -117,7 +101,6 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             </Button>
           )}
 
-          {/* O botão "Próximo" será sempre renderizado */}
           <Button
             onClick={onNext}
             disabled={!canProceed}
@@ -128,7 +111,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
                 : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
               } 
               ${showActivationEffect 
-                ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação atualizado
+                ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' 
                 : ''
               }
             `}

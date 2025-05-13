@@ -13,7 +13,7 @@ interface QuizOptionProps {
   type: 'text' | 'image' | 'both';
   questionId?: string;
   isDisabled?: boolean;
-  isStrategicOption?: boolean; // Nova prop
+  isStrategicOption?: boolean;
 }
 
 const QuizOption: React.FC<QuizOptionProps> = ({
@@ -23,7 +23,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   type,
   questionId,
   isDisabled = false,
-  isStrategicOption = false // Padrão para false
+  isStrategicOption = false
 }) => {
   const isMobile = useIsMobile();
   const is3DQuestion = option.imageUrl?.includes('sapatos') || option.imageUrl?.includes('calca');
@@ -38,14 +38,14 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         if (type === 'text') {
           optionRef.current.style.borderColor = '#b29670';
           optionRef.current.style.boxShadow = isStrategicOption 
-            ? '0 6px 12px rgba(178, 150, 112, 0.35)' // Sombra mais pronunciada para estratégicas
+            ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
             : '0 4px 8px rgba(178, 150, 112, 0.25)';
         } 
         // Para opções de imagem - sem borda, apenas sombra
         else {
           optionRef.current.style.borderColor = 'transparent';
           optionRef.current.style.boxShadow = isStrategicOption 
-            ? '0 15px 30px rgba(0, 0, 0, 0.25)' // Sombra mais pronunciada para estratégicas
+            ? '0 15px 30px rgba(0, 0, 0, 0.25)' 
             : '0 12px 24px rgba(0, 0, 0, 0.2)';
         }
       } else {
@@ -60,7 +60,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
     }
   }, [isSelected, type, isStrategicOption]);
   
-  // Manipulador de clique para seleção de opção
+  // Manipulador de clique para seleção de opção - sem delay
   const handleClick = () => {
     if (!isDisabled) {
       console.log(`Opção clicada: ${option.id}, tipo: ${isStrategicOption ? 'estratégica' : 'normal'}`);
@@ -69,20 +69,18 @@ const QuizOption: React.FC<QuizOptionProps> = ({
       if (optionRef.current) {
         // Alterando a aparência com base no estado atual (invertido porque o clique vai mudar o estado)
         if (type === 'text') {
-          // Se estiver selecionado, ao clicar vai desmarcar, então mostra borda padrão
-          // Se não estiver selecionado, vai marcar, então destaca com borda dourada
           optionRef.current.style.borderColor = isSelected ? '#B89B7A' : '#b29670';
         }
         
         // Aplicar sombra correspondente ao novo estado (após o clique)
         optionRef.current.style.boxShadow = isSelected 
-          ? '0 2px 4px rgba(0, 0, 0, 0.05)' // Vai desmarcar, sombra leve
+          ? '0 2px 4px rgba(0, 0, 0, 0.05)'
           : (isStrategicOption 
-              ? (type === 'text' ? '0 6px 12px rgba(178, 150, 112, 0.35)' : '0 15px 30px rgba(0, 0, 0, 0.25)') // Sombra mais forte para questões estratégicas
-              : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)')); // Sombra padrão
+              ? (type === 'text' ? '0 6px 12px rgba(178, 150, 112, 0.35)' : '0 15px 30px rgba(0, 0, 0, 0.25)')
+              : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)'));
       }
       
-      // Chamar onSelect imediatamente - removido o setTimeout que causava atraso
+      // Chamar onSelect imediatamente - sem delay
       onSelect(option.id);
     }
   };

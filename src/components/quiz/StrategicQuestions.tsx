@@ -5,6 +5,7 @@ import { UserResponse } from '@/types/quiz';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { AnimatedWrapper } from '../ui/animated-wrapper';
 import { preloadCriticalImages } from '@/utils/imageManager';
+import QuizNavigation from './QuizNavigation';
 
 interface StrategicQuestionsProps {
   currentQuestionIndex: number;
@@ -22,12 +23,18 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
   const [mountKey, setMountKey] = useState(Date.now());
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
   
-  console.log('Rendering strategic question:', strategicQuestions[currentQuestionIndex]?.id);
-  console.log('Question has image:', !!strategicQuestions[currentQuestionIndex]?.imageUrl);
+  const currentQuestion = strategicQuestions[currentQuestionIndex];
+  const currentAnswers = currentQuestion ? (answers[currentQuestion.id] || []) : [];
+  const canProceed = currentAnswers.length >= 1; // Questões estratégicas requerem apenas 1 seleção
+  
+  console.log('Rendering strategic question:', currentQuestion?.id);
+  console.log('Current answers for strategic question:', currentAnswers);
+  console.log('Question has image:', !!currentQuestion?.imageUrl);
   
   // Preload strategic images on first render
   useEffect(() => {
     if (!imagesPreloaded) {
+      console.log('Preloading strategic images...');
       preloadCriticalImages('strategic');
       setImagesPreloaded(true);
     }
@@ -38,18 +45,34 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
     setMountKey(Date.now());
   }, [currentQuestionIndex]);
 
-  if (currentQuestionIndex >= strategicQuestions.length) return null;
+  if (currentQuestionIndex >= strategicQuestions.length) {
+    console.error('Strategic question index out of bounds:', currentQuestionIndex, 'max:', strategicQuestions.length - 1);
+    return <div>Erro: Questão estratégica não encontrada.</div>;
+  }
+
+  if (!currentQuestion) {
+    console.error('Strategic question not found for index:', currentQuestionIndex);
+    return <div>Erro: Dados da questão estratégica ausentes.</div>;
+  }
 
   return (
     <AnimatedWrapper key={mountKey}>
       <QuizQuestion
-        question={strategicQuestions[currentQuestionIndex]}
+        question={currentQuestion}
         onAnswer={onAnswer}
-        currentAnswers={answers[strategicQuestions[currentQuestionIndex].id] || []}
-        autoAdvance={false} // Questões estratégicas NUNCA têm autoavanço
-        onNextClick={onNextClick} 
+        currentAnswers={currentAnswers}
         showQuestionImage={true}
-        isStrategicQuestion={true} // Garantir que está explicitamente marcado como questão estratégica
+        isStrategicQuestion={true}
+      />
+      
+      {/* Navegação das questões estratégicas */}
+      <QuizNavigation
+        canProceed={canProceed}
+        onNext={onNextClick || (() => {})}
+        currentQuestionType="strategic"
+        selectedOptionsCount={currentAnswers.length}
+        requiredOptionsCount={1}
+        isLastQuestion={currentQuestionIndex === strategicQuestions.length - 1}
       />
     </AnimatedWrapper>
   );

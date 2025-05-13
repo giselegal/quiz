@@ -34,7 +34,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     isStrategicQuestion = false
   } = props;
 
-  console.log(`QuizQuestion - autoAdvance: ${autoAdvance}, isStrategic: ${isStrategicQuestion}, requiredSelections: ${question?.multiSelect || 1}, currentAnswers: ${currentAnswers?.length || 0}`);
+  console.log(`QuizQuestion - autoAdvance: ${autoAdvance}, isStrategic: ${isStrategicQuestion}, requiredSelections: ${question?.multiSelect || 3}, currentAnswers: ${currentAnswers?.length || 0}`);
 
   // Fallback defensivo para evitar tela branca
   if (!question || !question.title || !Array.isArray(question.options)) {
@@ -49,24 +49,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
   const hasImageOptions = question.type !== 'text';
   const [imageError, setImageError] = useState(false);
   const { scrollToQuestion } = useQuestionScroll();
-  const [isButtonActive, setIsButtonActive] = useState(false); // Estado para efeito visual do botão
   
   useEffect(() => {
     scrollToQuestion(question.id);
   }, [question.id, scrollToQuestion]);
-
-  // Efeito para atualizar o estado do botão baseado nas seleções
-  useEffect(() => {
-    if (isStrategicQuestion) {
-      // Para questões estratégicas, o botão fica ativo quando qualquer opção é selecionada
-      setIsButtonActive(currentAnswers.length > 0);
-    } else {
-      // Para questões normais, o botão fica ativo quando o número exato de seleções é atingido
-      setIsButtonActive(currentAnswers.length === (question.multiSelect || 3));
-    }
-    
-    console.log(`Botão ativo: ${isButtonActive}, seleções atuais: ${currentAnswers.length}, necessárias: ${question.multiSelect || 3}`);
-  }, [currentAnswers, isStrategicQuestion, question.multiSelect]);
 
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];
@@ -89,7 +75,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     
     console.log(`Opção selecionada: ${optionId}, novas seleções: [${newSelectedOptions.join(', ')}]`);
     
-    // Atualizar as respostas
+    // Atualizar as respostas imediatamente - sem delay
     onAnswer({
       questionId: question.id,
       selectedOptions: newSelectedOptions
@@ -170,44 +156,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
         ))}
       </div>
       
-      {/* Botão Continuar para Questões Estratégicas */}
-      {isStrategicQuestion && onNextClick && (
-        <div className="mt-8 text-center">
-          <Button 
-            onClick={onNextClick}
-            disabled={currentAnswers.length === 0}
-            className={cn(
-              "text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
-              isButtonActive && !(currentAnswers.length === 0)
-                ? "bg-brand-primary hover:bg-brand-primary/90 transform hover:scale-105 focus:ring-brand-primary hover:shadow-lg" 
-                : "bg-brand-primary",
-              currentAnswers.length === 0 && "bg-gray-300 hover:bg-gray-300"
-            )}
-          >
-            Continuar <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      )}
-
-      {/* Botão Próximo para questões não-estratégicas */}
-      {!isStrategicQuestion && onNextClick && (
-        <div className="text-center mt-6">
-          <Button 
-            onClick={onNextClick}
-            disabled={!isButtonActive}
-            className={cn(
-              "text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
-              isButtonActive
-                ? "bg-brand-primary hover:bg-brand-primary/90 transform hover:scale-105 focus:ring-brand-primary hover:shadow-lg" 
-                : "bg-gray-300 hover:bg-gray-300"
-            )}
-          >
-            Próximo <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      )}
+      {/* Removendo o botão extra - mantemos apenas a navegação via QuizNavigation */}
     </div>
   );
 };
