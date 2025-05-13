@@ -40,8 +40,8 @@ export const QuizContent: React.FC<QuizContentProps> = ({
   // Check if we have enough selections to proceed
   const canProceed = currentAnswers?.length >= requiredSelections;
   
-  // Log important state for debugging
-  console.log(`QuizContent - currentQuestion: ${currentQuestion?.id}, answers: ${currentAnswers?.length || 0}, isStrategic: ${showingStrategicQuestions}, canProceed: ${canProceed}`);
+  // Log importante para depuração
+  console.log(`QuizContent - Questão atual(id=${currentQuestion?.id}, type=${currentQuestion?.type}), respostas: ${currentAnswers?.length || 0}, isStrategic: ${showingStrategicQuestions}, canProceed: ${canProceed}`);
   
   return (
     <>

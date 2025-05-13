@@ -39,6 +39,9 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       timerRef.current = null;
     }
     
+    // Adicionar log detalhado para depuração
+    console.log(`[QuizNavigation] Estado atual - Tipo: ${currentQuestionType}, Selecionadas: ${selectedOptionsCount}, Requeridas: ${requiredOptionsCount}, Pode prosseguir: ${canProceed}`);
+    
     // Condição para auto-avanço: Apenas para questões normais (não estratégicas) E 
     // quando selecionou EXATAMENTE o número requerido
     if (canProceed && 
