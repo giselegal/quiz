@@ -42,7 +42,7 @@ const QuizPage: React.FC = () => {
     calculateResults,
     handleStrategicAnswer: saveStrategicAnswer,
     submitQuizIfComplete,
-    canProceed,
+    canProceed: canProceedFromLogic, // Renomeado para evitar conflito
     allQuestions,
     isInitialLoadComplete
   } = useQuizLogic();
@@ -278,6 +278,40 @@ const QuizPage: React.FC = () => {
     }
   }, [currentQuestion, showingStrategicQuestions, currentAnswers, isLastQuestion, getCurrentCanProceed]);
 
+  // Determine current question type for navigation
+  const currentQuestionTypeForNav = showingStrategicQuestions ? 'strategic' : 'normal';
+  
+  // Determine required options count for navigation
+  const requiredOptionsCountForNav = currentQuestion?.multiSelect || (showingStrategicQuestions ? 1 : 3);
+
+  // Determine if user can proceed for navigation
+  // Usando o canProceed diretamente do useQuizLogic, mas também logando os componentes
+  const canProceedForNav = canProceedFromLogic;
+
+  console.log('[QuizPage] Props para QuizNavigation:', {
+    currentQuestionId: currentQuestion?.id,
+    currentQuestionMultiSelect: currentQuestion?.multiSelect,
+    showingStrategicQuestions,
+    calculatedRequiredOptions: requiredOptionsCountForNav,
+    currentAnswersLength: currentAnswers?.length || 0,
+    canProceedFromLogic, // Logando o valor do hook
+    finalCanProceedForNav: canProceedForNav, // Logando o valor final passado
+    currentQuestionTypeForNav
+  });
+
+  // Render QuizNavigation
+  const renderQuizNavigation = () => (
+    <QuizNavigation
+      canProceed={canProceedForNav} // Usar o valor determinado aqui
+      onNext={showingStrategicQuestions ? () => handleStrategicAnswer({ questionId: strategicQuestions[currentStrategicQuestionIndex].id, selectedOptions: strategicAnswers[strategicQuestions[currentStrategicQuestionIndex].id] || [] }) : handleNextClick}
+      onPrevious={showingStrategicQuestions ? handlePrevious : handlePrevious}
+      currentQuestionType={currentQuestionTypeForNav}
+      selectedOptionsCount={currentAnswers?.length || 0}
+      isLastQuestion={showingStrategicQuestions && currentStrategicQuestionIndex === strategicQuestions.length - 1}
+      requiredOptionsCount={requiredOptionsCountForNav} // Usar o valor determinado aqui
+    />
+  );
+
   return (
     <LoadingManager isLoading={!pageIsReady} useQuizIntroLoading={true}>
       <div className="relative">
@@ -333,16 +367,7 @@ const QuizPage: React.FC = () => {
                 />
                 
                 {/* Botões de navegação centralizados apenas aqui para evitar duplicação */}
-                <QuizNavigation
-                  key={`nav-${currentQuestionIndex}-${currentStrategicQuestionIndex}`}
-                  currentQuestionType={showingStrategicQuestions ? 'strategic' : 'normal'}
-                  selectedOptionsCount={currentAnswers?.length || 0}
-                  isLastQuestion={isLastQuestion}
-                  onNext={handleNextClick}
-                  onPrevious={handlePrevious}
-                  canProceed={canProceed}
-                  requiredOptionsCount={currentQuestion?.multiSelect || 3}
-                />
+                {renderQuizNavigation()}
               </motion.div>
             )}
           </AnimatePresence>
