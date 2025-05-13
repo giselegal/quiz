@@ -133,7 +133,7 @@ export const EditorPage = () => {
       }
     },
     
-    // Incluir secondaryStyles apenas se existir no templateToUse
+    // Incluir secondaryStyles para estar em conformidade com a interface ResultPageConfig
     secondaryStyles: templateToUse.secondaryStyles || {
       visible: true,
       content: {
@@ -153,7 +153,7 @@ export const EditorPage = () => {
       backgroundColor: '#FAF9F7',
       fontFamily: 'Playfair Display, serif'
     },
-    // Manter blocks como um array vazio se não estiver definido no template
+    // Incluir blocks para estar em conformidade com a interface ResultPageConfig
     blocks: templateToUse.blocks || [] 
   };
   

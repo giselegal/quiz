@@ -5,7 +5,7 @@
 
 declare global {
   interface Window {
-    fbq: any; // Using any type to avoid complex FB Pixel typings
+    fbq: (event: string, eventName: string, params?: any, eventId?: { eventID: string; }) => void;
     _fbq?: any;
   }
 }
