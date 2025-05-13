@@ -26,9 +26,10 @@
 
 /* Estilo específico para o botão quando está pronto para clique em questões estratégicas */
 .auto-advance-ready {
-  animation: readyPulse 0.3s ease-in-out infinite;
+  animation: readyPulse 0.6s ease-in-out infinite;
   background-color: #b29670 !important; /* Destacar botão com cor diferente */
   transform: translateY(-1px); /* Leve elevação para maior destaque */
+  box-shadow: 0 4px 12px rgba(178, 150, 112, 0.55) !important; /* Sombra mais intensa */
   box-shadow: 0 4px 12px rgba(178, 150, 112, 0.45) !important; /* Sombra mais pronunciada */
 }
 

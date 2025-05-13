@@ -26,6 +26,11 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  React.useEffect(() => {
+    // Registrar informações sobre a questão atual para depuração
+    console.log(`QuizNavigation - Tipo: ${currentQuestionType}, Selecionadas: ${selectedOptionsCount}, Requeridas: ${requiredOptionsCount}, Pode prosseguir: ${canProceed}`);
+  }, [currentQuestionType, selectedOptionsCount, requiredOptionsCount, canProceed]);
+
   // Verificar quando o botão se torna disponível para mostrar o efeito e auto-avançar
   React.useEffect(() => {
     // Limpar qualquer timer existente para evitar conflitos
@@ -40,19 +45,19 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
         selectedOptionsCount === requiredOptionsCount && 
         currentQuestionType !== 'strategic') {
       
-      console.log(`Auto-avanço instantâneo ativado: Tipo=${currentQuestionType}, Selected=${selectedOptionsCount}, Required=${requiredOptionsCount}`);
+      console.log(`Auto-avanço ativado: Tipo=${currentQuestionType}, Selected=${selectedOptionsCount}, Required=${requiredOptionsCount}`);
       
       // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
-      // Configurar um timer muito curto para avançar instantaneamente
-      // Um pequeno delay de 50ms para permitir o feedback visual
+      // Configurar um timer para avançar com um delay suficiente para permitir o feedback visual
+      // Aumentado para 400ms para dar tempo de visualizar o botão ativado
       timerRef.current = setTimeout(() => {
-        console.log("Executando auto-avanço instantâneo para questão normal");
+        console.log("Executando auto-avanço para questão normal");
         onNext();
         setShowActivationEffect(false); // Resetar o efeito visual após o avanço
         timerRef.current = null; // Limpar referência após execução
-      }, 50); // Reduzido para 50ms para ser praticamente instantâneo
+      }, 400); // Aumentado para 400ms para ser perceptível
       
       return () => {
         if (timerRef.current) {

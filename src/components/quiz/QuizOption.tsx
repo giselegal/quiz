@@ -35,31 +35,26 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   useEffect(() => {
     if (optionRef.current) {
       if (isSelected) {
-        // Para opções de texto - manter borda amarela
-        if (type === 'text') {
-          optionRef.current.style.borderColor = '#b29670';
-          optionRef.current.style.boxShadow = isStrategicOption 
-            ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
-            : '0 4px 8px rgba(178, 150, 112, 0.25)';
-        } 
-        // Para opções de imagem - sem borda, apenas sombra
-        else {
-          optionRef.current.style.borderColor = 'transparent';
-          optionRef.current.style.boxShadow = isStrategicOption 
-            ? '0 15px 30px rgba(0, 0, 0, 0.25)' 
-            : '0 12px 24px rgba(0, 0, 0, 0.2)';
-        }
+        // Comportamento consistente para todos os tipos de opções
+        optionRef.current.style.borderColor = '#b29670';
+        optionRef.current.style.boxShadow = isStrategicOption 
+          ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
+          : '0 4px 8px rgba(178, 150, 112, 0.25)';
+        
+        // Adicionar classe de animação para feedback visual
+        optionRef.current.classList.add('quiz-option-selected-flash');
+        setTimeout(() => {
+          if (optionRef.current) {
+            optionRef.current.classList.remove('quiz-option-selected-flash');
+          }
+        }, 300);
       } else {
-        if (type === 'text') {
-          optionRef.current.style.borderColor = '#B89B7A';
-          optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
-        } else {
-          optionRef.current.style.borderColor = 'transparent';
-          optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
-        }
+        // Comportamento consistente para não-selecionado
+        optionRef.current.style.borderColor = '#B89B7A';
+        optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
       }
     }
-  }, [isSelected, type, isStrategicOption]);
+  }, [isSelected, isStrategicOption]);
   
   // Manipulador de clique para seleção de opção - sem delay
   const handleClick = () => {
@@ -74,17 +69,10 @@ const QuizOption: React.FC<QuizOptionProps> = ({
           optionRef.current.classList.add('quiz-option-selected-flash');
           
           // Aplicar transformação imediata para feedback visual
-          if (type === 'text') {
-            optionRef.current.style.borderColor = '#b29670';
-            optionRef.current.style.boxShadow = isStrategicOption 
-              ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
-              : '0 4px 8px rgba(178, 150, 112, 0.25)';
-          } else {
-            optionRef.current.style.transform = 'scale(1.02)';
-            optionRef.current.style.boxShadow = isStrategicOption 
-              ? '0 15px 30px rgba(0, 0, 0, 0.25)' 
-              : '0 12px 24px rgba(0, 0, 0, 0.2)';
-          }
+          optionRef.current.style.borderColor = '#b29670';
+          optionRef.current.style.boxShadow = isStrategicOption 
+            ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
+            : '0 4px 8px rgba(178, 150, 112, 0.25)';
           
           // Remover a classe de animação após a animação terminar
           setTimeout(() => {
@@ -115,11 +103,8 @@ const QuizOption: React.FC<QuizOptionProps> = ({
           "relative h-full flex flex-col rounded-lg overflow-hidden",
           "cursor-pointer", 
           
-          // Para opções de texto - manter borda
-          type === 'text' && "p-4 border",
-          
-          // Para opções de imagem - SEM borda na coluna
-          type !== 'text' && "border-0",
+          // Para todas as opções - manter borda consistente
+          "p-4 border",
           
           // Fundo sólido sem transparência e adicionando sombra padrão
           "bg-[#FEFEFE] shadow-sm hover:shadow-md transition-all duration-300"
@@ -137,15 +122,8 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         )}
         
         <p className={cn(
-          type !== 'text' 
-            ? cn(
-                "leading-tight font-medium py-1 px-2 mt-auto text-[#432818] relative", 
-                isMobile ? "text-[0.7rem]" : "text-[0.7rem] sm:text-sm"
-              )
-            : cn(
-                "leading-relaxed text-[#432818]",
-                isMobile ? "text-[0.75rem]" : "text-sm sm:text-base"
-              )
+          "leading-relaxed text-[#432818]",
+          isMobile ? "text-[0.75rem]" : "text-sm sm:text-base"
         )}>
           {highlightStrategicWords(option.text)}
         </p>

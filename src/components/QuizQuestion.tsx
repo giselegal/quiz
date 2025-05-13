@@ -42,7 +42,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
   }
 
   const isMobile = useIsMobile();
-  const hasImageOptions = question.type !== 'text';
   const [imageError, setImageError] = useState(false);
   const { scrollToQuestion } = useQuestionScroll();
   
@@ -77,13 +76,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
   };
   
   const getGridColumns = () => {
-    if (question.type === 'text') {
-      if (isStrategicQuestion) {
-        return "grid-cols-1 gap-3 px-2";
-      }
-      return isMobile ? "grid-cols-1 gap-3 px-2" : "grid-cols-1 gap-4 px-4";
+    if (isStrategicQuestion) {
+      return "grid-cols-1 gap-3 px-2";
     }
-    return isMobile ? "grid-cols-2 gap-1 px-0.5" : "grid-cols-2 gap-3 px-2";
+    return isMobile ? "grid-cols-1 gap-3 px-2" : "grid-cols-1 gap-4 px-4";
   };
   
   return (
@@ -131,7 +127,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       <div className={cn(
         "grid h-full",
         getGridColumns(),
-        hasImageOptions && "mb-4 relative",
+        "mb-4 relative",
         isStrategicQuestion && "gap-4"
       )}>
         {question.options.map(option => (

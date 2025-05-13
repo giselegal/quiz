@@ -71,7 +71,7 @@ export const QuizContent: React.FC<QuizContentProps> = ({
             showQuestionImage={true}
             onPreviousClick={handlePrevious}
             isStrategicQuestion={false}
-            autoAdvance={true} // Manter ativado para questões normais
+            autoAdvance={true} // Questões normais sempre usam autoAdvance
           />
         )}
         
