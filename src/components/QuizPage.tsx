@@ -260,11 +260,23 @@ const QuizPage: React.FC = () => {
   const getCurrentCanProceed = useCallback(() => {
     if (!currentQuestion) return false;
     
-    const requiredSelections = currentQuestion.multiSelect || 1;
+    const requiredSelections = currentQuestion.multiSelect || (showingStrategicQuestions ? 1 : 3); // Ajustado para refletir o fallback de QuizNavigation
     const currentAnswersLength = currentAnswers?.length || 0;
     
+    // Log para depuração
+    console.log(`[QuizPage] getCurrentCanProceed - Question ID: ${currentQuestion.id}, multiSelect: ${currentQuestion.multiSelect}, requiredSelections: ${requiredSelections}, currentAnswersLength: ${currentAnswersLength}, Result: ${currentAnswersLength >= requiredSelections}`);
+    
     return currentAnswersLength >= requiredSelections;
-  }, [currentAnswers?.length, currentQuestion]);
+  }, [currentAnswers?.length, currentQuestion, showingStrategicQuestions]);
+
+  // Adicionar um log para as props enviadas para QuizNavigation
+  useEffect(() => {
+    if (currentQuestion) {
+      const calculatedRequiredOptions = currentQuestion.multiSelect || (showingStrategicQuestions ? 1 : 3);
+      const calculatedCanProceed = getCurrentCanProceed();
+      console.log(`[QuizPage] Props para QuizNavigation - currentQuestionType: ${showingStrategicQuestions ? 'strategic' : 'normal'}, selectedOptionsCount: ${currentAnswers?.length || 0}, requiredOptionsCount: ${calculatedRequiredOptions}, canProceed: ${calculatedCanProceed}, isLastQuestion: ${isLastQuestion}`);
+    }
+  }, [currentQuestion, showingStrategicQuestions, currentAnswers, isLastQuestion, getCurrentCanProceed]);
 
   return (
     <LoadingManager isLoading={!pageIsReady} useQuizIntroLoading={true}>
