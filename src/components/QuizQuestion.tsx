@@ -62,9 +62,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       // Para questões normais, o botão fica ativo quando o número exato de seleções é atingido
       setIsButtonActive(currentAnswers.length === question.multiSelect);
     }
-<<<<<<< Updated upstream
-  }, [currentAnswers, isStrategicQuestion, isButtonActive]); // Adicionado isButtonActive às dependências
-=======
   }, [currentAnswers, isStrategicQuestion, question.multiSelect]);
 
   // Adicionar lógica para ativar visualmente o botão "Próximo" antes da transição automática
@@ -78,7 +75,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       return () => clearTimeout(timer);
     }
   }, [currentAnswers, question.multiSelect, autoAdvance, isStrategicQuestion, onNextClick]);
->>>>>>> Stashed changes
   
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];

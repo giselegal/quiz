@@ -2,6 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { dynamicIconImport } from '@/utils/dynamicIconImport';
+import { LucideIcon } from 'lucide-react';
 
 interface IconBlockPreviewProps {
   content: {
@@ -24,7 +25,7 @@ const IconBlockPreview: React.FC<IconBlockPreviewProps> = ({ content }) => {
     style = {} 
   } = content;
 
-  // Get the icon component as a React ElementType
+  // Get the icon component as a LucideIcon
   const IconComponent = dynamicIconImport(icon);
   
   const containerStyle = {

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import type { Metric } from 'web-vitals';
 
 /**
  * Hook para monitorar e reportar métricas de desempenho Web Vitals
@@ -12,7 +13,7 @@ export const usePerformanceMonitoring = () => {
         const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
         
         // Função para enviar métricas
-        const sendMetric = ({ name, value, id }) => {
+        const sendMetric = ({ name, value, id }: Metric) => {
           // Log para desenvolvimento (remova em produção)
           if (process.env.NODE_ENV === 'development') {
             console.log(`[Web Vitals] ${name}: ${value} (ID: ${id})`);
