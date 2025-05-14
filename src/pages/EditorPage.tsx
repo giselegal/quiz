@@ -36,7 +36,7 @@ export const EditorPage = () => {
       content: templateToUse.header?.content || { title: 'Seu Resultado', logo: '' }
     },
     
-    // Incluir mainContent com a estrutura correta
+    // Incluir mainContent com a estrutura correta e garantir todas as propriedades exigidas
     mainContent: {
       visible: templateToUse.mainContent?.visible !== undefined ? templateToUse.mainContent.visible : true,
       content: {
