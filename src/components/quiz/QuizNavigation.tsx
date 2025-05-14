@@ -52,7 +52,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       if (shouldAutoAdvance) {
         const newTimer = setTimeout(() => {
           onNext(); // Chama a função para avançar para a próxima questão/etapa
-        }, 50); // Alterado de 1500ms para 50ms
+        }, 35); // Alterado para 35ms
         setAutoAdvanceTimer(newTimer);
       }
       
