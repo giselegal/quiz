@@ -155,45 +155,6 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
     };
   }, []);
 
-
-
-// Novo arquivo otimizado para o useEffect de preload
-// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente de preload
-
-  // Pré-carregamento para LCP com estratégia otimizada - MELHORADO
-  useEffect(() => {
-    // Preconnect para o domínio Cloudinary para acelerar conexões futuras
-    const preconnectLink = document.createElement('link');
-    preconnectLink.rel = 'preconnect';
-    preconnectLink.href = 'https://res.cloudinary.com';
-    preconnectLink.crossOrigin = 'anonymous';
-    document.head.appendChild(preconnectLink);
-
-    // DNS Prefetch para melhorar resolução de nome
-    const dnsPrefetchLink = document.createElement('link');
-    dnsPrefetchLink.rel = 'dns-prefetch';
-    dnsPrefetchLink.href = 'https://res.cloudinary.com';
-    document.head.appendChild(dnsPrefetchLink);
-
-    // Preload APENAS a imagem principal - LCP crítico
-    const lcpCandidatePreload = document.createElement('link');
-    lcpCandidatePreload.rel = 'preload';
-    lcpCandidatePreload.as = 'image';
-    lcpCandidatePreload.href = STATIC_INTRO_IMAGE_URLS.avif.large;
-    lcpCandidatePreload.type = 'image/avif';
-    lcpCandidatePreload.setAttribute('fetchpriority', 'high');
-    document.head.appendChild(lcpCandidatePreload);
-    
-    // Limpeza ao desmontar
-    return () => {
-      if (preconnectLink.parentNode) preconnectLink.parentNode.removeChild(preconnectLink);
-      if (dnsPrefetchLink.parentNode) dnsPrefetchLink.parentNode.removeChild(dnsPrefetchLink);
-      if (lcpCandidatePreload.parentNode) lcpCandidatePreload.parentNode.removeChild(lcpCandidatePreload);
-    };
-  }, []); // Dependências vazias = executa uma vez na montagem
-// Novo arquivo otimizado para o useEffect de carregamento base64
-// Copie e cole este conteúdo no arquivo QuizIntro.tsx, substituindo o useEffect existente
-
   // Efeito para carregar a versão tiny da imagem como base64 para exibição instantânea - OTIMIZADO
   useEffect(() => {
     // Carrega a versão mais leve possível da imagem como base64 para exibição instantânea
@@ -243,7 +204,7 @@ export const QuizIntro: React.FC<QuizIntroProps> = ({
         data-section="intro"
       >
         {/* Ajuste no espaçamento vertical para mobile: space-y-5, e mantendo sm:space-y-8 para telas maiores */}
-        <div className="w-full max-w-lg px-4 sm:px-6 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-5 sm:space-y-8">
+        <div className="w-full max-w-md px-2 sm:px-4 pt-6 sm:pt-8 md:pt-10 pb-8 space-y-5 sm:space-y-8">
           {/* Logo e barra dourada alinhadas */}
           <div className="flex flex-col items-center">
             <div className="relative">
