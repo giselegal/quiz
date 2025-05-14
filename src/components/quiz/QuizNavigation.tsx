@@ -1,7 +1,7 @@
-
 import * as React from 'react';
 import { Button } from '../ui/button';
 import '@/styles/quiz-animations.css';
+import { ChevronLeft, ChevronRight, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface QuizNavigationProps {
   canProceed: boolean;
@@ -93,6 +93,9 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
     return '';
   };
 
+  const nextButtonText = isLastQuestion ? "Ver Resultado" : (currentQuestionType === 'strategic' ? "Próxima Pergunta Estratégica" : "Próxima Pergunta");
+  const previousButtonText = currentQuestionType === 'strategic' ? "Pergunta Estratégica Anterior" : "Pergunta Anterior";
+
   return (
     <div className="mt-6 w-full px-4 md:px-0 mb-8">
       <div className="flex flex-col items-center w-full">
@@ -111,23 +114,29 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             </Button>
           )}
 
-          {(currentQuestionType === 'strategic' || isLastQuestion) && (
-            <Button
+          {/* Condição de renderização do botão Próximo/Continuar/Ver Resultado ajustada */}
+          {/* Sempre renderiza o botão se não for uma questão estratégica normal que não pode prosseguir */}
+          {/* Ou se for estratégica ou última questão */}
+          {(currentQuestionType !== 'strategic' || canProceed || isLastQuestion) && (
+             <Button
               onClick={onNext}
               disabled={!canProceed}
-              className={`
-                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50
-                ${!canProceed 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
-                } 
-                ${showActivationEffect && currentQuestionType === 'strategic'
+              variant="outline" // Mantido de fix/revert-quiz-state
+              className={`text-lg px-6 py-3 flex items-center transition-all duration-300 ease-in-out
+                ${canProceed 
+                  ? 'bg-[#b29670] text-white hover:bg-[#a0845c] border-[#b29670]' // Estilo de fix/revert-quiz-state quando habilitado
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300' // Estilo de fix/revert-quiz-state quando desabilitado
+                } focus:ring-2 focus:ring-offset-2 focus:ring-[#b29670]
+                ${showActivationEffect && currentQuestionType === 'strategic' && canProceed // Adiciona animação se estratégica e pode prosseguir
                   ? 'auto-advance-ready' 
                   : ''
                 }
               `}
+              aria-label={nextButtonText}
+              aria-disabled={!canProceed}
             >
-              {isLastQuestion ? 'Ver Resultado' : 'Continuar'}
+              {nextButtonText}
+              {isLastQuestion ? <CheckCircle className="ml-2 h-5 w-5" /> : <ChevronRight className="ml-2 h-5 w-5" />}
             </Button>
           )}
         </div>
