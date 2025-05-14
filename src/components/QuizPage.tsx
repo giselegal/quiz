@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useQuizLogic } from '../hooks/useQuizLogic';
 import { UserResponse } from '@/types/quiz';
 import { toast } from './ui/use-toast';
@@ -9,7 +8,7 @@ import { QuizTransitionManager } from './quiz/QuizTransitionManager';
 import QuizNavigation from './quiz/QuizNavigation';
 import { strategicQuestions } from '@/data/strategicQuestions';
 import { useAuth } from '../context/AuthContext';
-import { trackQuizStart, trackQuizAnswer, trackQuizComplete, trackResultView } from '../utils/analytics';
+import { trackQuizStart, trackQuizAnswer, trackQuizComplete, trackResultView } from '@/utils/analytics';
 import { preloadImages } from '@/utils/imageManager';
 import LoadingManager from './quiz/LoadingManager';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,7 +41,7 @@ const QuizPage: React.FC = () => {
     calculateResults,
     handleStrategicAnswer: saveStrategicAnswer,
     submitQuizIfComplete,
-    // canProceed: canProceedFromLogic, // Removido para evitar confusão
+    canProceed,
     allQuestions,
     isInitialLoadComplete
   } = useQuizLogic();
@@ -130,8 +129,6 @@ const QuizPage: React.FC = () => {
         const nextIndex = currentStrategicQuestionIndex + 1;
         if (nextIndex < strategicQuestions.length) {
           const nextQuestion = strategicQuestions[nextIndex];
-          
-          // Pré-carregar a próxima questão estratégica imediatamente com alta prioridade
           if (nextQuestion.imageUrl) {
             preloadImages([{ 
               src: nextQuestion.imageUrl, 
@@ -139,27 +136,11 @@ const QuizPage: React.FC = () => {
               category: 'strategic',
               tags: [],
               alt: `Question ${nextIndex}`,
-              preloadPriority: 5 // Prioridade aumentada
-            }], { quality: 90 }); // Qualidade ligeiramente reduzida para carregamento mais rápido
+              preloadPriority: 3
+            }], { quality: 95 });
           }
           
-          // Pré-carregar também as imagens das opções da próxima questão
-          const optionImages = nextQuestion.options
-            .map(option => option.imageUrl)
-            .filter(Boolean) as string[];
-            
-          if (optionImages.length > 0) {
-            preloadImages(optionImages.map((src, i) => ({ 
-              src, 
-              id: `strategic-${nextIndex}-option-${i}`,
-              category: 'strategic',
-              tags: ['option'],
-              alt: `Option ${i}`,
-              preloadPriority: 4
-            })), { quality: 85, batchSize: 3 });
-          }
-          
-          // Também pré-carregar a questão depois da próxima com prioridade mais baixa
+          // Also preload the next-next question with lower priority if available
           if (nextIndex + 1 < strategicQuestions.length) {
             const nextNextQuestion = strategicQuestions[nextIndex + 1];
             if (nextNextQuestion.imageUrl) {
@@ -170,7 +151,7 @@ const QuizPage: React.FC = () => {
                 tags: [],
                 alt: `Question ${nextIndex+1}`,
                 preloadPriority: 2
-              }], { quality: 85 });
+              }], { quality: 95 });
             }
           }
         }
@@ -256,98 +237,18 @@ const QuizPage: React.FC = () => {
     }
   }, [calculateResults, handleNext, isLastQuestion, totalQuestions]);
 
-  // Define a questão atual com base no tipo (normal ou estratégica)
-  const actualCurrentQuestionData = showingStrategicQuestions
-    ? strategicQuestions[currentStrategicQuestionIndex]
-    : currentQuestion;
-
-  // Determina o tipo da questão para navegação
-  const currentQuestionTypeForNav = showingStrategicQuestions ? 'strategic' : 'normal';
-  
-  // Calcula as opções requeridas com base na questão atual
-  // Fallback para 1 para estratégicas, 3 para normais, se multiSelect não estiver definido
-  const calculatedRequiredOptions = actualCurrentQuestionData?.multiSelect || (showingStrategicQuestions ? 1 : 3);
-
-  let determinedCanProceed;
-  let finalSelectedCountForNav; // Usado para QuizNavigation e logs
-
-  if (showingStrategicQuestions) {
-      // Para questões estratégicas, usa a contagem de strategicAnswers
-      const strategicQuestionId = actualCurrentQuestionData?.id;
-      const currentStrategicSelectedCount = strategicQuestionId ? (strategicAnswers[strategicQuestionId]?.length || 0) : 0;
-      finalSelectedCountForNav = currentStrategicSelectedCount;
-      
-      console.log(`[QuizPage] Cálculo Strategic CanProceed - ID: ${strategicQuestionId}, Selecionadas (strategicAnswers): ${currentStrategicSelectedCount}, Requeridas: ${calculatedRequiredOptions}, Resultado: ${currentStrategicSelectedCount >= calculatedRequiredOptions}`);
-      determinedCanProceed = currentStrategicSelectedCount >= calculatedRequiredOptions;
-  } else { // Questões Normais
-      // Para questões normais, usa a contagem de currentAnswers
-      const currentNormalSelectedCount = currentAnswers?.length || 0;
-      finalSelectedCountForNav = currentNormalSelectedCount;
-
-      console.log(`[QuizPage] Cálculo Normal CanProceed - ID: ${actualCurrentQuestionData?.id}, Selecionadas (currentAnswers): ${currentNormalSelectedCount}, Requeridas: ${calculatedRequiredOptions}, Resultado: ${currentNormalSelectedCount === calculatedRequiredOptions}`);
-      determinedCanProceed = currentNormalSelectedCount === calculatedRequiredOptions;
-  }
-
-  console.log('[QuizPage] Props para QuizNavigation:', {
-    currentQuestionId: actualCurrentQuestionData?.id,
-    currentQuestionTypeForNav,
-    currentSelectedCountForNav: finalSelectedCountForNav,
-    calculatedRequiredOptions,
-    finalCanProceedForNav: determinedCanProceed,
-  });
-
-  // Render QuizNavigation
-  const renderQuizNavigation = () => (
-    <QuizNavigation
-      canProceed={determinedCanProceed}
-      onNext={
-        showingStrategicQuestions && actualCurrentQuestionData
-          ? () => handleStrategicAnswer({
-              questionId: actualCurrentQuestionData.id,
-              selectedOptions: strategicAnswers[actualCurrentQuestionData.id] || []
-            })
-          : handleNextClick
-      }
-      onPrevious={
-        showingStrategicQuestions
-          ? () => setCurrentStrategicQuestionIndex(prev => Math.max(0, prev - 1))
-          : handlePrevious
-      }
-      currentQuestionType={currentQuestionTypeForNav}
-      selectedOptionsCount={finalSelectedCountForNav}
-      isLastQuestion={
-        // Considera "última questão" para o botão APENAS se estivermos em questões estratégicas
-        // e for a última delas. Questões normais não terão o botão "Continuar/Ver Resultado"
-        // baseado nesta flag, dependerão do auto-avanço.
-        showingStrategicQuestions &&
-        currentStrategicQuestionIndex === strategicQuestions.length - 1
-      }
-      requiredOptionsCount={calculatedRequiredOptions}
-    />
-  );
-
-  // DEBUG: Informações visuais temporárias
-  const renderDebugInfo = () => {
-    // TEMPORARIAMENTE REMOVIDA A CONDIÇÃO PARA TESTE:
-    // if (showingStrategicQuestions) {
-    //   return null; 
-    // }
-    return (
-      <div style={{ position: 'fixed', bottom: '10px', left: '10px', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '10px', zIndex: 9999, fontSize: '12px', borderRadius: '5px' }}>
-        <p>DEBUG INFO (Visível Sempre):</p>
-        <p>- ID Questão Atual: {actualCurrentQuestionData?.id || 'N/A'}</p>
-        <p>- Opções Selecionadas (currentAnswers): {currentAnswers?.length || 0}</p>
-        <p>- Opções Requeridas (calculatedRequiredOptions): {calculatedRequiredOptions}</p>
-        <p>- Pode Prosseguir (determinedCanProceed): {determinedCanProceed ? 'SIM' : 'NÃO'}</p>
-        <p>- Tipo Questão p/ Nav (currentQuestionTypeForNav): {currentQuestionTypeForNav}</p>
-        <p>- Contagem p/ Nav (finalSelectedCountForNav): {finalSelectedCountForNav}</p>
-        <p>- Showing Strategic Qs: {showingStrategicQuestions ? 'SIM' : 'NÃO'}</p>
-      </div>
-    );
-  };
+  // Determine if we can proceed based on the question type and selected answers
+  const getCurrentCanProceed = useCallback(() => {
+    if (!currentQuestion) return false;
+    
+    const requiredSelections = currentQuestion.multiSelect || 1;
+    const currentAnswersLength = currentAnswers?.length || 0;
+    
+    return currentAnswersLength >= requiredSelections;
+  }, [currentAnswers?.length, currentQuestion]);
 
   return (
-    <LoadingManager isLoading={!pageIsReady} useQuizIntroLoading={true}>
+    <LoadingManager isLoading={!pageIsReady}>
       <div className="relative">
         {/* Barra de progresso */}
         <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
@@ -400,14 +301,18 @@ const QuizPage: React.FC = () => {
                   handlePrevious={handlePrevious}
                 />
                 
-                {/* Botões de navegação centralizados apenas aqui para evitar duplicação */}
-                {renderQuizNavigation()}
+                <QuizNavigation
+                  currentQuestionType={currentQuestion?.id?.startsWith('strategic') ? 'strategic' : 'normal'}
+                  selectedOptionsCount={currentAnswers?.length || 0}
+                  isLastQuestion={isLastQuestion}
+                  onNext={handleNextClick}
+                  onPrevious={handlePrevious}
+                  canProceed={getCurrentCanProceed()}
+                />
               </motion.div>
             )}
           </AnimatePresence>
         </QuizContainer>
-        {/* DEBUG: Renderiza as informações de depuração */}
-        {renderDebugInfo()}
       </div>
     </LoadingManager>
   );
