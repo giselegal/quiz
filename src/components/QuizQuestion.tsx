@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { QuizOption } from './quiz/QuizOption';
 import { highlightStrategicWords } from '@/utils/textHighlight';
 import { useQuestionScroll } from '@/hooks/useQuestionScroll';
+import QuizNavigation from './quiz/QuizNavigation';
 import '@/styles/quiz-animations.css';
 
 interface QuizQuestionProps {
@@ -25,8 +26,9 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     question,
     onAnswer,
     currentAnswers,
-    autoAdvance = false,
+    autoAdvance = true, // Por padrão, todas as questões usam auto-avanço
     hideTitle = false,
+    onNextClick,
     onPreviousClick,
     showQuestionImage = false,
     isStrategicQuestion = false
@@ -48,12 +50,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
   const { scrollToQuestion } = useQuestionScroll();
   
   useEffect(() => {
-    console.log(`QuizQuestion renderizada: ${question.id}, isStrategic: ${isStrategicQuestion}`);
+    console.log(`QuizQuestion renderizada: ${question.id}, isStrategic: ${isStrategicQuestion}, tipo: ${question.type}`);
     console.log(`Respostas atuais: ${currentAnswers}`);
-    console.log(`Tipo de questão: ${question.type}, multiSelect: ${question.multiSelect}`);
-    
     scrollToQuestion(question.id);
-  }, [question.id, scrollToQuestion, isStrategicQuestion, currentAnswers, question.type, question.multiSelect]);
+  }, [question.id, scrollToQuestion, isStrategicQuestion, currentAnswers, question.type]);
 
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];
@@ -74,7 +74,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
       }
     }
     
-    console.log(`Opção selecionada: ${optionId}, novas seleções: ${newSelectedOptions}`);
+    console.log(`Opção selecionada: ${optionId}, novas seleções: ${newSelectedOptions}, tipo de questão: ${question.type}`);
     
     // Atualizar as respostas imediatamente
     onAnswer({
@@ -92,6 +92,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     }
     return isMobile ? "grid-cols-2 gap-1 px-0.5" : "grid-cols-2 gap-3 px-2";
   };
+  
+  // Determinar se o usuário pode avançar para a próxima questão
+  const requiredSelections = isStrategicQuestion ? 1 : (question.multiSelect || 3);
+  const canProceed = currentAnswers.length === requiredSelections;
   
   return (
     <div className={cn("w-full max-w-6xl mx-auto pb-5 relative", 
@@ -156,6 +160,17 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
           />
         ))}
       </div>
+      
+      {/* Componente de navegação - simplificado e unificado */}
+      <QuizNavigation
+        canProceed={canProceed}
+        onNext={onNextClick || (() => {})}
+        onPrevious={onPreviousClick}
+        currentQuestionType={isStrategicQuestion ? 'strategic' : 'normal'}
+        selectedOptionsCount={currentAnswers.length}
+        isLastQuestion={false}
+        requiredOptionsCount={requiredSelections}
+      />
     </div>
   );
 };

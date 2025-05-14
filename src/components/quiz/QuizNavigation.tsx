@@ -22,13 +22,12 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   isLastQuestion = false,
   requiredOptionsCount = 3
 }) => {
-  console.log("QuizNavigation RENDERED"); // Debug log
   // Estado para controlar a animação de ativação do botão
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // Debug logs aprimorados
   React.useEffect(() => {
-    // Registrar informações sobre a questão atual para depuração
     console.log(`QuizNavigation - Tipo: ${currentQuestionType}, Selecionadas: ${selectedOptionsCount}, Requeridas: ${requiredOptionsCount}, Pode prosseguir: ${canProceed}`);
   }, [currentQuestionType, selectedOptionsCount, requiredOptionsCount, canProceed]);
 
@@ -40,10 +39,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       timerRef.current = null;
     }
     
-    // Log detalhado para depuração
-    console.log(`[QuizNavigation] Estado atual - Tipo: ${currentQuestionType}, Selecionadas: ${selectedOptionsCount}, Requeridas: ${requiredOptionsCount}, Pode prosseguir: ${canProceed}`);
-    
-    // Condição para auto-avanço: Apenas para questões normais (não estratégicas) E 
+    // Condição para auto-avanço: Para questões normais (não estratégicas) E 
     // quando selecionou EXATAMENTE o número requerido
     if (canProceed && 
         selectedOptionsCount === requiredOptionsCount && 
@@ -54,14 +50,13 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
-      // Configurar um timer para avançar com um delay reduzido para feedback mais rápido
-      // Reduzido para 300ms para ser mais rápido mas ainda permitir ver o botão ativado
+      // Configurar timer para avançar com delay reduzido
       timerRef.current = setTimeout(() => {
         console.log("Executando auto-avanço para questão normal");
         onNext();
-        setShowActivationEffect(false); // Resetar o efeito visual após o avanço
-        timerRef.current = null; // Limpar referência após execução
-      }, 300); // Reduzido para 300ms para feedback mais rápido
+        setShowActivationEffect(false);
+        timerRef.current = null;
+      }, 200); // Reduzido de 300ms para 200ms para feedback mais rápido
       
       return () => {
         if (timerRef.current) {
@@ -71,18 +66,16 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       };
     } else if (canProceed && currentQuestionType === 'strategic') {
       // Para questões estratégicas, apenas mostrar o efeito visual, sem auto-avanço
-      // O usuário precisa clicar no botão "Continuar"
       setShowActivationEffect(true);
     } else {
       // Se as condições não são mais satisfeitas
-      setShowActivationEffect(false); // Resetar o efeito visual
+      setShowActivationEffect(false);
     }
   }, [canProceed, onNext, selectedOptionsCount, requiredOptionsCount, currentQuestionType]);
 
   // Limpar timers quando o componente for desmontado
   React.useEffect(() => {
     return () => {
-      console.log("QuizNavigation desmontando - limpando timers");
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -103,7 +96,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0 mb-8">
       <div className="flex flex-col items-center w-full">
-        {!canProceed && currentQuestionType !== 'strategic' && (
+        {!canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
@@ -112,7 +105,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             <Button 
               variant="outline" 
               onClick={onPrevious}
-              className="text-[#8F7A6A] border-[#8F7A6A] hover:bg-[#F3E8E6]/50 hover:text-[#A38A69] py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-opacity-50"
+              className="text-[#8F7A6A] border-[#8F7A6A] hover:bg-[#F3E8E6]/50 hover:text-[#A38A69] py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#B89B7A] focus:ring-opacity-50"
             >
               Voltar
             </Button>
@@ -123,7 +116,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
               onClick={onNext}
               disabled={!canProceed}
               className={`
-                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50
+                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50
                 ${!canProceed 
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                   : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
@@ -138,10 +131,6 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             </Button>
           )}
         </div>
-        {/* Adicionar helper text para questões estratégicas se o botão estiver visível e desabilitado */}
-        {currentQuestionType === 'strategic' && !canProceed && (
-           <p className="text-sm text-[#8F7A6A] mt-3">{getHelperText()}</p>
-        )}
       </div>
     </div>
   );

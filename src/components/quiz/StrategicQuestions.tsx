@@ -59,7 +59,7 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
       if (currentQuestion?.imageUrl) {
         console.log('Pré-carregando imagem da questão atual:', currentQuestion.imageUrl);
         preloadImagesByUrls([currentQuestion.imageUrl], {
-          quality: 85,
+          quality: 90, // Aumentado para melhor qualidade
           batchSize: 1,
           onComplete: () => {
             console.log('Imagem da questão estratégica atual carregada');
@@ -68,12 +68,10 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
             if (nextQuestion?.imageUrl) {
               console.log('Pré-carregando imagem da próxima questão:', nextQuestion.imageUrl);
               preloadImagesByUrls([nextQuestion.imageUrl], {
-                quality: 75,
+                quality: 80,
                 batchSize: 1,
                 onComplete: () => {
                   console.log('Imagem da próxima questão estratégica carregada');
-                  
-                  // Por fim, carregar outras imagens estratégicas em segundo plano
                   preloadCriticalImages('strategic');
                   setImagesPreloaded(true);
                   preloadingRef.current = false;
@@ -119,7 +117,8 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
         currentAnswers={currentAnswers}
         showQuestionImage={true}
         isStrategicQuestion={true}
-        autoAdvance={false} // Desabilitar auto-avanço para questões estratégicas
+        autoAdvance={false} // Questões estratégicas precisam de clique manual
+        onNextClick={onNextClick}
       />
     </AnimatedWrapper>
   );

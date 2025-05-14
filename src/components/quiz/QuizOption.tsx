@@ -30,7 +30,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   const is3DQuestion = option.imageUrl?.includes('sapatos') || option.imageUrl?.includes('calca');
   const optionRef = useRef<HTMLDivElement>(null);
   
-  // Usar useEffect para lidar com mudanças de isSelected sem causar flash
+  // Aplicar efeitos visuais quando o isSelected mudar
   useEffect(() => {
     if (optionRef.current) {
       if (isSelected) {
@@ -43,7 +43,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         } 
         // Para opções de imagem - sem borda, apenas sombra
         else {
-          optionRef.current.style.borderColor = 'transparent';
+          optionRef.current.style.borderColor = '#b29670';
           optionRef.current.style.boxShadow = isStrategicOption 
             ? '0 15px 30px rgba(0, 0, 0, 0.25)' 
             : '0 12px 24px rgba(0, 0, 0, 0.2)';
@@ -55,38 +55,26 @@ const QuizOption: React.FC<QuizOptionProps> = ({
           if (optionRef.current) {
             optionRef.current.classList.remove('quiz-option-selected-flash');
           }
-        }, 300);
+        }, 200); // Reduzido de 300ms para 200ms
       } else {
-        // Comportamento consistente para não-selecionado
+        // Comportamento para não-selecionado
         optionRef.current.style.borderColor = '#B89B7A';
         optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
       }
     }
   }, [isSelected, isStrategicOption, type]);
   
-  // Manipulador de clique para seleção de opção - sem delay
+  // Manipulador de clique otimizado para seleção de opção - sem delay
   const handleClick = () => {
     if (!isDisabled) {
-      console.log(`Opção clicada: ${option.id}, tipo: ${isStrategicOption ? 'estratégica' : 'normal'}`);
+      console.log(`Opção clicada: ${option.id}, tipo: ${type}, categoria: ${option.styleCategory}`);
       
       // Aplicar mudança visual imediatamente para feedback instantâneo
       if (optionRef.current) {
-        // Efeito visual de seleção instantâneo
-        if (!isSelected) {
-          optionRef.current.classList.add('quiz-option-selected-flash');
-          
-          // Aplicar transformação imediata para feedback visual
-          optionRef.current.style.borderColor = '#b29670';
-          optionRef.current.style.boxShadow = isStrategicOption 
-            ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
-            : '0 4px 8px rgba(178, 150, 112, 0.25)';
-          
-          setTimeout(() => {
-            if (optionRef.current) {
-              optionRef.current.classList.remove('quiz-option-selected-flash');
-            }
-          }, 300);
-        }
+        optionRef.current.style.borderColor = '#b29670';
+        optionRef.current.style.boxShadow = isStrategicOption 
+          ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
+          : '0 4px 8px rgba(178, 150, 112, 0.25)';
       }
       
       // Chamar onSelect imediatamente - sem delay
@@ -113,7 +101,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
           "p-4 border",
           
           // Fundo sólido sem transparência e adicionando sombra padrão
-          "bg-[#FEFEFE] shadow-sm hover:shadow-md transition-all duration-300"
+          "bg-[#FEFEFE] shadow-sm hover:shadow-md transition-all duration-200"
         )}
       >
         {type !== 'text' && option.imageUrl && (

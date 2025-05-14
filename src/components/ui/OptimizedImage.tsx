@@ -1,180 +1,90 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
-import { optimizeCloudinaryUrl, getResponsiveImageSources, getLowQualityPlaceholder } from '@/utils/imageUtils';
-import { getImageMetadata, isImagePreloaded, getOptimizedImage } from '@/utils/imageManager';
+import { isImagePreloaded, optimizeImageUrl } from '@/utils/preloadUtils';
 
 interface OptimizedImageProps {
   src: string;
   alt: string;
-  width?: number;
-  height?: number;
   className?: string;
+  style?: React.CSSProperties;
+  sizes?: string;
   priority?: boolean;
   onLoad?: () => void;
-  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
-  style?: React.CSSProperties;
+  onError?: () => void;
+  width?: number | string; 
+  height?: number | string;
 }
 
-/**
- * Componente de imagem otimizado que implementa:
- * - Lazy loading
- * - Carregamento prioritário opcional
- * - Fallback para imagens que falham
- * - Estado de carregamento com placeholder
- * - Otimização automática de URLs do Cloudinary
- * - Carregamento progressivo com efeito blur
- * - Integração com o banco de imagens
- */
-export default function OptimizedImage({
+const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
-  width,
-  height,
   className,
+  style,
+  sizes,
   priority = false,
   onLoad,
-  objectFit = 'cover',
-  style
-}: OptimizedImageProps) {
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
-  const [blurredLoaded, setBlurredLoaded] = useState(false);
+  onError,
+  width,
+  height
+}) => {
+  // Converter width e height para string, se forem números
+  const widthStr = width !== undefined ? String(width) : undefined;
+  const heightStr = height !== undefined ? String(height) : undefined;
+  
+  const isPreloaded = isImagePreloaded(src);
+  
+  // Se a imagem já foi pré-carregada, podemos renderizá-la diretamente
+  // sem precisar de estado de loading
+  const [loaded, setLoaded] = React.useState(isPreloaded);
 
-  // Check if this image has metadata in our image bank
-  const imageMetadata = useMemo(() => src ? getImageMetadata(src) : undefined, [src]);
+  // Para imagens não pré-carregadas, rastreamos o carregamento
+  const handleLoad = () => {
+    setLoaded(true);
+    onLoad?.();
+  };
 
-  // Generate placeholders and optimized URLs only once
-  const placeholderSrc = useMemo(() => {
-    if (!src) return '';
-    return getLowQualityPlaceholder(src);
-  }, [src]);
+  const handleError = () => {
+    console.error(`Failed to load image: ${src}`);
+    onError?.();
+  };
 
-  // Otimizar URLs do Cloudinary automaticamente
-  const optimizedSrc = useMemo(() => {
-    if (!src) return '';
-    
-    // Use metadata width/height if available and not overridden
-    const imgWidth = width || (imageMetadata?.width || undefined);
-    const imgHeight = height || (imageMetadata?.height || undefined);
-    
-    return getOptimizedImage(src, {
-      quality: 95,
-      format: 'auto',
-      width: imgWidth,
-      height: imgHeight
-    });
-  }, [src, width, height, imageMetadata]);
-
-  // Get responsive image attributes if needed
-  const responsiveImageProps = useMemo(() => {
-    if (!src) return { srcSet: '', sizes: '' };
-    if (width && width > 300) {
-      return getResponsiveImageSources(src, [width/2, width, width*1.5]);
-    }
-    return { srcSet: '', sizes: '' };
-  }, [src, width]);
-
-  // For priority images, we check if they're already preloaded and update state accordingly
-  useEffect(() => {
-    // Reset states when src changes
-    setLoaded(false);
-    setBlurredLoaded(false);
-    setError(false);
-    
-    if (src && priority) {
-      if (isImagePreloaded(src)) {
-        // If already preloaded, mark as loaded
-        setLoaded(true);
-        onLoad?.();
-      } else {
-        // Otherwise load it now
-        const img = new Image();
-        img.src = optimizedSrc;
-        img.onload = () => {
-          setLoaded(true);
-          onLoad?.();
-        };
-        img.onerror = () => setError(true);
-      }
-
-      // Always load the blurred version for smoother transitions
-      const blurImg = new Image();
-      blurImg.src = placeholderSrc;
-      blurImg.onload = () => setBlurredLoaded(true);
-    }
-  }, [optimizedSrc, placeholderSrc, priority, src, onLoad]);
+  // Otimizar a URL da imagem se necessário
+  const optimizedSrc = optimizeImageUrl(src, {
+    quality: priority ? 95 : 85
+  });
   
   return (
-    <div 
-      className="relative"
-      style={{
-        width: style?.width || '100%', // Prioriza style.width, senão 100% para responsividade
-        height: style?.height || (height ? `${height}px` : 'auto'), // Prioriza style.height, senão a prop height em pixels, senão auto
-        ...style // Aplica o resto do style original passado via props
-      }} 
-    >
-      {!loaded && !error && (
-        <>
-          {/* Low quality placeholder image */}
-          {blurredLoaded && (
-            <img 
-              src={placeholderSrc} 
-              alt="" 
-              width={width} 
-              height={height} 
-              className={cn(
-                "absolute inset-0 w-full h-full",
-                objectFit === 'cover' && "object-cover",
-                objectFit === 'contain' && "object-contain",
-                objectFit === 'fill' && "object-fill",
-                objectFit === 'none' && "object-none",
-                objectFit === 'scale-down' && "object-scale-down",
-                "blur-xl scale-110" // Blur effect for placeholders
-              )}
-              aria-hidden="true"
-            />
+    <>
+      {!loaded && (
+        <div 
+          className={cn(
+            "flex items-center justify-center bg-gray-100",
+            className
           )}
-          
-          {/* Shimmer loading effect */}
-          <div className="absolute inset-0 bg-gray-100 animate-pulse rounded" />
-        </>
-      )}
-      
-      <img 
-        src={optimizedSrc} 
-        alt={imageMetadata?.alt || alt}  // Use metadata alt if available
-        width={width} 
-        height={height}
-        loading={priority ? "eager" : "lazy"}
-        decoding={priority ? "sync" : "async"}
-        fetchPriority={priority ? "high" : "auto"}
-        srcSet={responsiveImageProps.srcSet || undefined}
-        sizes={responsiveImageProps.sizes || undefined}
-        onLoad={() => {
-          setLoaded(true);
-          onLoad?.();
-        }}
-        onError={() => setError(true)}
-        className={cn(
-          "w-full h-full transition-opacity duration-300",
-          !loaded && "opacity-0",
-          loaded && "opacity-100",
-          objectFit === 'cover' && "object-cover",
-          objectFit === 'contain' && "object-contain",
-          objectFit === 'fill' && "object-fill",
-          objectFit === 'none' && "object-none",
-          objectFit === 'scale-down' && "object-scale-down",
-          className
-        )}
-        style={style}
-      />
-      
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
-          <span className="text-sm text-gray-500">Imagem não disponível</span>
+          style={style}
+        >
+          <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
         </div>
       )}
-    </div>
+      
+      <img
+        src={optimizedSrc}
+        alt={alt}
+        loading={priority ? "eager" : "lazy"}
+        onLoad={handleLoad}
+        onError={handleError}
+        className={cn(
+          className,
+          !loaded && "hidden"
+        )}
+        style={style}
+        sizes={sizes}
+        width={widthStr}
+        height={heightStr}
+      />
+    </>
   );
-}
+};
+
+export default OptimizedImage;

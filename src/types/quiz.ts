@@ -71,20 +71,20 @@ export interface QuizConfig {
   };
 }
 
-// Add the missing interface for UserResponse
+// Interface for UserResponse
 export interface UserResponse {
   questionId: string;
   selectedOptions: string[];
 }
 
-// Add the missing interface for QuizResult
+// Interface for QuizResult
 export interface QuizResult {
   primaryStyle: StyleResult;
   secondaryStyles: StyleResult[];
   totalSelections?: number;
 }
 
-// Add BlockType for the SortableBlock component
+// BlockType for the SortableBlock component
 export type BlockType = 
   | 'title' 
   | 'subtitle' 
@@ -99,3 +99,70 @@ export type BlockType =
   | 'heading'
   | 'paragraph'
   | string; // Allow any string to handle dynamic values
+
+// Add interface for the result page configuration
+export interface ResultPageConfig {
+  styleType: string;
+  header: {
+    content: { 
+      title: string; 
+      subtitle: string;
+    };
+    style: {
+      paddingY: string;
+      paddingX: string;
+      backgroundColor: string;
+      textColor: string;
+      borderRadius: string;
+    };
+    visible: boolean;
+  };
+  mainContent: {
+    content: {
+      description: string;
+      mainImage: string;
+      tabletImage: string;
+      showSecondaryStyles: boolean;
+      showOffer: boolean;
+    };
+    style: {
+      paddingY: string;
+      paddingX: string;
+      backgroundColor: string;
+      textColor: string;
+      borderRadius: string;
+    };
+    visible: boolean;
+  };
+  offer: {
+    content: {
+      title: string;
+      description: string;
+      buttonText: string;
+      buttonUrl: string;
+      showPrice: boolean;
+      regularPrice: string;
+      salePrice: string;
+      showInstallments: boolean;
+      installmentCount: number;
+      installmentPrice: string;
+    };
+    style: {
+      paddingY: string;
+      paddingX: string;
+      backgroundColor: string;
+      textColor: string;
+      borderRadius: string;
+      buttonColor: string;
+      buttonTextColor: string;
+    };
+    visible: boolean;
+  };
+  globalStyles?: Record<string, any>;
+  blocks?: Array<{
+    id: string;
+    type: BlockType;
+    content: Record<string, any>;
+    style?: Record<string, any>;
+  }>;
+}
