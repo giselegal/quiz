@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { QuizQuestion as QuizQuestionType, UserResponse } from '../types/quiz';
@@ -26,7 +27,6 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
     currentAnswers,
     autoAdvance = false,
     hideTitle = false,
-    onNextClick,
     onPreviousClick,
     showQuestionImage = false,
     isStrategicQuestion = false
@@ -34,6 +34,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
 
   // Fallback defensivo para evitar tela branca
   if (!question || !question.title || !Array.isArray(question.options)) {
+    console.error('Dados inválidos da questão:', question);
     return (
       <div className="w-full max-w-2xl mx-auto py-12 text-center text-red-700">
         Erro: Dados da questão ausentes ou inválidos. Por favor, recarregue a página ou tente novamente mais tarde.
@@ -47,8 +48,12 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
   const { scrollToQuestion } = useQuestionScroll();
   
   useEffect(() => {
+    console.log(`QuizQuestion renderizada: ${question.id}, isStrategic: ${isStrategicQuestion}`);
+    console.log(`Respostas atuais: ${currentAnswers}`);
+    console.log(`Tipo de questão: ${question.type}, multiSelect: ${question.multiSelect}`);
+    
     scrollToQuestion(question.id);
-  }, [question.id, scrollToQuestion]);
+  }, [question.id, scrollToQuestion, isStrategicQuestion, currentAnswers, question.type, question.multiSelect]);
 
   const handleOptionSelect = (optionId: string) => {
     let newSelectedOptions: string[];
@@ -68,6 +73,8 @@ const QuizQuestion: React.FC<QuizQuestionProps> = (props) => {
         newSelectedOptions = [...currentAnswers, optionId];
       }
     }
+    
+    console.log(`Opção selecionada: ${optionId}, novas seleções: ${newSelectedOptions}`);
     
     // Atualizar as respostas imediatamente
     onAnswer({

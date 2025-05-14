@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
@@ -23,8 +24,26 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const preloadingRef = useRef(false);
   
+  useEffect(() => {
+    console.log('StrategicQuestions montado com índice:', currentQuestionIndex);
+    console.log('Total de questões estratégicas:', strategicQuestions.length);
+    return () => {
+      console.log('StrategicQuestions desmontado');
+    };
+  }, []);
+  
   const currentQuestion = strategicQuestions[currentQuestionIndex];
+  
+  useEffect(() => {
+    console.log('Questão estratégica atual:', currentQuestionIndex, currentQuestion?.id);
+  }, [currentQuestionIndex, currentQuestion]);
+  
+  // Recuperar as respostas da questão atual, se existirem
   const currentAnswers = currentQuestion ? (answers[currentQuestion.id] || []) : [];
+
+  useEffect(() => {
+    console.log('Respostas para questão estratégica atual:', currentAnswers);
+  }, [currentAnswers]);
   
   // Obter a próxima questão para pré-carregar
   const nextIndex = currentQuestionIndex + 1;
@@ -33,23 +52,26 @@ export const StrategicQuestions: React.FC<StrategicQuestionsProps> = ({
   // Preload strategic images efficiently
   useEffect(() => {
     if (!imagesPreloaded && !preloadingRef.current) {
+      console.log('Iniciando pré-carregamento de imagens estratégicas');
       preloadingRef.current = true;
       
       // Primeiro, carregue a questão atual com alta prioridade
       if (currentQuestion?.imageUrl) {
+        console.log('Pré-carregando imagem da questão atual:', currentQuestion.imageUrl);
         preloadImagesByUrls([currentQuestion.imageUrl], {
           quality: 85,
           batchSize: 1,
           onComplete: () => {
-            console.log('Current strategic question image loaded');
+            console.log('Imagem da questão estratégica atual carregada');
             
             // Depois, pré-carregar a próxima questão com prioridade média
             if (nextQuestion?.imageUrl) {
+              console.log('Pré-carregando imagem da próxima questão:', nextQuestion.imageUrl);
               preloadImagesByUrls([nextQuestion.imageUrl], {
                 quality: 75,
                 batchSize: 1,
                 onComplete: () => {
-                  console.log('Next strategic question image loaded');
+                  console.log('Imagem da próxima questão estratégica carregada');
                   
                   // Por fim, carregar outras imagens estratégicas em segundo plano
                   preloadCriticalImages('strategic');

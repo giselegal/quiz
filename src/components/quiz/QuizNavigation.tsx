@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { Button } from '../ui/button';
 import '@/styles/quiz-animations.css';
@@ -21,7 +22,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   isLastQuestion = false,
   requiredOptionsCount = 3
 }) => {
-  console.log("QuizNavigation RENDERED"); // Adicionado para verificar a renderização
+  console.log("QuizNavigation RENDERED"); // Debug log
   // Estado para controlar a animação de ativação do botão
   const [showActivationEffect, setShowActivationEffect] = React.useState(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -39,7 +40,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       timerRef.current = null;
     }
     
-    // Adicionar log detalhado para depuração
+    // Log detalhado para depuração
     console.log(`[QuizNavigation] Estado atual - Tipo: ${currentQuestionType}, Selecionadas: ${selectedOptionsCount}, Requeridas: ${requiredOptionsCount}, Pode prosseguir: ${canProceed}`);
     
     // Condição para auto-avanço: Apenas para questões normais (não estratégicas) E 
@@ -53,14 +54,14 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       // Mostrar a ativação visual do botão imediatamente
       setShowActivationEffect(true);
       
-      // Configurar um timer para avançar com um delay suficiente para permitir o feedback visual
-      // Aumentado para 400ms para dar tempo de visualizar o botão ativado
+      // Configurar um timer para avançar com um delay reduzido para feedback mais rápido
+      // Reduzido para 300ms para ser mais rápido mas ainda permitir ver o botão ativado
       timerRef.current = setTimeout(() => {
         console.log("Executando auto-avanço para questão normal");
         onNext();
         setShowActivationEffect(false); // Resetar o efeito visual após o avanço
         timerRef.current = null; // Limpar referência após execução
-      }, 400); // Aumentado para 400ms para ser perceptível
+      }, 300); // Reduzido para 300ms para feedback mais rápido
       
       return () => {
         if (timerRef.current) {
@@ -102,7 +103,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0 mb-8">
       <div className="flex flex-col items-center w-full">
-        {!canProceed && currentQuestionType !== 'strategic' && ( // Modificado para não mostrar para strategic aqui, já que o botão pode estar visível
+        {!canProceed && currentQuestionType !== 'strategic' && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
         )}
         
@@ -127,7 +128,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                   : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
                 } 
-                ${showActivationEffect && currentQuestionType === 'strategic' // Efeito de ativação só para strategic se o botão estiver visível
+                ${showActivationEffect && currentQuestionType === 'strategic'
                   ? 'auto-advance-ready' 
                   : ''
                 }

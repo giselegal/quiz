@@ -1,10 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
 import { QuizHeader } from './QuizHeader';
 import { StrategicQuestions } from './StrategicQuestions';
-import QuizNavigation from './QuizNavigation';
 
 interface QuizContentProps {
   user: any;
@@ -34,14 +33,10 @@ export const QuizContent: React.FC<QuizContentProps> = ({
   // Get user name from localStorage if not provided in props
   const userName = user?.userName || localStorage.getItem('userName') || '';
   
-  // Determine the required selections based on question type
-  const requiredSelections = showingStrategicQuestions ? 1 : (currentQuestion?.multiSelect || 3);
-  
-  // Check if we have enough selections to proceed
-  const canProceed = currentAnswers?.length >= requiredSelections;
-  
   // Log importante para depuração
-  console.log(`QuizContent - Questão atual(id=${currentQuestion?.id}, type=${currentQuestion?.type}), respostas: ${currentAnswers?.length || 0}, isStrategic: ${showingStrategicQuestions}, canProceed: ${canProceed}`);
+  useEffect(() => {
+    console.log(`QuizContent renderizado - Questão atual(id=${currentQuestion?.id}, type=${currentQuestion?.type}), respostas: ${currentAnswers?.length || 0}, isStrategic: ${showingStrategicQuestions}`);
+  }, [currentQuestion, currentAnswers, showingStrategicQuestions]);
   
   return (
     <>

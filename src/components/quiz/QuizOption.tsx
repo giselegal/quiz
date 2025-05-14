@@ -28,7 +28,6 @@ const QuizOption: React.FC<QuizOptionProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const is3DQuestion = option.imageUrl?.includes('sapatos') || option.imageUrl?.includes('calca');
-  // Usar ref para evitar re-renderizações desnecessárias
   const optionRef = useRef<HTMLDivElement>(null);
   
   // Usar useEffect para lidar com mudanças de isSelected sem causar flash
@@ -63,7 +62,7 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
       }
     }
-  }, [isSelected, isStrategicOption]);
+  }, [isSelected, isStrategicOption, type]);
   
   // Manipulador de clique para seleção de opção - sem delay
   const handleClick = () => {
@@ -74,7 +73,6 @@ const QuizOption: React.FC<QuizOptionProps> = ({
       if (optionRef.current) {
         // Efeito visual de seleção instantâneo
         if (!isSelected) {
-          // Adicionar flash de seleção para feedback instantâneo
           optionRef.current.classList.add('quiz-option-selected-flash');
           
           // Aplicar transformação imediata para feedback visual
@@ -83,7 +81,6 @@ const QuizOption: React.FC<QuizOptionProps> = ({
             ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
             : '0 4px 8px rgba(178, 150, 112, 0.25)';
           
-          // Remover a classe de animação após a animação terminar
           setTimeout(() => {
             if (optionRef.current) {
               optionRef.current.classList.remove('quiz-option-selected-flash');

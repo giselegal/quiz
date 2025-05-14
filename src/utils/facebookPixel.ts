@@ -1,76 +1,61 @@
 
-// Corrigir a definição de fbq para resolver "All declarations of 'fbq' must have identical modifiers."
-// Sem acesso ao arquivo original, a correção seria unificar as declarações:
-
-interface FacebookPixelEvent {
-  (event: string, eventId: string): void;
-  (event: string, eventId: string, data: any): void;
+interface WindowWithFBQ extends Window {
+  fbq?: FacebookPixelEvent;
 }
 
-// Declare fb pixel
+export type FacebookPixelEvent = (
+  event: string,
+  eventName: string,
+  params?: any,
+  eventId?: { eventID: string }
+) => void;
+
 declare global {
   interface Window {
-    fbq: FacebookPixelEvent;
+    fbq?: FacebookPixelEvent;
   }
 }
 
-// Inicializar o Facebook Pixel
-export const initFacebookPixel = (pixelId: string = '1234567890123456'): void => {
-  if (typeof window === 'undefined') return;
-
-  // Verificar se o script já foi carregado
-  if (window.fbq) return;
-
-  // Criar o script do Facebook Pixel
-  window.fbq = function() {
-    // @ts-ignore
-    window.fbq.callMethod ? 
-    // @ts-ignore
-    window.fbq.callMethod.apply(window.fbq, arguments) : 
-    // @ts-ignore
-    window.fbq.queue.push(arguments);
-  };
-
-  // @ts-ignore
-  if (!window._fbq) window._fbq = window.fbq;
-  // @ts-ignore
-  window.fbq.push = window.fbq;
-  // @ts-ignore
-  window.fbq.loaded = true;
-  // @ts-ignore
-  window.fbq.version = '2.0';
-  // @ts-ignore
-  window.fbq.queue = [];
-
-  // Carregar o script do Facebook
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-  
-  const firstScript = document.getElementsByTagName('script')[0];
-  if (firstScript && firstScript.parentNode) {
-    firstScript.parentNode.insertBefore(script, firstScript);
-  }
-
-  // Inicializar o Pixel
-  if (window.fbq) {
-    window.fbq('init', pixelId);
-    window.fbq('track', 'PageView');
+export const initFacebookPixel = (pixelId: string): void => {
+  // Only initialize if we're in a browser environment
+  if (typeof window !== 'undefined') {
+    // Add the Facebook pixel code
+    const script = document.createElement('script');
+    script.innerHTML = `
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '${pixelId}');
+      fbq('track', 'PageView');
+    `;
+    document.head.appendChild(script);
+    
+    // Add the noscript fallback
+    const noscript = document.createElement('noscript');
+    const img = document.createElement('img');
+    img.height = 1;
+    img.width = 1;
+    img.style.display = 'none';
+    img.src = `https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`;
+    noscript.appendChild(img);
+    document.head.appendChild(noscript);
   }
 };
 
-// Função para carregar o Facebook Pixel
-export const loadFacebookPixel = (): void => {
-  try {
-    initFacebookPixel();
-  } catch (error) {
-    console.error('Erro ao carregar o Facebook Pixel:', error);
-  }
-};
-
-// Função para rastrear eventos do Facebook Pixel
-export const trackPixelEvent = (event: string, data?: any): void => {
+export const trackQuizEvent = (eventName: string, params?: any): void => {
   if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', event, data);
+    window.fbq('track', eventName, params);
+    console.log(`[Facebook Pixel] Tracked event: ${eventName}`, params);
+  } else {
+    console.warn(`[Facebook Pixel] Failed to track event: ${eventName}. Pixel not initialized.`);
   }
+};
+
+export const trackQuizCompletion = (primaryStyle: string): void => {
+  trackQuizEvent('QuizCompleted', { primaryStyle });
 };
