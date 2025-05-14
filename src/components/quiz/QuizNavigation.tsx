@@ -56,7 +56,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
         onNext();
         setShowActivationEffect(false);
         timerRef.current = null;
-      }, 100); // Reduzido de 200ms para 100ms para feedback mais rápido
+      }, 50); // Reduzido de 100ms para 50ms para feedback mais rápido
       
       return () => {
         if (timerRef.current) {
@@ -99,9 +99,9 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0 mb-8">
       <div className="flex flex-col items-center w-full">
-        {!canProceed && (
+        {/* !canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
-        )}
+        ) */}
         
         <div className="flex justify-center items-center w-full gap-3">
           {onPrevious && (
