@@ -52,7 +52,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
       if (shouldAutoAdvance) {
         const newTimer = setTimeout(() => {
           onNext(); // Chama a função para avançar para a próxima questão/etapa
-        }, 1500); // Aumentado para 1.5 segundos para o efeito visual ser mais perceptível antes do avanço
+        }, 50); // Alterado de 1500ms para 50ms
         setAutoAdvanceTimer(newTimer);
       }
       
@@ -91,9 +91,9 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0">
       <div className="flex flex-col items-center w-full">
-        {!canProceed && currentQuestionType !== 'strategic' && (
+        {/* !canProceed && currentQuestionType !== 'strategic' && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
-        )}
+        ) */}
         
         <div className="flex justify-center items-center w-full gap-3">
           {onPrevious && (
