@@ -23,6 +23,7 @@ interface OptimizedImageProps {
  * - Otimiza formatos de imagem automaticamente via Cloudinary
  * - Suporta lazy loading e priority loading
  * - Adicionado melhor tratamento de erro e estados de transição
+ * - Transição suave entre placeholder e imagem principal
  */
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
@@ -40,6 +41,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lowQualitySrc, setLowQualitySrc] = useState<string>('');
   const [hasError, setHasError] = useState(false);
+  const [placeholderFading, setPlaceholderFading] = useState(false);
   
   /**
    * Otimiza URLs do Cloudinary aplicando transformações para melhor qualidade e performance.
@@ -72,12 +74,17 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       'e_sharpen:60'         // leve nitidez para melhorar a qualidade percebida
     ].join(',');
     
-    // Extrair o nome do arquivo e extensão
-    const filePathParts = pathAndQuery.split('/');
-    const fileName = filePathParts[filePathParts.length - 1];
+    // Verifica se a URL tem formato de versão (v12345)
+    const versionMatch = pathAndQuery.match(/^(v\d+)\//);
+    if (versionMatch) {
+      const version = versionMatch[1];
+      const rest = pathAndQuery.substring(version.length + 1);
+      // Preserva a versão na URL
+      return `${baseUrl}${version}/${transforms}/${rest}`;
+    }
     
-    // Adicionar transformações
-    return `${baseUrl}${transforms}/${fileName}`;
+    // URL normal sem versão
+    return `${baseUrl}${transforms}/${pathAndQuery}`;
   };
   
   const optimizedSrc = optimizeCloudinaryUrl(src);
@@ -87,6 +94,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     // Resetar estados quando a fonte muda
     setImageLoaded(false);
     setHasError(false);
+    setPlaceholderFading(false);
     
     // Gerar LQIP apenas para imagens do Cloudinary
     if (src.includes('cloudinary.com')) {
@@ -104,10 +112,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Lidar com o carregamento da imagem
   const handleImageLoad = () => {
-    setImageLoaded(true);
-    if (onLoad) {
-      onLoad();
-    }
+    // Primeiro marca o placeholder como em transição
+    setPlaceholderFading(true);
+    
+    // Após um breve atraso, marca a imagem como carregada
+    setTimeout(() => {
+      setImageLoaded(true);
+      if (onLoad) {
+        onLoad();
+      }
+    }, 150); // Pequeno atraso para permitir uma transição suave
   };
   
   // Lidar com erros de carregamento
@@ -136,7 +150,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           alt={alt}
           width={widthStr}
           height={heightStr}
-          className={`w-full h-full object-${objectFit} absolute inset-0 transition-opacity duration-300 ${className}`}
+          className={`w-full h-full object-${objectFit} absolute inset-0 transition-all duration-500 ease-in-out ${className} ${placeholderFading ? 'opacity-50' : 'opacity-100'}`}
           loading="eager"
           decoding="async"
         />
@@ -149,7 +163,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           alt={alt}
           width={widthStr}
           height={heightStr}
-          className={`w-full h-full object-${objectFit} absolute inset-0 transition-opacity duration-500 ${className} ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full h-full object-${objectFit} absolute inset-0 transition-all duration-700 ease-in-out ${className} ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.02]'}`}
           onLoad={handleImageLoad}
           onError={handleImageError}
           loading={priority ? 'eager' : 'lazy'}

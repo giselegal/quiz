@@ -1,56 +1,54 @@
-
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { injectCriticalCSS, removeCriticalCSS } from '@/utils/critical-css';
 
 interface CriticalCSSLoaderProps {
   cssContent: string;
   id?: string;
   removeOnLoad?: boolean;
+  removeDelay?: number;
 }
 
 /**
- * Componente que injeta CSS crítico no head
- * e opcionalmente o remove após carregamento da página
+ * Componente que injeta CSS crítico para melhorar o First Contentful Paint
+ * e o remove quando o conteúdo completo for carregado
  */
-const CriticalCSSLoader = ({
+const CriticalCSSLoader: React.FC<CriticalCSSLoaderProps> = ({
   cssContent,
   id = 'critical-css',
-  removeOnLoad = false
-}: CriticalCSSLoaderProps) => {
+  removeOnLoad = true,
+  removeDelay = 1000
+}) => {
   useEffect(() => {
-    // Injetar CSS no head
-    const style = document.createElement('style');
-    style.id = id;
-    style.innerHTML = cssContent;
-    document.head.appendChild(style);
+    // Injetar CSS crítico no carregamento do componente
+    injectCriticalCSS(cssContent, id);
 
-    // Remover CSS após carregamento se necessário
+    // Configurar remoção do CSS crítico após carregamento completo
     if (removeOnLoad) {
       const handleLoad = () => {
-        // Pequeno atraso para garantir que os estilos permanentes foram aplicados
         setTimeout(() => {
-          if (style && style.parentNode) {
-            style.parentNode.removeChild(style);
-          }
-        }, 1000);
+          removeCriticalCSS(id);
+          console.log(`Critical CSS with ID "${id}" removed after page load`);
+        }, removeDelay);
       };
 
+      // Adicionar event listener para o evento 'load'
       window.addEventListener('load', handleLoad);
-      
+
+      // Cleanup
       return () => {
         window.removeEventListener('load', handleLoad);
-        if (style && style.parentNode) {
-          style.parentNode.removeChild(style);
-        }
+        removeCriticalCSS(id);
       };
     }
-    
+
     return () => {
-      if (style && style.parentNode) {
-        style.parentNode.removeChild(style);
+      if (!removeOnLoad) {
+        removeCriticalCSS(id);
       }
     };
-  }, [cssContent, id, removeOnLoad]);
+  }, [cssContent, id, removeOnLoad, removeDelay]);
 
+  // Este componente não renderiza nada no DOM
   return null;
 };
 

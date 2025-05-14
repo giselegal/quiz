@@ -5,7 +5,7 @@ import { useQuizContext } from '../context/QuizContext';
 import { useAuth } from '../context/AuthContext';
 import { trackLeadGeneration, trackQuizStart, captureUTMParameters } from '@/utils/analytics';
 import { useUtmParameters } from '@/hooks/useUtmParameters';
-import LoadingManager from '@/components/quiz/LoadingManager';
+import { LoadingState } from '@/components/ui/loading-state';
 
 const HomePage = () => {
   const [started, setStarted] = useState(false);
@@ -65,7 +65,7 @@ const HomePage = () => {
   };
 
   if (isLoading) {
-    return <LoadingManager isLoading={true} useQuizIntroLoading={true} message="Preparando sua experiência..." />;
+    return <LoadingState message="Carregando quiz..." />;
   }
 
   return (

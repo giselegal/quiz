@@ -1,6 +1,5 @@
-// This file provides the lovable component definition interface
-import React from 'react';
 
+// This file provides the lovable component definition interface
 export interface LovableProps {
   name: string;
   displayName: string;

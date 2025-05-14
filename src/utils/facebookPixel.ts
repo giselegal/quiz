@@ -1,78 +1,105 @@
 
-interface WindowWithFBQ extends Window {
-  fbq?: FacebookPixelEvent;
-}
+// Facebook Pixel utility functions
 
-export type FacebookPixelEvent = (
-  event: string,
-  eventName: string,
-  params?: any,
-  eventId?: { eventID: string }
-) => void;
-
+// Define types for fbq function
 declare global {
   interface Window {
-    fbq?: FacebookPixelEvent;
+    fbq?: (event: string, eventName: string, params?: any) => void;
+    _fbq?: any;
   }
 }
 
-export const initFacebookPixel = (pixelId: string): void => {
-  // Only initialize if we're in a browser environment
-  if (typeof window !== 'undefined') {
-    // Add the Facebook pixel code
-    const script = document.createElement('script');
-    script.innerHTML = `
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '${pixelId}');
-      fbq('track', 'PageView');
-    `;
-    document.head.appendChild(script);
+/**
+ * Initialize Facebook Pixel with the provided ID
+ * @param pixelId Facebook Pixel ID to initialize
+ * @returns True if initialization was successful
+ */
+export const initFacebookPixel = (pixelId: string): boolean => {
+  try {
+    if (!pixelId) {
+      console.warn('Facebook Pixel ID not provided');
+      return false;
+    }
+
+    // Initialize Facebook Pixel
+    window.fbq = window.fbq || function() {
+      (window.fbq as any).q = (window.fbq as any).q || [];
+      (window.fbq as any).q.push(arguments);
+    };
     
-    // Add the noscript fallback
-    const noscript = document.createElement('noscript');
-    const img = document.createElement('img');
-    img.height = 1;
-    img.width = 1;
-    img.style.display = 'none';
-    img.src = `https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`;
-    noscript.appendChild(img);
-    document.head.appendChild(noscript);
+    window._fbq = window._fbq || window.fbq;
+    
+    window.fbq('init', pixelId);
+    window.fbq('track', 'PageView');
+    
+    console.log(`Facebook Pixel initialized with ID: ${pixelId}`);
+    return true;
+  } catch (error) {
+    console.error('Error initializing Facebook Pixel:', error);
+    return false;
   }
 };
 
-export const trackQuizEvent = (eventName: string, params?: any): void => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', eventName, params);
-    console.log(`[Facebook Pixel] Tracked event: ${eventName}`, params);
-  } else {
-    console.warn(`[Facebook Pixel] Failed to track event: ${eventName}. Pixel not initialized.`);
+/**
+ * Track a custom event with Facebook Pixel
+ * @param eventName Name of the event to track
+ * @param params Additional parameters to send
+ */
+export const trackPixelEvent = (
+  eventName: string, 
+  params?: Record<string, any>
+): void => {
+  try {
+    if (typeof window === 'undefined' || !window.fbq) {
+      console.warn('Facebook Pixel not initialized');
+      return;
+    }
+
+    if (params) {
+      window.fbq('track', eventName, params);
+    } else {
+      window.fbq('track', eventName);
+    }
+    
+    console.log(`Tracked Facebook Pixel event: ${eventName}`, params || '');
+  } catch (error) {
+    console.error(`Error tracking Facebook Pixel event ${eventName}:`, error);
   }
 };
 
-export const trackQuizCompletion = (primaryStyle: string): void => {
-  trackQuizEvent('QuizCompleted', { primaryStyle });
+/**
+ * Track PageView event on route change
+ * @param url The URL to track
+ */
+export const trackPageView = (url?: string): void => {
+  try {
+    if (typeof window === 'undefined' || !window.fbq) {
+      return;
+    }
+
+    window.fbq('track', 'PageView');
+    
+    if (url) {
+      console.log(`Tracked Facebook Pixel PageView: ${url}`);
+    }
+  } catch (error) {
+    console.error('Error tracking Facebook Pixel PageView:', error);
+  }
 };
 
-// Add the missing export for loadFacebookPixel
+// Adding the loadFacebookPixel function to match App.tsx import
 export const loadFacebookPixel = (): void => {
-  // Default pixel ID - can be configured from environment variables if needed
-  const pixelId = process.env.FACEBOOK_PIXEL_ID || '1234567890';
-  initFacebookPixel(pixelId);
+  const pixelId = process.env.REACT_APP_FACEBOOK_PIXEL_ID || '';
+  if (pixelId) {
+    initFacebookPixel(pixelId);
+  } else {
+    console.warn('Facebook Pixel ID not found in environment variables');
+  }
 };
 
-// Add the missing export for trackPixelEvent
-export const trackPixelEvent = (eventName: string, params?: any): void => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', eventName, params);
-    console.log(`[Facebook Pixel] Tracked event: ${eventName}`, params);
-  } else {
-    console.warn(`[Facebook Pixel] Failed to track event: ${eventName}. Pixel not initialized.`);
-  }
+export default {
+  initFacebookPixel,
+  trackPixelEvent,
+  trackPageView,
+  loadFacebookPixel
 };

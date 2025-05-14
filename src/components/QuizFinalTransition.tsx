@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { preloadCriticalImages } from '@/utils/imageManager';
 import { useNavigate } from 'react-router-dom';
+import { OptimizedImage } from './ui/optimized-image'; // Importar OptimizedImage
 
 interface QuizFinalTransitionProps {
   onShowResult?: () => void;
@@ -67,15 +68,14 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <img 
+          <OptimizedImage 
             src="https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_auto,dpr_auto,e_sharpen:80/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
             alt="Gisele Galvão"
             className="h-16 w-auto"
-            width={128}
-            height={64}
-            loading="eager"
-            fetchPriority="high"
-            style={{objectFit: 'contain', background: 'none'}}
+            width={128} // Exemplo de largura, ajuste conforme o design original da logo (h-16 implica uma largura) 
+            height={64} // Altura correspondente a h-16 (16 * 4 = 64px)
+            priority={true} // Garante que a logo seja carregada com prioridade
+            objectFit="contain"
           />
         </div>
 
@@ -87,7 +87,7 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
           <h2 className="text-2xl font-playfair text-[#aa6b5d] mb-2">
             Finalizando Seu Quiz
           </h2>
-          <p className="text-[#3a3a3a] font-inter">
+          <p className="text-[#3a3a3a]">
             Estamos preparando seu resultado personalizado
           </p>
         </motion.div>
@@ -113,7 +113,7 @@ const QuizFinalTransition: React.FC<QuizFinalTransitionProps> = ({ onShowResult 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="text-center text-[#3a3a3a] font-medium font-inter"
+          className="text-center text-[#3a3a3a] font-medium"
         >
           {steps[step]}
         </motion.div>

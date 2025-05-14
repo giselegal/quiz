@@ -1,16 +1,11 @@
-import { initLazyLoading } from './utils/lazyScript';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import './styles/image-optimizations.css';
 import { displayVersion } from './utils/version';
 import { injectCriticalCSS, initialCriticalCSS, removeCriticalCSS } from './utils/critical-css';
 import { checkSiteHealth } from './utils/siteHealthCheck';
 import { monitorFunnelRoutes } from './utils/funnelMonitor';
-import './utils/imagePerformanceOptimizer.js';
-import './utils/extremeImageOptimizer.js';
-import './styles/extreme-optimizations.css';
 
 // Injetar CSS crítico para renderização inicial mais rápida
 injectCriticalCSS(initialCriticalCSS);
@@ -27,15 +22,11 @@ if (process.env.NODE_ENV !== 'production') {
 try {
   const rootElement = document.getElementById('root');
   if (rootElement) {
-    // Inicializar lazy loading de scripts
-    initLazyLoading();
-    
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
         <App />
       </React.StrictMode>
     );
-    // NÃO DEIXE UM PARENTESE EXTRA AQUI!
     console.log('Aplicativo renderizado com sucesso!');
   } else {
     console.error('Elemento root não encontrado!');

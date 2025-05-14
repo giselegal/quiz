@@ -2,26 +2,20 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { QuizProvider } from './context/QuizContext';
-import { TooltipProvider } from './components/ui/tooltip';
-import { Toaster } from './components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/toaster';
 import { captureUTMParameters } from './utils/analytics';
-import { initFacebookPixel } from './utils/facebookPixel';
-import { LoadingSpinner } from './components/ui/loading-spinner';
+import { loadFacebookPixel } from './utils/facebookPixel';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import CriticalCSSLoader from './components/CriticalCSSLoader';
-import { initialCriticalCSS } from './utils/critical-css';
+import { initialCriticalCSS, heroCriticalCSS } from './utils/critical-css';
 
 // Componente de loading para Suspense
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
     <div className="text-center">
-      <LoadingSpinner 
-        size="lg" 
-        color="#B89B7A" 
-        className="mx-auto" 
-        thickness="normal"
-        showText={true}
-        text="Carregando..."
-      />
+      <LoadingSpinner size="lg" color="#B89B7A" className="mx-auto" />
+      <p className="mt-4 text-gray-600">Carregando...</p>
     </div>
   </div>
 );
@@ -61,7 +55,7 @@ const App = () => {
   useEffect(() => {
     try {
       // Inicializar Facebook Pixel
-      initFacebookPixel('YOUR_PIXEL_ID'); // Adicionando ID de pixel como parâmetro
+      loadFacebookPixel();
       
       // Capturar UTM parameters para analytics de marketing
       captureUTMParameters();
@@ -98,6 +92,7 @@ const App = () => {
           <Router>
             {/* Injetar CSS crítico para melhorar o First Contentful Paint */}
             <CriticalCSSLoader cssContent={initialCriticalCSS} id="initial-critical" removeOnLoad={true} />
+            <CriticalCSSLoader cssContent={heroCriticalCSS} id="hero-critical" removeOnLoad={true} />
             
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
@@ -113,8 +108,7 @@ const App = () => {
                 <Route path="/resultado/editar" element={<Navigate to="/admin/editor?tab=result" replace />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 {/* Manter apenas uma rota principal para o editor unificado */}
-                {/* Modificada para aceitar pageType e style para diferentes tipos de página (ex: oferta direta) */}
-                <Route path="/admin/editor/:pageType?/:style?" element={<EditorPage />} />
+                <Route path="/admin/editor" element={<EditorPage />} />
                 <Route path="/admin/editor/error" element={<EditorNotFoundPage />} />
                 {/* Redirecionar o antigo quiz-builder para o editor unificado com a aba de quiz ativa */}
                 <Route path="/admin/quiz-builder" element={<Navigate to="/admin/editor?tab=quiz" replace />} />
@@ -124,8 +118,6 @@ const App = () => {
                 <Route path="/admin/ab-test-manager" element={<ABTestManagerPage />} />
                 {/* Adicionando acesso ao protótipo no painel admin */}
                 <Route path="/admin/prototipo" element={<ResultPagePrototype />} />
-                <Route path="/oferta-direta" element={React.createElement(lazy(() => import('./pages/Funil2OfertaDireta')))} />
-                <Route path="/quiz-descubra-seu-estilo/oferta" element={React.createElement(lazy(() => import('./pages/Funil2OfertaDireta')))} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

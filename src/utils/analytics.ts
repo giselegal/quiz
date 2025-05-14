@@ -1,65 +1,173 @@
 /**
- * Utility para funções de analytics e tracking
+ * Inicializa o Pixel do Facebook
  */
+import { getPixelId, getCurrentFunnelConfig, getFacebookToken, getCtaUrl, getUtmCampaign, trackFunnelEvent } from '@/services/pixelManager';
 
-// Tipo para parâmetros UTM
-interface UTMParameters {
-  source?: string;
-  medium?: string;
-  campaign?: string;
-  term?: string;
-  content?: string;
-  fbclid?: string;
-  gclid?: string;
-}
+export const initFacebookPixel = () => {
+  if (typeof window === 'undefined') return;
 
-// Capturar parâmetros UTM da URL
-export const captureUTMParameters = (): UTMParameters => {
-  const urlParams = new URLSearchParams(window.location.search);
-  
-  const utmParams: UTMParameters = {
-    source: urlParams.get('utm_source') || undefined,
-    medium: urlParams.get('utm_medium') || undefined,
-    campaign: urlParams.get('utm_campaign') || undefined,
-    term: urlParams.get('utm_term') || undefined,
-    content: urlParams.get('utm_content') || undefined,
-    fbclid: urlParams.get('fbclid') || undefined,
-    gclid: urlParams.get('gclid') || undefined
-  };
-  
-  // Salvar no localStorage para uso posterior
-  if (Object.values(utmParams).some(value => value !== undefined)) {
-    localStorage.setItem('utm_params', JSON.stringify(utmParams));
-    console.log('[Analytics] UTM parameters capturados:', utmParams);
+  try {
+    // Verifica se o objeto fbq já existe
+    if (!window.fbq) {
+      // Se não existir, criamos o script do Facebook Pixel manualmente
+      (function(f,b,e,v,n,t,s) {
+        if (f.fbq) return; n=f.fbq=function() {
+          n.callMethod ? n.callMethod.apply(n,arguments) : n.queue.push(arguments)
+        };
+        if (!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
+        n.queue=[]; t=b.createElement(e); t.async=!0;
+        t.src=v; s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)
+      })(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      
+      console.log('Facebook Pixel script carregado manualmente');
+    }
+
+    // Obtém o ID do pixel para o funil atual
+    const pixelId = getPixelId();
+    console.log('Inicializando Facebook Pixel com ID:', pixelId);
+
+    // Inicializa o Pixel
+    window.fbq('init', pixelId);
+    window.fbq('track', 'PageView');
+    
+    // Registra adicionalmente o funil atual para análises
+    const funnelConfig = getCurrentFunnelConfig();
+    console.log('Funil atual:', funnelConfig.funnelName, '(', funnelConfig.utmCampaign, ')');
+
+  } catch (error) {
+    console.error('Erro ao inicializar o Facebook Pixel:', error);
   }
-  
-  return utmParams;
 };
 
-// Inicializar Facebook Pixel
-export const initFacebookPixel = () => {
-  if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'development') {
-    // Importar dinamicamente para evitar carregamento desnecessário em desenvolvimento
-    import('./facebookPixel').then(module => {
-      // module.loadFacebookPixel(); // Comentado para teste
-      console.log('[Analytics] Carregamento do Facebook Pixel desabilitado para teste.');
+// Utilitário para adicionar parâmetros UTM aos eventos - REMOVIDO - duplicado abaixo
+
+/**
+ * Rastreia um evento de geração de lead
+ * @param email Email do lead
+ */
+export const trackLeadGeneration = (email: string) => {
+  if (window.fbq) {
+    window.fbq('track', 'Lead', {
+      email: email
+    });
+    console.log('Lead tracked with email:', email);
+  }
+  
+  // Track in Google Analytics, if available
+  if (window.gtag) {
+    window.gtag('event', 'lead_generation', {
+      event_category: 'lead',
+      event_label: email
     });
   }
 };
 
-// Track específico para início do quiz
-export const trackQuizStart = (name: string, email?: string) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('trackCustom', 'QuizStart', { name, email });
-    console.log('[Analytics] Quiz iniciado por:', name, email || '');
+/**
+ * Captura parâmetros UTM da URL atual e armazena no localStorage
+ * Retorna os parâmetros UTM capturados
+ */
+export const captureUTMParameters = (): Record<string, string> => {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmParams: Record<string, string> = {};
+    
+    // Parâmetros UTM padrão
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id'];
+    utmKeys.forEach(key => {
+      if (urlParams.has(key)) {
+        const value = urlParams.get(key);
+        if (value) {
+          utmParams[key] = value;
+        }
+      }
+    });
+    
+    // Parâmetro específico do Facebook
+    if (urlParams.has('fbclid')) {
+      utmParams['fbclid'] = urlParams.get('fbclid') || '';
+    }
+    
+    // Gclid para Google Ads
+    if (urlParams.has('gclid')) {
+      utmParams['gclid'] = urlParams.get('gclid') || '';
+    }
+    
+    // Se encontrou algum parâmetro UTM, armazena no localStorage
+    if (Object.keys(utmParams).length > 0) {
+      localStorage.setItem('utm_parameters', JSON.stringify(utmParams));
+      
+      // Track UTM parameters if Facebook Pixel is available
+      if (window.fbq) {
+        window.fbq('trackCustom', 'UTMCaptured', utmParams);
+      }
+      
+      console.log('UTM parameters captured:', utmParams);
+    }
+    
+    return utmParams;
+  } catch (error) {
+    console.error('Error capturing UTM parameters:', error);
+    return {};
   }
 };
 
-// Track específico para geração de lead
-export const trackLeadGeneration = (email: string) => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'Lead', { email });
-    console.log('[Analytics] Lead gerado:', email);
+/**
+ * Adiciona parâmetros UTM armazenados ao evento do Facebook Pixel
+ */
+export const addUtmParamsToEvent = (eventData: Record<string, any> = {}): Record<string, any> => {
+  try {
+    const storedUtmParams = localStorage.getItem('utm_parameters');
+    if (storedUtmParams) {
+      const utmParams = JSON.parse(storedUtmParams);
+      // Adiciona parâmetros UTM ao objeto eventData para o Facebook Pixel
+      return {
+        ...eventData,
+        utm_source: utmParams.utm_source || utmParams.source,
+        utm_medium: utmParams.utm_medium || utmParams.medium,
+        utm_campaign: utmParams.utm_campaign || utmParams.campaign,
+        utm_content: utmParams.utm_content || utmParams.content,
+        utm_term: utmParams.utm_term || utmParams.term,
+        fbclid: utmParams.fbclid
+      };
+    }
+    return eventData;
+  } catch (error) {
+    console.error('Error adding UTM parameters to event:', error);
+    return eventData;
+  }
+};
+
+/**
+ * Rastreia o início do quiz
+ * @param userName Nome do usuário
+ * @param userEmail Email do usuário (opcional)
+ */
+export const trackQuizStart = (userName?: string, userEmail?: string) => {
+  if (window.fbq) {
+    const eventData = addUtmParamsToEvent({
+      username: userName || 'Anônimo',
+      user_email: userEmail || '',
+      funnel: getCurrentFunnelConfig().funnelName
+    });
+    window.fbq('trackCustom', 'QuizStart', eventData);
+    
+    // Adicionar tracking específico para análises de funil
+    trackFunnelEvent('FunnelQuizStart', {
+      username: userName || 'Anônimo',
+      has_email: !!userEmail
+    });
+    
+    console.log('QuizStart tracked with UTM data');
+  }
+  
+  // Track in Google Analytics, if available
+  if (window.gtag) {
+    window.gtag('event', 'quiz_start', {
+      event_category: 'quiz',
+      event_label: userEmail ? 'with_email' : 'anonymous',
+      funnel: getCurrentFunnelConfig().funnelName
+    });
   }
 };
 
@@ -72,16 +180,17 @@ export const trackLeadGeneration = (email: string) => {
  */
 export const trackQuizAnswer = (questionId: string, selectedOptions: string[], currentQuestionIndex: number, totalQuestions: number) => {
   if (window.fbq) {
-    const eventData = { // Idealmente, adicionar UTMs aqui também se necessário
+    const eventData = addUtmParamsToEvent({
       question_id: questionId,
       selected_options: selectedOptions.join(', '),
       current_question_index: currentQuestionIndex,
       total_questions: totalQuestions
-    };
+    });
     window.fbq('trackCustom', 'QuizAnswer', eventData);
-    console.log(`[Analytics] QuizAnswer tracked for question ${questionId}`);
+    console.log(`QuizAnswer tracked for question ${questionId} with options ${selectedOptions.join(', ')}`);
   }
   
+  // Track in Google Analytics, if available
   if (window.gtag) {
     window.gtag('event', 'quiz_answer', {
       event_category: 'quiz',
@@ -97,16 +206,20 @@ export const trackQuizAnswer = (questionId: string, selectedOptions: string[], c
  * Rastreia a conclusão do quiz
  */
 export const trackQuizComplete = () => {
+  // Calcular o tempo decorrido desde o início do quiz
   const startTime = localStorage.getItem('quiz_start_time');
   const endTime = Date.now();
   const duration = startTime ? (endTime - parseInt(startTime, 10)) / 1000 : 0; // em segundos
   
   if (window.fbq) {
-    const eventData = { quiz_duration: duration }; // Adicionar UTMs se necessário
+    const eventData = addUtmParamsToEvent({
+      quiz_duration: duration
+    });
     window.fbq('trackCustom', 'QuizComplete', eventData);
-    console.log('[Analytics] QuizComplete tracked');
+    console.log('QuizComplete tracked');
   }
   
+  // Track in Google Analytics, if available
   if (window.gtag) {
     window.gtag('event', 'quiz_complete', {
       event_category: 'quiz',
@@ -121,11 +234,14 @@ export const trackQuizComplete = () => {
  */
 export const trackResultView = (styleCategory: string) => {
   if (window.fbq) {
-    const eventData = { style_category: styleCategory }; // Adicionar UTMs se necessário
+    const eventData = addUtmParamsToEvent({
+      style_category: styleCategory
+    });
     window.fbq('trackCustom', 'ResultView', eventData);
-    console.log('[Analytics] ResultView tracked for style:', styleCategory);
+    console.log('ResultView tracked with UTM data for style:', styleCategory);
   }
   
+  // Track in Google Analytics, if available
   if (window.gtag) {
     window.gtag('event', 'result_view', {
       event_category: 'quiz',
@@ -136,6 +252,10 @@ export const trackResultView = (styleCategory: string) => {
 
 /**
  * Registra cliques em botões para análise
+ * @param buttonId ID do botão (opcional)
+ * @param buttonText Texto do botão (opcional)
+ * @param buttonLocation Localização do botão na interface (opcional)
+ * @param actionType Tipo de ação associada ao botão (opcional)
  */
 export const trackButtonClick = (
   buttonId?: string, 
@@ -144,45 +264,57 @@ export const trackButtonClick = (
   actionType?: string
 ) => {
   if (window.fbq) {
-    const eventData = { // Adicionar UTMs se necessário
+    const eventData = addUtmParamsToEvent({
       button_id: buttonId || 'unknown',
       button_text: buttonText || 'unknown',
       button_location: buttonLocation || 'unknown',
       action_type: actionType || 'click',
-      // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida neste escopo
-    };
+      funnel: getCurrentFunnelConfig().funnelName
+    });
     
     window.fbq('trackCustom', 'ButtonClick', eventData);
-    console.log(`[Analytics] Button click tracked: ${buttonText || buttonId}`);
+    console.log(`Button click tracked: ${buttonText || buttonId}`);
   }
   
+  // Track in Google Analytics, if available
   if (window.gtag) {
     window.gtag('event', 'button_click', {
       event_category: 'interaction',
       event_label: buttonText || buttonId,
       button_location: buttonLocation,
-      // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida
+      funnel: getCurrentFunnelConfig().funnelName
     });
   }
 };
 
 /**
  * Registra conversões de vendas
+ * @param value Valor da venda
+ * @param productName Nome do produto (opcional)
  */
 export const trackSaleConversion = (value: number, productName?: string) => {
   if (window.fbq) {
-    const eventData = { // Adicionar UTMs se necessário
+    const eventData = addUtmParamsToEvent({
       value: value,
       currency: 'BRL',
       content_name: productName || 'Guia de Estilo',
       content_type: 'product',
-      // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida
-    };
+      funnel: getCurrentFunnelConfig().funnelName
+    });
     
+    // Standard Purchase event
     window.fbq('track', 'Purchase', eventData);
-    console.log(`[Analytics] Sale conversion tracked: ${value} BRL for ${productName || 'Guia de Estilo'}`);
+    
+    // Adicionar tracking específico para análises de funil
+    trackFunnelEvent('FunnelPurchase', {
+      value: value,
+      product_name: productName || 'Guia de Estilo'
+    });
+    
+    console.log(`Sale conversion tracked: ${value} BRL for ${productName || 'Guia de Estilo'}`);
   }
   
+  // Track in Google Analytics, if available
   if (window.gtag) {
     window.gtag('event', 'purchase', {
       transaction_id: 'T_' + Date.now(),
@@ -191,7 +323,7 @@ export const trackSaleConversion = (value: number, productName?: string) => {
       items: [{
         name: productName || 'Guia de Estilo',
         price: value,
-        // funnel: getCurrentFunnelConfig().funnelName // getCurrentFunnelConfig não está definida
+        funnel: getCurrentFunnelConfig().funnelName
       }]
     });
   }
@@ -239,19 +371,3 @@ export const testFacebookPixel = () => {
     return false;
   }
 };
-
-// Exportações padrão podem não ser necessárias se todas as funções são exportadas nomeadamente
-// export default {
-//   captureUTMParameters,
-//   initFacebookPixel,
-//   trackQuizStart,
-//   trackLeadGeneration,
-//   getAnalyticsEvents,
-//   clearAnalyticsData,
-//   testFacebookPixel
-// };
-
-// Funções que estavam na versão local e podem precisar ser reintegradas ou foram substituídas:
-// - addUtmParamsToEvent (a lógica de UTM agora está em captureUTMParameters e precisa ser aplicada aos eventos)
-// - A inicialização manual do script do FB pixel (agora em ./facebookPixel, presumivelmente)
-// - As chamadas para trackFunnelEvent e getCurrentFunnelConfig (precisam ser verificadas/reintegradas se necessário)

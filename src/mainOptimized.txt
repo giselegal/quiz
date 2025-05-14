@@ -1,8 +1,0 @@
-/* 
-Aplicando otimizações adicionais na inicialização:
-1. Service Worker para cache de imagens e estratégia offline
-2. Carregamento otimizado de scripts de terceiros
-3. Preload inteligente baseado na rota
-4. Métricas de web vitals
-*/
-

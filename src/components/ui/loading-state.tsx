@@ -4,56 +4,30 @@ import { LoadingSpinner } from './loading-spinner';
 interface LoadingStateProps {
   message?: string;
   showLogo?: boolean;
-  role?: string;
-  'aria-busy'?: "true" | "false" | boolean;
-  spinnerSize?: 'sm' | 'md' | 'lg' | 'xl';
-  spinnerColor?: string;
 }
 
-/**
- * Componente de estado de carregamento padronizado para todo o aplicativo
- * Usa o LoadingSpinner padronizado para garantir consistência visual
- */
 export const LoadingState: React.FC<LoadingStateProps> = ({ 
   message = 'Carregando...', 
-  showLogo = true,
-  role = 'status',
-  'aria-busy': ariaBusy = true,
-  spinnerSize = 'md',
-  spinnerColor = '#B89B7A'
+  showLogo = true 
 }) => {
-  // Logo otimizada com parâmetros otimizados
-  const logoUrl = "https://res.cloudinary.com/dqljyf76t/image/upload/f_auto,q_90,w_112,h_56,c_fit,dpr_auto/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp";
-  
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FEFEFE]" role={role} aria-busy={ariaBusy}>
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FEFEFE]">
       {showLogo && (
-        <div className="w-28 h-auto mb-6">
+        <div className="w-28 h-auto mb-8">
           <img 
-            src={logoUrl}
+            src="https://res.cloudinary.com/dqljyf76t/image/upload/v1744911572/LOGO_DA_MARCA_GISELE_r14oz2.webp"
             alt="Logo Gisele Galvão"
             width={112}
             height={56}
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            style={{
-              objectFit: 'contain',
-              imageRendering: 'crisp-edges'
-            }}
           />
         </div>
       )}
       
-      {/* Spinner padronizado para todo o aplicativo */}
-      <LoadingSpinner 
-        size={spinnerSize}
-        color={spinnerColor}
-        thickness="normal"
-        className="mb-4"
-      />
+      <div className="relative w-40 h-[4px] bg-[#f1e8db] rounded-full overflow-hidden mb-4">
+        <div className="absolute inset-0 w-1/3 bg-[#b29670] animate-loading-bar rounded-full"></div>
+      </div>
       
-      <p className="text-[#432818] font-medium font-inter">{message}</p>
+      <p className="text-[#432818] font-medium">{message}</p>
     </div>
   );
 };

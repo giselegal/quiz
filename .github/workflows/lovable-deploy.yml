@@ -1,111 +1,32 @@
-name: Implantação Lovable
+name: Lovable Deployment
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:  # Gatilho manual para execução do workflow
+    branches:
+      - main
+    paths:
+      - 'src/components/lovable/**'
+      - 'public/lovable-uploads/**'
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
         
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
           
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
         
-      - name: Build project
+      - name: Build Project
         run: npm run build
         
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-files
-          path: dist/
-          
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-          path: dist/
-          
-      - name: Update .htaccess for subdirectory
-        run: |
-          echo '# Configurações otimizadas para Hostinger (Apache)
-
-# Habilitar reescrita de URL para SPA (crucial para React Router)
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /quiz-de-estilo/
-
-    # Se o arquivo solicitado não existir fisicamente, redirecionar para index.html
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.html [L,QSA]
-</IfModule>
-
-# Definir tipos MIME corretos (crucial para resolver problemas de script loading)
-<IfModule mod_mime.c>
-    # JavaScript
-    AddType application/javascript .js
-    AddType application/javascript .jsx
-    AddType application/javascript .mjs
-    AddType application/javascript .ts
-    AddType application/javascript .tsx
-    
-    # JSON
-    AddType application/json .json
-    
-    # Imagens modernas
-    AddType image/webp .webp
-    AddType image/avif .avif
-    AddType image/svg+xml .svg
-    AddType image/png .png
-    AddType image/jpeg .jpg .jpeg
-</IfModule>
-
-# Desabilitar sniffing de MIME types (resolver erro de import.meta)
-<IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    
-    # Cabeçalhos específicos para JavaScript
-    <FilesMatch "\.(js|jsx|mjs|ts|tsx)$">
-        Header set Content-Type "application/javascript; charset=UTF-8"
-    </FilesMatch>
-    
-    # Cabeçalhos específicos para JSON
-    <FilesMatch "\.json$">
-        Header set Content-Type "application/json; charset=UTF-8"
-    </FilesMatch>
-    
-    # Cabeçalhos específicos para CSS
-    <FilesMatch "\.css$">
-        Header set Content-Type "text/css; charset=UTF-8"
-    </FilesMatch>
-</IfModule>' > dist/.htaccess
-          
-      - name: Deploy to Hostinger
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ftp.giselegalvao.com.br
-          username: u116045488.giselegalvao
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
-          server-dir: /u116045488/domains/giselegalvao.com.br/public_html/quiz-de-estilo/
-          dangerous-clean-slate: true
+      - name: Deploy to Server
+        # Adicione aqui os comandos para deploy ao seu servidor
+        run: echo "Deployment would happen here"

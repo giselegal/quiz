@@ -1,13 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { componentTagger } from "lovable-tagger";
 import compression from "vite-plugin-compression";
-import cloudinaryImageOptimizer from "./src/plugins/cloudinaryImageOptimizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   root: '.',
-  base: '/',
+  base: './',
   
   server: {
     host: "::",
@@ -21,16 +21,13 @@ export default defineConfig(({ mode }) => ({
       allow: ['../']
     },
     allowedHosts: [
-      "a10d1b34-b5d4-426b-8c97-45f125d03ec1.lovableproject.com",
-      "giselegalvao.com.br",
-      "www.giselegalvao.com.br"
+      "a10d1b34-b5d4-426b-8c97-45f125d03ec1.lovableproject.com"
     ]
   },
   
   plugins: [
     react(),
-    cloudinaryImageOptimizer(),
-    
+    componentTagger(),
     // Compressão GZIP
     compression({
       algorithm: 'gzip',
@@ -55,20 +52,11 @@ export default defineConfig(({ mode }) => ({
     assetsDir: 'assets',
     emptyOutDir: true,
     sourcemap: false,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: process.env.NODE_ENV === 'production' ? true : false,
-        drop_debugger: true,
-        pure_funcs: process.env.NODE_ENV === 'production' ? ['console.log', 'console.info', 'console.debug'] : []
-      }
-    },
+    // Configurações para evitar problemas de MIME type
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['framer-motion', 'tailwindcss'],
-          'vendor-utils': ['lodash', 'dayjs'],
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-components': [
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
@@ -76,24 +64,15 @@ export default defineConfig(({ mode }) => ({
             'clsx',
             'tailwind-merge'
           ],
-          'quiz-intro': ['./src/components/QuizIntro.tsx'],
           'analytics': [
             './src/utils/analytics.ts',
             './src/utils/facebookPixel.ts'
           ]
         },
+        // Garantir que os assets sejam carregados corretamente para as rotas específicas
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-          const fileName = assetInfo.name || '';
-          if (/\.(woff|woff2|eot|ttf|otf)$/.test(fileName)) {
-            return 'assets/fonts/[name]-[hash].[ext]';
-          }
-          if (/\.(png|jpe?g|gif|svg|webp|avif)$/.test(fileName)) {
-            return 'assets/images/[name]-[hash].[ext]';
-          }
-          return 'assets/[name]-[hash].[ext]';
-        }
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
     chunkSizeWarningLimit: 1000,

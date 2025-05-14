@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '../ui/aspect-ratio';
 import { getFallbackStyle } from '@/utils/styleUtils';
-import { isImagePreloaded, optimizeImageUrl } from '@/utils/preloadUtils';
+import { isImagePreloaded, getOptimizedImage, getImageMetadata } from '@/utils/imageManager';
 import OptimizedImage from '../ui/OptimizedImage';
 
 interface QuizOptionImageProps {
@@ -28,21 +28,28 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   
+  // Get image metadata from our bank if available
+  const imageMetadata = useMemo(() => 
+    getImageMetadata(imageUrl),
+    [imageUrl]
+  );
+  
+  // Use memoization to avoid recalculating the URL on each render
+  const optimizedImageUrl = useMemo(() => 
+    getOptimizedImage(imageUrl, {
+      quality: 95,
+      format: 'auto',
+      width: imageUrl.includes('sapatos') ? 400 : 500
+    }),
+    [imageUrl]
+  );
+  
   // Check if image is already preloaded on mount
   useEffect(() => {
     if (isImagePreloaded(imageUrl)) {
       setImageLoaded(true);
     }
   }, [imageUrl]);
-  
-  // Use memoization to avoid recalculating the URL on each render
-  const optimizedImageUrl = useMemo(() => 
-    optimizeImageUrl(imageUrl, {
-      quality: 95,
-      width: imageUrl.includes('sapatos') ? 400 : 500
-    }),
-    [imageUrl]
-  );
 
   if (imageError) {
     return (
@@ -64,12 +71,12 @@ export const QuizOptionImage: React.FC<QuizOptionImageProps> = ({
       >
         <div className={cn(
           "w-full h-full flex items-center justify-center overflow-hidden transform-gpu",
-          isSelected && "scale-[1.03] transition-all duration-200"
+          isSelected && "scale-[1.03] transition-all duration-300"
         )}>
-          {/* Use OptimizedImage component for better loading experience */}
+          {/* Use OptimizedImage component instead of img tag */}
           <OptimizedImage 
             src={optimizedImageUrl}
-            alt={altText}
+            alt={imageMetadata?.alt || altText}
             className={cn(
               "object-cover w-full h-full",
               isSelected 

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { QuizQuestion } from '../QuizQuestion';
 import { UserResponse } from '@/types/quiz';
 import { QuizHeader } from './QuizHeader';
@@ -33,11 +33,12 @@ export const QuizContent: React.FC<QuizContentProps> = ({
   // Get user name from localStorage if not provided in props
   const userName = user?.userName || localStorage.getItem('userName') || '';
   
-  // Log importante para depuração
-  useEffect(() => {
-    console.log(`QuizContent renderizado - Questão atual(id=${currentQuestion?.id}, type=${currentQuestion?.type}), respostas: ${currentAnswers?.length || 0}, isStrategic: ${showingStrategicQuestions}`);
-  }, [currentQuestion, currentAnswers, showingStrategicQuestions]);
+  // Determine the required selections based on question type
+  const requiredSelections = showingStrategicQuestions ? 1 : (currentQuestion?.multiSelect || 3);
   
+  // Check if we have enough selections to proceed
+  const canProceed = currentAnswers?.length === requiredSelections;
+
   return (
     <>
       <QuizHeader 
@@ -52,9 +53,7 @@ export const QuizContent: React.FC<QuizContentProps> = ({
         {showingStrategicQuestions ? (
           <StrategicQuestions
             currentQuestionIndex={currentStrategicQuestionIndex}
-            answers={{
-              [currentQuestion?.id]: currentAnswers || [] // Garantir que as respostas atuais são passadas
-            }}
+            answers={{}}
             onAnswer={handleAnswerSubmit}
             onNextClick={handleNextClick}
           />
@@ -63,14 +62,12 @@ export const QuizContent: React.FC<QuizContentProps> = ({
             question={currentQuestion}
             onAnswer={handleAnswerSubmit}
             currentAnswers={currentAnswers || []}
+            onNextClick={handleNextClick}
             showQuestionImage={true}
             onPreviousClick={handlePrevious}
-            isStrategicQuestion={false}
-            autoAdvance={true} // Questões normais sempre usam autoAdvance
+            autoAdvance={true}
           />
         )}
-        
-        {/* A navegação agora é exibida apenas no QuizPage para evitar duplicação */}
       </div>
     </>
   );

@@ -1,60 +1,163 @@
-
 /**
- * Utility para gerenciar CSS crítico injetado diretamente no head
- * para melhorar o First Contentful Paint
+ * Utilitário para gerenciar CSS crítico para melhorar o First Contentful Paint
  */
 
 /**
- * CSS crítico para renderização inicial da aplicação
+ * Injeta CSS crítico diretamente no head
+ * @param css CSS crítico a ser injetado
+ * @param id Identificador opcional para o CSS crítico
+ */
+export const injectCriticalCSS = (css: string, id = 'critical') => {
+  if (typeof document !== 'undefined') {
+    // Verificar se já existe um estilo com este ID
+    const existingStyle = document.querySelector(`style[data-critical-id="${id}"]`);
+    if (existingStyle) {
+      existingStyle.textContent = css;
+      return;
+    }
+    
+    // Criar novo elemento de estilo
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('data-critical', 'true');
+    styleEl.setAttribute('data-critical-id', id);
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Critical CSS "${id}" injected, ${css.length} chars`);
+    }
+  }
+};
+
+/**
+ * Remove CSS crítico injetado quando não for mais necessário
+ * @param id Identificador opcional do CSS crítico a remover
+ */
+export const removeCriticalCSS = (id?: string) => {
+  if (typeof document !== 'undefined') {
+    const selector = id 
+      ? `style[data-critical="true"][data-critical-id="${id}"]`
+      : 'style[data-critical="true"]';
+      
+    const criticalStyles = document.querySelectorAll(selector);
+    criticalStyles.forEach(style => {
+      style.remove();
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Critical CSS ${id ? `"${id}"` : ''} removed`);
+      }
+    });
+  }
+};
+
+/**
+ * CSS crítico para carregamento inicial da aplicação
+ * Contém apenas os estilos necessários para renderizar o conteúdo acima da dobra
  */
 export const initialCriticalCSS = `
-  * {margin:0;padding:0;box-sizing:border-box;}
-  body {background:#FEFEFE;font-family:sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
-  .loading-spinner{width:40px;height:40px;border:3px solid rgba(184,155,122,0.2);border-radius:50%;border-top-color:#B89B7A;animation:spin 0.8s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .loading-fallback{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#FAF9F7;}
-  .quiz-intro-container{display:flex;flex-direction:column;align-items:center;padding:1rem;}
+/* Estilos críticos para o carregamento inicial */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBF8F4 100%);
+}
+
+/* Spinner de carregamento otimizado */
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #B89B7A;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spinner 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Placeholder de imagem */
+.image-placeholder {
+  background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* Animação fade-in para elementos principais */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
 `;
 
-/**
- * Injeta CSS diretamente no head da página para melhor performance
- * @param css Conteúdo CSS a ser injetado
- * @param id ID opcional do elemento style
- */
-export const injectCriticalCSS = (css: string, id = 'critical-css') => {
-  // Evitar duplicação se já existir
-  if (document.getElementById(id)) {
-    return;
-  }
-  
-  try {
-    const style = document.createElement('style');
-    style.id = id;
-    style.setAttribute('type', 'text/css');
-    style.innerHTML = css;
-    document.head.appendChild(style);
-    console.log(`[Performance] CSS crítico injetado: ${id}`);
-  } catch (error) {
-    console.error('Erro ao injetar CSS crítico:', error);
-  }
-};
+// Use para componentes específicos
+export const heroCriticalCSS = `
+.hero-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+}
 
-/**
- * Remove o CSS crítico quando não for mais necessário
- * @param id ID do elemento style a ser removido
- */
-export const removeCriticalCSS = (id = 'critical-css') => {
-  const styleElement = document.getElementById(id);
-  if (styleElement && styleElement.parentNode) {
-    styleElement.parentNode.removeChild(styleElement);
-    console.log(`[Performance] CSS crítico removido: ${id}`);
-  }
-};
+.hero-image {
+  width: 100%;
+  max-width: 32rem;
+  height: auto;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+`;
 
-/**
- * Verifica se o CSS crítico foi aplicado corretamente
- * @param id ID do elemento style a verificar
- */
-export const hasCriticalCSS = (id = 'critical-css') => {
-  return !!document.getElementById(id);
+// CSS crítico para página de resultados
+export const resultPageCriticalCSS = `
+.result-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+.result-header {
+  padding: 1.5rem;
+  text-align: center;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.result-content {
+  width: 100%;
+  max-width: 64rem;
+  padding: 1rem;
+  margin: 0 auto;
+}
+`;
+
+export default {
+  injectCriticalCSS,
+  removeCriticalCSS,
+  initialCriticalCSS,
+  heroCriticalCSS,
+  resultPageCriticalCSS
 };

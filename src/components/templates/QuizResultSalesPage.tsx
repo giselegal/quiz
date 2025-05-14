@@ -26,7 +26,6 @@ import { ShoppingCart, Heart, Award, CheckCircle, Star } from 'lucide-react';
 // Lazy load componentes menos críticos
 const Testimonials = lazy(() => import('@/components/quiz-result/sales/Testimonials'));
 const BenefitList = lazy(() => import('@/components/quiz-result/sales/BenefitList'));
-const GuaranteeSection = lazy(() => import('@/components/result/GuaranteeSection'));
 
 interface QuizResultSalesPageProps {
   primaryStyle: StyleResult;
@@ -333,13 +332,30 @@ const QuizResultSalesPage: React.FC<QuizResultSalesPageProps> = ({
 
         {/* Guarantee */}
         <section className="mb-16">
-          <Suspense fallback={
-            <div className="text-center p-8">
-              <LoadingSpinner />
+          <Card className="p-6 border-[#aa6b5d]/20 bg-[#fff7f3]">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="md:w-1/4 flex justify-center">
+                <div className="w-32 h-32 rounded-full bg-[#aa6b5d] flex items-center justify-center text-white">
+                  <div className="text-center">
+                    <Award className="w-12 h-12 mx-auto" />
+                    <span className="block font-bold text-xl">7 Dias</span>
+                  </div>
+                </div>
+              </div>
+              <div className="md:w-3/4">
+                <h2 className="text-2xl font-playfair text-[#aa6b5d] mb-4">
+                  Garantia de Satisfação
+                </h2>
+                <p className="mb-2">
+                  Se você não ficar completamente satisfeita com o seu Guia de Estilo Personalizado, 
+                  basta solicitar o reembolso em até 7 dias após a compra.
+                </p>
+                <p>
+                  Sem perguntas, sem complicações. Sua satisfação é nossa prioridade!
+                </p>
+              </div>
             </div>
-          }>
-            <GuaranteeSection />
-          </Suspense>
+          </Card>
         </section>
 
         {/* FAQ Section */}

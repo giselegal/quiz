@@ -43,7 +43,7 @@ export const AnalyticsLoadingState: React.FC = () => {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="h-[300px] w-full flex items-center justify-center">
-            <LoadingSpinner size="lg" thickness="normal" />
+            <LoadingSpinner size="lg" thickness="thin" />
           </div>
         </CardContent>
       </Card>

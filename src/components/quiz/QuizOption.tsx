@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { QuizOption as QuizOptionType } from '@/types/quiz';
 import { highlightStrategicWords } from '@/utils/textHighlight';
 import { QuizOptionImage } from './QuizOptionImage';
 import { useIsMobile } from '@/hooks/use-mobile';
-import '@/styles/quiz-animations.css';
 
 interface QuizOptionProps {
   option: QuizOptionType;
@@ -14,7 +12,7 @@ interface QuizOptionProps {
   type: 'text' | 'image' | 'both';
   questionId?: string;
   isDisabled?: boolean;
-  isStrategicOption?: boolean;
+  isStrategicOption?: boolean; // Nova prop
 }
 
 const QuizOption: React.FC<QuizOptionProps> = ({
@@ -24,13 +22,14 @@ const QuizOption: React.FC<QuizOptionProps> = ({
   type,
   questionId,
   isDisabled = false,
-  isStrategicOption = false
+  isStrategicOption = false // Padrão para false
 }) => {
   const isMobile = useIsMobile();
   const is3DQuestion = option.imageUrl?.includes('sapatos') || option.imageUrl?.includes('calca');
+  // Usar ref para evitar re-renderizações desnecessárias
   const optionRef = useRef<HTMLDivElement>(null);
   
-  // Aplicar efeitos visuais quando o isSelected mudar
+  // Usar useEffect para lidar com mudanças de isSelected sem causar flash
   useEffect(() => {
     if (optionRef.current) {
       if (isSelected) {
@@ -38,47 +37,47 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         if (type === 'text') {
           optionRef.current.style.borderColor = '#b29670';
           optionRef.current.style.boxShadow = isStrategicOption 
-            ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
+            ? '0 6px 12px rgba(178, 150, 112, 0.35)' // Sombra mais pronunciada para estratégicas
             : '0 4px 8px rgba(178, 150, 112, 0.25)';
         } 
         // Para opções de imagem - sem borda, apenas sombra
         else {
-          optionRef.current.style.borderColor = '#b29670';
+          optionRef.current.style.borderColor = 'transparent';
           optionRef.current.style.boxShadow = isStrategicOption 
-            ? '0 15px 30px rgba(0, 0, 0, 0.25)' 
+            ? '0 15px 30px rgba(0, 0, 0, 0.25)' // Sombra mais pronunciada para estratégicas
             : '0 12px 24px rgba(0, 0, 0, 0.2)';
         }
-        
-        // Adicionar classe de animação para feedback visual
-        optionRef.current.classList.add('quiz-option-selected-flash');
-        setTimeout(() => {
-          if (optionRef.current) {
-            optionRef.current.classList.remove('quiz-option-selected-flash');
-          }
-        }, 200); // Reduzido de 300ms para 200ms
       } else {
-        // Comportamento para não-selecionado
-        optionRef.current.style.borderColor = '#B89B7A';
-        optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+        if (type === 'text') {
+          optionRef.current.style.borderColor = '#B89B7A';
+          optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+        } else {
+          optionRef.current.style.borderColor = 'transparent';
+          optionRef.current.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+        }
       }
     }
-  }, [isSelected, isStrategicOption, type]);
+  }, [isSelected, type, isStrategicOption]);
   
-  // Manipulador de clique otimizado para seleção de opção - sem delay
+  // Manipulador de clique customizado com debounce
   const handleClick = () => {
     if (!isDisabled) {
-      console.log(`Opção clicada: ${option.id}, tipo: ${type}, categoria: ${option.styleCategory}`);
-      
       // Aplicar mudança visual imediatamente para feedback instantâneo
       if (optionRef.current) {
-        optionRef.current.style.borderColor = '#b29670';
-        optionRef.current.style.boxShadow = isStrategicOption 
-          ? '0 6px 12px rgba(178, 150, 112, 0.35)' 
-          : '0 4px 8px rgba(178, 150, 112, 0.25)';
+        if (type === 'text') {
+          optionRef.current.style.borderColor = isSelected ? '#B89B7A' : '#b29670';
+        }
+        // Aplicar sombra correspondente ao estado
+        optionRef.current.style.boxShadow = isSelected 
+          ? '0 2px 4px rgba(0, 0, 0, 0.05)' 
+          : (isStrategicOption 
+              ? (type === 'text' ? '0 6px 12px rgba(178, 150, 112, 0.35)' : '0 15px 30px rgba(0, 0, 0, 0.25)') 
+              : (type === 'text' ? '0 4px 8px rgba(178, 150, 112, 0.25)' : '0 12px 24px rgba(0, 0, 0, 0.2)'));
       }
-      
-      // Chamar onSelect imediatamente - sem delay
-      onSelect(option.id);
+      // Chamar onSelect com um pequeno atraso para evitar flash
+      setTimeout(() => {
+        onSelect(option.id);
+      }, 10);
     }
   };
   
@@ -97,11 +96,14 @@ const QuizOption: React.FC<QuizOptionProps> = ({
           "relative h-full flex flex-col rounded-lg overflow-hidden",
           "cursor-pointer", 
           
-          // Para todas as opções - manter borda consistente
-          "p-4 border",
+          // Para opções de texto - manter borda
+          type === 'text' && "p-4 border",
+          
+          // Para opções de imagem - SEM borda na coluna
+          type !== 'text' && "border-0",
           
           // Fundo sólido sem transparência e adicionando sombra padrão
-          "bg-[#FEFEFE] shadow-sm hover:shadow-md transition-all duration-200"
+          "bg-[#FEFEFE] shadow-sm hover:shadow-md transition-all duration-300"
         )}
       >
         {type !== 'text' && option.imageUrl && (
@@ -116,8 +118,15 @@ const QuizOption: React.FC<QuizOptionProps> = ({
         )}
         
         <p className={cn(
-          "leading-relaxed text-[#432818]",
-          isMobile ? "text-[0.75rem]" : "text-sm sm:text-base"
+          type !== 'text' 
+            ? cn(
+                "leading-tight font-medium py-1 px-2 mt-auto text-[#432818] relative", 
+                isMobile ? "text-[0.7rem]" : "text-[0.7rem] sm:text-sm"
+              )
+            : cn(
+                "leading-relaxed text-[#432818]",
+                isMobile ? "text-[0.75rem]" : "text-sm sm:text-base"
+              )
         )}>
           {highlightStrategicWords(option.text)}
         </p>

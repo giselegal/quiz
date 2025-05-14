@@ -3,29 +3,32 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Performance: Desativar will-change global para evitar sobrecarga de GPU */
+/* Melhorar performance desativando animações não críticas */
 * {
   will-change: auto !important;
 }
 
-/* Remover transições globais de imagens para otimizar performance */
-img {
-  transition: none !important;
-  transform: none !important;
-  filter: none !important;
-  image-rendering: crisp-edges;
+/* Permitir apenas animações específicas que são críticas para UX */
+img, .hover-scale {
+  transition: transform 300ms ease-in-out !important;
 }
 
-/* Permitir transições apenas para elementos interativos específicos */
-.hover-scale {
-  transition: transform 200ms ease-in-out !important;
+img:hover, .hover-scale:hover {
+  transform: scale(1.05) !important;
 }
 
-.hover-scale:hover {
-  transform: scale(1.03) !important;
+/* Classe para animação 3D */
+.transform-3d {
+  transform-style: preserve-3d !important;
+  perspective: 1000px !important;
 }
 
-/* Adicionar animação de loading bar otimizada */
+/* Restaurar animações para botões específicos */
+.btn-hover-effect:hover svg {
+  transform: scale(1.1) !important;
+}
+
+/* Adicionar animação de loading bar */
 @keyframes loading-bar {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
@@ -35,15 +38,17 @@ img {
   animation: loading-bar 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Animação de pulso otimizada apenas para elementos importantes */
+/* Animação de pulso aprimorada para destaque do botão */
 @keyframes enhanced-pulse {
   0%, 100% { 
     opacity: 1;
     transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(184, 155, 122, 0.7);
   }
   50% { 
     opacity: 0.95;
-    transform: scale(1.02); 
+    transform: scale(1.03); 
+    box-shadow: 0 0 0 10px rgba(184, 155, 122, 0);
   }
 }
 
@@ -148,9 +153,5 @@ img {
 
   .font-playfair {
     font-family: 'Playfair Display', serif;
-  }
-  
-  .font-inter {
-    font-family: 'Inter', sans-serif;
   }
 }

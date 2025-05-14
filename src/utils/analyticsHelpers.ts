@@ -1,3 +1,4 @@
+
 import { getAnalyticsEvents } from './analytics';
 
 // Get cached metrics or calculate if not in cache
