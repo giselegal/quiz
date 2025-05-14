@@ -59,3 +59,20 @@ export const trackQuizEvent = (eventName: string, params?: any): void => {
 export const trackQuizCompletion = (primaryStyle: string): void => {
   trackQuizEvent('QuizCompleted', { primaryStyle });
 };
+
+// Add the missing export for loadFacebookPixel
+export const loadFacebookPixel = (): void => {
+  // Default pixel ID - can be configured from environment variables if needed
+  const pixelId = process.env.FACEBOOK_PIXEL_ID || '1234567890';
+  initFacebookPixel(pixelId);
+};
+
+// Add the missing export for trackPixelEvent
+export const trackPixelEvent = (eventName: string, params?: any): void => {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', eventName, params);
+    console.log(`[Facebook Pixel] Tracked event: ${eventName}`, params);
+  } else {
+    console.warn(`[Facebook Pixel] Failed to track event: ${eventName}. Pixel not initialized.`);
+  }
+};

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { trackPixelEvent } from '@/utils/facebookPixel';
 
@@ -92,7 +93,7 @@ export default function Funil2OfertaDireta() {
       <section className="w-full max-w-2xl bg-white rounded-lg shadow p-4 sm:p-6 mb-6 flex flex-col items-center">
         <img src={IMAGES.mulherShein} alt="Mulher com sacolas da Shein" className="h-32 sm:h-40 rounded mb-3 object-cover" loading="lazy" />
         <p className="text-[#432818] text-center mb-2">
-          Esse valor nem se compara às “blusinhas da Shein” que já ficaram encostadas no seu armário.<br />
+          Esse valor nem se compara às "blusinhas da Shein" que já ficaram encostadas no seu armário.<br />
           <span className="font-semibold">Esse conhecimento, sim, você vai usar pra sempre</span> — porque transforma a forma como você se veste, se vê e se apresenta.
         </p>
       </section>

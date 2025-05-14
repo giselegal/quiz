@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -6,7 +5,7 @@ import { QuizProvider } from './context/QuizContext';
 import { TooltipProvider } from './components/ui/tooltip';
 import { Toaster } from './components/ui/toaster';
 import { captureUTMParameters } from './utils/analytics';
-import { loadFacebookPixel } from './utils/facebookPixel';
+import { initFacebookPixel } from './utils/facebookPixel';
 import { LoadingSpinner } from './components/ui/loading-spinner';
 import CriticalCSSLoader from './components/CriticalCSSLoader';
 import { initialCriticalCSS } from './utils/critical-css';
@@ -62,7 +61,7 @@ const App = () => {
   useEffect(() => {
     try {
       // Inicializar Facebook Pixel
-      loadFacebookPixel();
+      initFacebookPixel('YOUR_PIXEL_ID'); // Adicionando ID de pixel como parâmetro
       
       // Capturar UTM parameters para analytics de marketing
       captureUTMParameters();

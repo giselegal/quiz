@@ -6,7 +6,6 @@ import { TemplateList } from '@/components/editor/templates/TemplateList';
 import { Button } from '@/components/ui/button';
 // Importar ambos os templates
 import { defaultResultTemplate, directOfferTemplate } from '@/config/resultPageTemplates';
-import { createOfferSectionConfig } from '@/utils/config/offerDefaults';
 import { ResultPageConfig } from '@/types/resultPageConfig'; // Para tipagem explícita
 
 export const EditorPage = () => {
@@ -39,7 +38,7 @@ export const EditorPage = () => {
     
     // Incluir mainContent com a estrutura correta
     mainContent: {
-      visible: true,
+      visible: templateToUse.mainContent?.visible !== undefined ? templateToUse.mainContent.visible : true,
       content: {
         introText: `Conheça seu estilo ${styleCategory}!`,
         benefits: [],
@@ -133,8 +132,8 @@ export const EditorPage = () => {
       }
     },
     
-    // Incluir secondaryStyles para estar em conformidade com a interface ResultPageConfig
-    secondaryStyles: templateToUse.secondaryStyles || {
+    // Adicionar secondaryStyles que está faltando na interface ResultPageConfig
+    secondaryStyles: {
       visible: true,
       content: {
         title: 'Seus estilos secundários',
@@ -153,8 +152,9 @@ export const EditorPage = () => {
       backgroundColor: '#FAF9F7',
       fontFamily: 'Playfair Display, serif'
     },
-    // Incluir blocks para estar em conformidade com a interface ResultPageConfig
-    blocks: templateToUse.blocks || [] 
+    
+    // Adicionar blocks que está faltando na interface ResultPageConfig
+    blocks: [] 
   };
   
   return (
