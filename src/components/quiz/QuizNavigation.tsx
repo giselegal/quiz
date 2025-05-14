@@ -56,7 +56,7 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
         onNext();
         setShowActivationEffect(false);
         timerRef.current = null;
-      }, 200); // Reduzido de 300ms para 200ms para feedback mais rápido
+      }, 100); // Reduzido de 200ms para 100ms para feedback mais rápido
       
       return () => {
         if (timerRef.current) {
