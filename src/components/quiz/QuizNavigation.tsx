@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
+import { ChevronLeft, ChevronRight, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface QuizNavigationProps {
   canProceed: boolean;
@@ -84,6 +85,9 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
     return '';
   };
 
+  const nextButtonText = isLastQuestion ? "Ver Resultado" : (currentQuestionType === 'strategic' ? "Próxima Pergunta Estratégica" : "Próxima Pergunta");
+  const previousButtonText = currentQuestionType === 'strategic' ? "Pergunta Estratégica Anterior" : "Pergunta Anterior";
+
   return (
     <div className="mt-6 w-full px-4 md:px-0">
       <div className="flex flex-col items-center w-full">
@@ -108,19 +112,17 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
             <Button
               onClick={onNext}
               disabled={!canProceed}
-              className={`
-                py-3 px-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50
-                ${!canProceed 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-brand-primary hover:bg-brand-primary/90 text-white focus:ring-brand-primary'
-                } 
-                ${showActivationEffect 
-                  ? 'scale-105 shadow-lg ring-2 ring-brand-primary ring-opacity-75' // Efeito de ativação atualizado
-                  : ''
-                }
-              `}
+              variant="outline" // Alterado de "default" para "outline"
+              className={`text-lg px-6 py-3 flex items-center transition-all duration-300 ease-in-out
+                ${canProceed 
+                  ? 'bg-[#b29670] text-white hover:bg-[#a0845c] border-[#b29670]' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300'
+                } focus:ring-2 focus:ring-offset-2 focus:ring-[#b29670]`}
+              aria-label={nextButtonText}
+              aria-disabled={!canProceed}
             >
-              {isLastQuestion ? 'Ver Resultado' : 'Próximo'}
+              {nextButtonText}
+              {isLastQuestion ? <CheckCircle className="ml-2 h-5 w-5" /> : <ChevronRight className="ml-2 h-5 w-5" />}
             </Button>
           )}
         </div>
