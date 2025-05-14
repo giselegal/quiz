@@ -99,9 +99,9 @@ const QuizNavigation: React.FC<QuizNavigationProps> = ({
   return (
     <div className="mt-6 w-full px-4 md:px-0 mb-8">
       <div className="flex flex-col items-center w-full">
-        {/* !canProceed && (
+        {!canProceed && (
           <p className="text-sm text-[#8F7A6A] mb-3">{getHelperText()}</p>
-        ) */}
+        )}
         
         <div className="flex justify-center items-center w-full gap-3">
           {onPrevious && (
