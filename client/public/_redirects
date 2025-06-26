@@ -1,0 +1,14 @@
+
+# Rotas SPA simplificadas - Redirecionamento para index.html
+
+# Rotas principais
+/                           /index.html                 200
+/quiz                       /index.html                 200
+/resultado                  /index.html                 200
+/descubra-seu-estilo        /index.html                 200
+/quiz-descubra-seu-estilo   /index.html                 200
+/unified-editor             /index.html                 200
+/quiz-offer-editor          /index.html                 200
+
+# Fallback para SPA - deve vir por último
+/*                          /index.html                 200

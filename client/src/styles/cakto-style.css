@@ -1,0 +1,567 @@
+/* Estilos específicos para o layout CaktoQuiz */
+
+.cakto-editor {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Layout principal - 3 colunas específicas do Cakto */
+.cakto-layout {
+  display: flex;
+  height: 100vh;
+  background: #f8fafc;
+}
+
+/* Coluna 1: Steps horizontais no topo (mobile) e verticais (desktop) */
+.cakto-steps-container {
+  background: white;
+  border-right: 1px solid #e2e8f0;
+}
+
+/* Desktop: steps verticais na lateral */
+@media (min-width: 768px) {
+  .cakto-steps-container {
+    width: 280px;
+    flex-shrink: 0;
+  }
+  
+  .cakto-steps-vertical {
+    display: block;
+  }
+  
+  .cakto-steps-horizontal {
+    display: none;
+  }
+}
+
+/* Mobile: steps horizontais no topo */
+@media (max-width: 767px) {
+  .cakto-steps-container {
+    width: 100%;
+    height: 120px;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .cakto-steps-vertical {
+    display: none;
+  }
+  
+  .cakto-steps-horizontal {
+    display: block;
+  }
+}
+
+/* Steps horizontais (mobile) */
+.cakto-steps-horizontal {
+  display: flex;
+  overflow-x: auto;
+  padding: 8px;
+  gap: 8px;
+  scrollbar-width: none;
+}
+
+.cakto-steps-horizontal::-webkit-scrollbar {
+  display: none;
+}
+
+.cakto-step-horizontal {
+  min-width: 160px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.cakto-step-horizontal:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.cakto-step-horizontal.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+/* Steps verticais (desktop) */
+.cakto-steps-vertical {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.cakto-step-vertical {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.cakto-step-vertical:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.cakto-step-vertical.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.cakto-step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cakto-step-number {
+  width: 24px;
+  height: 24px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.cakto-step-vertical.active .cakto-step-number {
+  background: #3b82f6;
+  color: white;
+}
+
+.cakto-step-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+
+.cakto-step-type {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.cakto-step-type.intro { background: #dbeafe; color: #1d4ed8; }
+.cakto-step-type.question { background: #dcfce7; color: #166534; }
+.cakto-step-type.strategic { background: #fed7aa; color: #ea580c; }
+.cakto-step-type.transition { background: #f3e8ff; color: #7c3aed; }
+.cakto-step-type.result { background: #fef3c7; color: #d97706; }
+.cakto-step-type.offer { background: #fecaca; color: #dc2626; }
+
+.cakto-step-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.cakto-step-progress {
+  font-weight: 500;
+}
+
+.cakto-step-components {
+  color: #9ca3af;
+}
+
+/* Coluna 2: Toolbar de componentes */
+.cakto-toolbar-container {
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  width: 80px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cakto-toolbar-vertical {
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.cakto-toolbar-horizontal {
+  display: none;
+  padding: 8px;
+  overflow-x: auto;
+  flex-direction: row;
+  gap: 8px;
+  scrollbar-width: none;
+}
+
+.cakto-toolbar-horizontal::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .cakto-toolbar-container {
+    width: 100%;
+    height: 60px;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    flex-direction: row;
+  }
+  
+  .cakto-toolbar-vertical {
+    display: none;
+  }
+  
+  .cakto-toolbar-horizontal {
+    display: flex;
+  }
+}
+
+.cakto-toolbar-item {
+  width: 56px;
+  height: 56px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.cakto-toolbar-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.cakto-toolbar-item:active {
+  transform: translateY(0);
+}
+
+.cakto-toolbar-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.cakto-toolbar-label {
+  font-size: 8px;
+  font-weight: 500;
+  color: #64748b;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Coluna 3: Canvas principal */
+.cakto-canvas-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  min-width: 0;
+}
+
+.cakto-canvas-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.cakto-canvas-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cakto-canvas-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cakto-device-toggle {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.cakto-device-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+}
+
+.cakto-device-btn:hover {
+  background: #e2e8f0;
+}
+
+.cakto-device-btn.active {
+  background: white;
+  color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.cakto-canvas-main {
+  flex: 1;
+  padding: 24px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.cakto-canvas-viewport {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cakto-canvas-viewport.desktop {
+  width: 100%;
+  max-width: 900px;
+  min-height: 600px;
+}
+
+.cakto-canvas-viewport.tablet {
+  width: 768px;
+  min-height: 1024px;
+}
+
+.cakto-canvas-viewport.mobile {
+  width: 375px;
+  min-height: 667px;
+}
+
+.cakto-canvas-content {
+  padding: 24px;
+  min-height: 100%;
+  position: relative;
+}
+
+.cakto-canvas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #94a3b8;
+  text-align: center;
+  border: 2px dashed #e2e8f0;
+  border-radius: 8px;
+}
+
+.cakto-canvas-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.cakto-canvas-empty-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.cakto-canvas-empty-text {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* Componentes no canvas */
+.cakto-component {
+  position: relative;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.cakto-component:hover {
+  box-shadow: 0 0 0 2px #e0e7ff;
+}
+
+.cakto-component.selected {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.cakto-component-overlay {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cakto-component:hover .cakto-component-overlay {
+  opacity: 1;
+}
+
+.cakto-component-btn {
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.cakto-component-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Coluna 4: Propriedades (mobile: modal) */
+.cakto-properties-container {
+  background: white;
+  border-left: 1px solid #e2e8f0;
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 767px) {
+  .cakto-properties-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .cakto-properties-container.open {
+    transform: translateX(0);
+  }
+}
+
+.cakto-properties-header {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: white;
+  flex-shrink: 0;
+}
+
+.cakto-properties-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cakto-properties-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.cakto-properties-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.cakto-properties-empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.cakto-properties-empty-text {
+  font-size: 14px;
+}
+
+/* Animações */
+@keyframes cakto-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cakto-fade-in {
+  animation: cakto-fade-in 0.3s ease-out;
+}
+
+/* Scrollbars customizadas */
+.cakto-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cakto-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cakto-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.cakto-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .cakto-layout {
+    flex-direction: column;
+  }
+  
+  .cakto-canvas-main {
+    padding: 16px;
+  }
+  
+  .cakto-canvas-viewport {
+    width: 100%;
+    max-width: none;
+  }
+}

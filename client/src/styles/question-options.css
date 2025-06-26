@@ -1,0 +1,284 @@
+/* Question Options Layout Styles - Versão Melhorada */
+
+/* Classe utility para clamp de texto */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Grid responsivo para opções - Layout otimizado */
+.options-grid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Layout baseado no tipo de conteúdo - Sempre uma coluna para texto */
+.options-grid.text-only {
+  grid-template-columns: 1fr;
+  max-width: 700px; /* Aumentado para melhor uso do espaço */
+  margin: 0 auto;
+}
+
+.options-grid.with-images {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .options-grid.with-images {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .options-grid.with-images.three-columns {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Opção individual - Design moderno sem sombras padrão */
+.option-card {
+  position: relative;
+  border: 2px solid #e5e7eb;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fefefe;
+  /* Sombra removida por padrão */
+}
+
+.option-card:hover {
+  border-color: #b89b7a;
+  transform: translateY(-2px);
+}
+
+.option-card.selected {
+  border-color: #b89b7a;
+  background: linear-gradient(
+    135deg,
+    rgba(184, 155, 122, 0.05) 0%,
+    rgba(184, 155, 122, 0.1) 100%
+  );
+  /* Sombra apenas quando selecionado */
+  box-shadow: 0 10px 30px rgba(184, 155, 122, 0.2),
+    0 0 0 1px rgba(184, 155, 122, 0.3);
+  transform: translateY(-4px);
+}
+
+/* Imagem da opção - Layout otimizado */
+.option-image {
+  width: 100%;
+  height: 220px; /* Altura aumentada para melhor impacto visual */
+  object-fit: cover; /* Mobile: corte estratégico para destaque */
+  object-position: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.option-card:hover .option-image {
+  transform: scale(1.05);
+}
+
+/* Responsividade das imagens - Desktop com mais altura */
+@media (min-width: 640px) {
+  .option-image {
+    height: 240px; /* Aumentado para desktop */
+    object-fit: contain; /* Desktop: imagem completa sem corte */
+    background-color: #fefefe;
+  }
+}
+
+@media (min-width: 1024px) {
+  .option-image {
+    height: 260px; /* Ainda maior em telas grandes */
+    object-fit: contain;
+    background-color: #fefefe;
+  }
+}
+
+/* Conteúdo da opção - Melhor organização do espaçamento */
+.option-content {
+  padding: 1.25rem;
+}
+
+.option-content.with-image {
+  padding: 1rem 1.25rem 1.25rem 1.25rem;
+}
+
+.option-content.text-only {
+  padding: 2rem 1.5rem; /* Mais espaço para opções só texto */
+  min-height: 120px; /* Altura mínima para consistência */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Mobile: prioriza a imagem, texto mais discreto */
+@media (max-width: 639px) {
+  .option-content {
+    padding: 0.5rem;
+  }
+
+  .option-content.with-image {
+    padding: 0.5rem 0.75rem;
+    background: rgba(254, 254, 254, 0.95);
+  }
+
+  .option-content.text-only {
+    padding: 1.5rem 1rem;
+    min-height: 100px;
+  }
+
+  /* Remove efeitos visuais no mobile para performance */
+  .option-card {
+    box-shadow: none;
+  }
+
+  .option-card:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* Sombra sutil apenas na seleção */
+  .option-card.selected {
+    box-shadow: 0 8px 25px rgba(184, 155, 122, 0.3);
+    transform: translateY(-3px);
+  }
+
+  /* Evita transformação da imagem no mobile */
+  .option-card:hover .option-image {
+    transform: none;
+  }
+}
+
+/* Título da opção - Tipografia melhorada */
+.option-title {
+  font-weight: 500; /* Meio termo entre regular e bold */
+  color: #1f2937;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.option-title .strategic-word {
+  font-weight: 700; /* Bold para palavras estratégicas */
+  color: #b89b7a; /* Cor temática */
+}
+
+/* Tamanhos de fonte responsivos */
+.option-title.small {
+  font-size: 0.875rem;
+}
+
+.option-title.medium {
+  font-size: 1rem;
+}
+
+.option-title.large {
+  font-size: 1.125rem;
+}
+
+/* Mobile: texto mais discreto quando há imagem */
+@media (max-width: 639px) {
+  .option-title.small {
+    font-size: 0.75rem;
+  }
+
+  .option-title.medium {
+    font-size: 0.875rem;
+  }
+
+  .option-title.large {
+    font-size: 0.925rem;
+  }
+
+  /* Texto sutil quando há imagem no mobile */
+  .option-content.with-image .option-title {
+    color: #6b7280;
+    font-size: 0.75rem !important;
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+    font-weight: 400;
+  }
+
+  /* Palavras estratégicas mantêm destaque */
+  .option-content.with-image .option-title .strategic-word {
+    color: #b89b7a;
+    font-weight: 600;
+  }
+}
+
+/* Desktop: tipografia mais generosa */
+@media (min-width: 640px) {
+  .option-title.small {
+    font-size: 1rem;
+  }
+
+  .option-title.medium {
+    font-size: 1.125rem;
+  }
+
+  .option-title.large {
+    font-size: 1.25rem;
+  }
+
+  /* Melhor contraste no desktop */
+  .option-title {
+    color: #111827;
+  }
+
+  /* Cor de fundo das imagens */
+  .option-image {
+    background-color: #fefefe;
+  }
+}
+
+/* Footer removido - interface mais limpa sem informações internas */
+
+/* Animações de entrada */
+@keyframes optionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.option-card {
+  animation: optionFadeIn 0.3s ease-out;
+}
+
+/* Estados de foco para acessibilidade */
+.option-card:focus-visible {
+  outline: 2px solid #b89b7a;
+  outline-offset: 2px;
+}
+
+/* Overlay para imagens */
+.option-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.option-card:hover .option-image-overlay {
+  opacity: 1;
+}

@@ -1,0 +1,77 @@
+/* Quiz Background Colors - #FEFEFE Theme */
+
+/* Fundo principal do quiz */
+.quiz-container {
+  background-color: #fefefe !important;
+}
+
+/* Override para componentes de fundo branco */
+.quiz-background,
+.question-background,
+.option-background {
+  background-color: #fefefe !important;
+}
+
+/* Cards e containers principais */
+.quiz-card,
+.quiz-content {
+  background-color: #fefefe !important;
+}
+
+/* Fundos de imagens */
+.quiz-image-background,
+.option-image-container {
+  background-color: #fefefe !important;
+}
+
+/* Override para classes Tailwind específicas do quiz */
+.quiz-section .bg-white {
+  background-color: #fefefe !important;
+}
+
+/* Modals e overlays do quiz */
+.quiz-modal,
+.quiz-overlay {
+  background-color: #fefefe !important;
+}
+
+/* Preview containers */
+.quiz-preview-container {
+  background-color: #fefefe !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .quiz-mobile-background {
+    background-color: #fefefe !important;
+  }
+}
+
+/* Editor specific backgrounds */
+.quiz-editor-background {
+  background-color: #fefefe !important;
+}
+
+/* Visual editor containers */
+.visual-editor-container,
+.visual-editor-canvas,
+.visual-editor-preview {
+  background-color: #fefefe !important;
+}
+
+/* Configuration panel backgrounds */
+.config-panel-background {
+  background-color: #fefefe !important;
+}
+
+/* Result page backgrounds */
+.quiz-result-background {
+  background-color: #fefefe !important;
+}
+
+/* Override for all quiz related white backgrounds */
+.quiz-app [style*="background-color: white"],
+.quiz-app [style*="background: white"],
+.quiz-app .bg-white {
+  background-color: #fefefe !important;
+}

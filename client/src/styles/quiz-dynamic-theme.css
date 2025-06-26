@@ -1,0 +1,265 @@
+/* Quiz Dynamic Styles - Aplicado via configuração */
+
+:root {
+  /* Cores padrão - serão sobrescritas dinamicamente */
+  --quiz-bg-color: #fefefe;
+  --quiz-primary-color: #b89b7a;
+  --quiz-secondary-color: #432818;
+  --quiz-accent-color: #d4c4a0;
+  --quiz-text-color: #432818;
+  --quiz-text-secondary-color: #8f7a6a;
+
+  /* Tipografia padrão */
+  --quiz-font-family: "Playfair Display", serif;
+  --quiz-font-size-title: 1.5rem;
+  --quiz-font-size-subtitle: 1.25rem;
+  --quiz-font-size-body: 1rem;
+  --quiz-font-size-small: 0.875rem;
+
+  /* Layout padrão */
+  --quiz-border-radius: 0.75rem;
+  --quiz-shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --quiz-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --quiz-shadow-strong: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+  /* Espaçamentos dinâmicos */
+  --quiz-spacing-compact: 0.5rem;
+  --quiz-spacing-normal: 1rem;
+  --quiz-spacing-spacious: 1.5rem;
+
+  /* Transições */
+  --quiz-transition-fast: 150ms ease-in-out;
+  --quiz-transition-normal: 300ms ease-in-out;
+  --quiz-transition-slow: 500ms ease-in-out;
+}
+
+/* Aplicação das variáveis CSS dinamicamente */
+.quiz-dynamic-theme {
+  background-color: var(--quiz-bg-color);
+  color: var(--quiz-text-color);
+  font-family: var(--quiz-font-family);
+}
+
+/* Containers principais */
+.quiz-dynamic-theme .quiz-container,
+.quiz-dynamic-theme .quiz-background,
+.quiz-dynamic-theme .question-background {
+  background-color: var(--quiz-bg-color);
+}
+
+/* Títulos */
+.quiz-dynamic-theme h1,
+.quiz-dynamic-theme h2,
+.quiz-dynamic-theme h3 {
+  color: var(--quiz-text-color);
+  font-family: var(--quiz-font-family);
+}
+
+.quiz-dynamic-theme h1 {
+  font-size: var(--quiz-font-size-title);
+}
+
+.quiz-dynamic-theme h2 {
+  font-size: var(--quiz-font-size-subtitle);
+}
+
+.quiz-dynamic-theme p,
+.quiz-dynamic-theme span {
+  font-size: var(--quiz-font-size-body);
+}
+
+.quiz-dynamic-theme .text-small {
+  font-size: var(--quiz-font-size-small);
+}
+
+/* Cards e opções */
+.quiz-dynamic-theme .option-card {
+  background-color: var(--quiz-bg-color);
+  border-radius: var(--quiz-border-radius);
+  transition: all var(--quiz-transition-normal);
+}
+
+.quiz-dynamic-theme .option-card:hover {
+  border-color: var(--quiz-primary-color);
+  box-shadow: var(--quiz-shadow-medium);
+}
+
+.quiz-dynamic-theme .option-card.selected {
+  border-color: var(--quiz-primary-color);
+  box-shadow: 0 0 0 2px var(--quiz-primary-color);
+}
+
+/* Botões */
+.quiz-dynamic-theme .btn-primary {
+  background-color: var(--quiz-primary-color);
+  color: white;
+  border-radius: var(--quiz-border-radius);
+  transition: all var(--quiz-transition-normal);
+}
+
+.quiz-dynamic-theme .btn-primary:hover {
+  background-color: var(--quiz-secondary-color);
+  box-shadow: var(--quiz-shadow-medium);
+}
+
+.quiz-dynamic-theme .btn-secondary {
+  background-color: transparent;
+  color: var(--quiz-primary-color);
+  border: 2px solid var(--quiz-primary-color);
+  border-radius: var(--quiz-border-radius);
+}
+
+/* Progress indicators */
+.quiz-dynamic-theme .progress-bar {
+  background-color: var(--quiz-accent-color);
+}
+
+.quiz-dynamic-theme .progress-fill {
+  background-color: var(--quiz-primary-color);
+}
+
+/* Text highlights */
+.quiz-dynamic-theme .strategic-word {
+  color: var(--quiz-primary-color);
+  font-weight: 600;
+}
+
+/* Navigation */
+.quiz-dynamic-theme .quiz-navigation {
+  background-color: var(--quiz-bg-color);
+  border-top: 1px solid var(--quiz-accent-color);
+}
+
+/* Layouts dinâmicos */
+.quiz-dynamic-theme.layout-compact {
+  --quiz-spacing: var(--quiz-spacing-compact);
+}
+
+.quiz-dynamic-theme.layout-normal {
+  --quiz-spacing: var(--quiz-spacing-normal);
+}
+
+.quiz-dynamic-theme.layout-spacious {
+  --quiz-spacing: var(--quiz-spacing-spacious);
+}
+
+/* Estilos de card */
+.quiz-dynamic-theme.card-style-modern .option-card {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: var(--quiz-shadow-subtle);
+}
+
+.quiz-dynamic-theme.card-style-classic .option-card {
+  border: 2px solid var(--quiz-accent-color);
+  box-shadow: none;
+}
+
+.quiz-dynamic-theme.card-style-minimal .option-card {
+  border: none;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Grid layouts */
+.quiz-dynamic-theme .options-grid.grid-1-column {
+  grid-template-columns: 1fr;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.quiz-dynamic-theme .options-grid.grid-2-column {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.quiz-dynamic-theme .options-grid.grid-3-column {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Animações dinâmicas */
+.quiz-dynamic-theme.animations-enabled .option-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.quiz-dynamic-theme.animations-enabled .option-card:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.quiz-dynamic-theme.animations-enabled .option-card:nth-child(2) {
+  animation-delay: 100ms;
+}
+
+.quiz-dynamic-theme.animations-enabled .option-card:nth-child(3) {
+  animation-delay: 200ms;
+}
+
+.quiz-dynamic-theme.animations-enabled .option-card:nth-child(4) {
+  animation-delay: 300ms;
+}
+
+/* Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .quiz-dynamic-theme .options-grid.grid-3-column {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-dynamic-theme .options-grid.grid-2-column {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-dynamic-theme {
+    --quiz-font-size-title: 1.25rem;
+    --quiz-font-size-subtitle: 1.125rem;
+    --quiz-spacing: calc(var(--quiz-spacing) * 0.8);
+  }
+}
+
+/* Estados especiais */
+.quiz-dynamic-theme.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.quiz-dynamic-theme.error {
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+}
+
+/* Override para garantir compatibilidade */
+.quiz-dynamic-theme [style*="background-color: white"],
+.quiz-dynamic-theme [style*="background: white"],
+.quiz-dynamic-theme .bg-white {
+  background-color: var(--quiz-bg-color) !important;
+}

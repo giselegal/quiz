@@ -1,0 +1,94 @@
+/* Estilos customizados para barras de rolagem */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #b89b7a #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #b89b7a;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a0845c;
+}
+
+/* Barra de rolagem mais sutil para áreas menores */
+.sm-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+.sm-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sm-scrollbar::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.sm-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.sm-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Animações para transições suaves */
+.scroll-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para container de rolagem */
+.scroll-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.scroll-container:hover .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #b89b7a;
+}
+
+/* Indicador de rolagem */
+.scroll-indicator {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 20px;
+  background: rgba(184, 155, 122, 0.3);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-container:hover .scroll-indicator {
+  opacity: 1;
+}
