@@ -5546,7 +5546,7 @@ const SimpleDragDropEditor: React.FC = () => {
                 ❓ QUESTÕES PRINCIPAIS (1-10)
               </div>
               {currentFunnel.pages.slice(1, 11).map((page, index) => (
-                <div key={page.id} className="relative">
+                <div key={`main-question-${page.id}-${index}`} className="relative">
                   <Button
                     variant={index + 1 === currentPageIndex ? "default" : "outline"}
                     size="sm"
@@ -5610,7 +5610,7 @@ const SimpleDragDropEditor: React.FC = () => {
                 🎯 QUESTÕES ESTRATÉGICAS (1-7)
               </div>
               {currentFunnel.pages.slice(12, 19).map((page, index) => (
-                <div key={page.id} className="relative">
+                <div key={`strategic-question-${page.id}-${index}`} className="relative">
                   <Button
                     variant={index + 12 === currentPageIndex ? "default" : "outline"}
                     size="sm"
@@ -5642,7 +5642,7 @@ const SimpleDragDropEditor: React.FC = () => {
                 🏆 RESULTADO E OFERTA
               </div>
               {currentFunnel.pages.slice(19).map((page, index) => (
-                <div key={page.id} className="relative">
+                <div key={`result-offer-${page.id}-${index}`} className="relative">
                   <Button
                     variant={index + 19 === currentPageIndex ? "default" : "outline"}
                     size="sm"
@@ -6095,12 +6095,7 @@ const SimpleDragDropEditor: React.FC = () => {
                             <div className="text-gray-400 text-xs font-bold">⋮⋮</div>
                           </div>
 
-                          {/* Component Content */}
-                          <div
-                            style={{ padding: "8px", paddingLeft: "24px" }}
-                            className="pl-[0px] pr-[0px]">
-                            {renderComponentContent(component)}
-                          </div>
+                          {renderComponentContent(component)}
                         </div>
                         {/* Drop Zone após o último componente */}
                         {index === currentPage.components.length - 1 && (
